@@ -1,0 +1,4 @@
+fastapi
+uvicorn[standard]
+dataclasses-json
+sqlalchemy==1.4
