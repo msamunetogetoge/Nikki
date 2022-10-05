@@ -1,4 +1,5 @@
 fastapi
 uvicorn[standard]
+pydantic
 dataclasses-json
 sqlalchemy==1.4
