@@ -1,13 +1,16 @@
+from dataclasses import dataclass
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.sql import func
+from typing import List
 
 from pydantic import BaseModel
+from dataclasses_json import dataclass_json
 
+from db.dbconfig import DATABASE_URI
 
-DATABASE_URI = 'postgresql+psycopg2://nikki_user:PHJUPQm7nprzF3EzcqOZ854l3AqygjvU@dpg-cctn76pa6gdgmf2lgfqg-a.oregon-postgres.render.com/nikki'
 
 engine = create_engine(DATABASE_URI)
 
@@ -17,6 +20,8 @@ Base = declarative_base()
 # table 定義
 
 
+@dataclass_json
+@dataclass
 class Nikki(Base):
     """DBに日記を格納する為のモデル
     """
@@ -27,20 +32,28 @@ class Nikki(Base):
     goodness: int = Column(Integer, default=10)
     summary: str = Column(String, nullable=False)
     content: str = Column(String, nullable=False)
-    created_at: datetime = Column(DateTime(timezone=True), default=func.now())
+    created_at: datetime = Column(DateTime(timezone=False), default=func.now())
+
+
+@dataclass_json
+@dataclass
+class Nikkis():
+    """ Nikkiクラスのリスト
+    """
+    nikkis: List[Nikki]
 
 
 class _Nikki(BaseModel):
     """FastAPIでdbのモデルを扱う為のクラス
 
     """
-    id: int
+    id: int = None
     created_by: int
     title: str
     goodness: int
     summary: str
     content: str
-    created_at: datetime = None
+    created_at: str
 
     class Config:
         """ sqlalchemy model -> pydantic modelの変換を許す設定
@@ -48,23 +61,48 @@ class _Nikki(BaseModel):
         orm_mode = True
 
 
-def api_to_orm(_nikki: _Nikki) -> Nikki:
+def api_to_orm(_nikki: _Nikki) -> Nikki or ValueError:
     """_Nikki をNikkiに変換する
 
     Args:
         _nikki (_Nikki): FastAPIで使用されるクラス
 
     Returns:
-        Nikki: 変換されたクラス
+        Nikki or ValueError: 変換されたクラス or ValueError
     """
+    try:
+        created_at = utc_str_to_datetime(_nikki.created_at)
+    except ValueError as error_of_utc_str_to_datetime:
+        raise (error_of_utc_str_to_datetime)
     nikki = Nikki(id=_nikki.id,
                   created_by=_nikki.created_by,
                   title=_nikki.title,
                   goodness=_nikki.goodness,
                   summary=_nikki.summary,
                   content=_nikki.content,
-                  created_at=_nikki.created_at)
+                  created_at=created_at)
     return nikki
+
+
+# todo: error のlogging する。loggingの設定必要
+def utc_str_to_datetime(utc: str) -> datetime or ValueError:
+    """js のdateObj.toUTCString() で生成された文字列をdatetimeに変換する
+
+    Args:
+        utc (str): Www, dd Mmm yyyy hh:mm:ss GMT
+
+    Raises:
+        e: datetime.strptime から排出されるエラー
+
+    Returns:
+        datetime or ValueError: datetime.strptime(utc, "%a, %d %b %Y %H:%M:%S %Z") の結果
+    """
+    try:
+        date_time = datetime.strptime(utc, "%a, %d %b %Y %H:%M:%S %Z")
+        return date_time
+    except ValueError as error_of_strptime:
+
+        raise error_of_strptime
 
 
 class User(Base):
@@ -103,10 +141,11 @@ class PublicNikki(Base):
 
 
 # table 作成
-try:
-    Base.metadata.create_all(engine)
-    print("create table")
-except Exception as e:
-    print(e)
-    print("failed create table")
-    pass
+def create_table():
+    try:
+        Base.metadata.create_all(engine)
+        print("create table")
+    except Exception as e:
+        print(e)
+        print("failed create table")
+        pass
