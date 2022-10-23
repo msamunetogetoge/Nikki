@@ -25,7 +25,7 @@ def get_nikkis(user_id: int, from_date: datetime, number_of_nikki: int = 10) -> 
     """
     session = Session()
     queryed_nikkis = session.query(Nikki).filter(
-        Nikki.created_at >= from_date).filter(Nikki.created_by == user_id).order_by(Nikki.created_at.desc()).limit(number_of_nikki)
+        Nikki.created_at <= from_date).filter(Nikki.created_by == user_id).order_by(Nikki.created_at.desc()).limit(number_of_nikki)
     nikkis = Nikkis(nikkis=list())
     for nikki in queryed_nikkis:
         nikkis.nikkis.append(nikki)

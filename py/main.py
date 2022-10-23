@@ -28,8 +28,8 @@ async def root() -> dict:
     return {"message": "Hello World"}
 
 
-@app.get("/nikki/")
-async def get_nikki(user_id: int, from_date: str, number_ob_nikki: int = 10) -> Nikkis:
+@app.get("/nikki")
+async def get_nikki(created_by: int, from_date: str, number_ob_nikki: int = 10) -> Nikkis:
     """nikkiを取得する。
     Args:
         from_date (str): '%a, %d %b %Y %H:%M:%S %Z' フォーマットのdatetimeに変換されるstr
@@ -41,8 +41,9 @@ async def get_nikki(user_id: int, from_date: str, number_ob_nikki: int = 10) -> 
     print(f"from_date = {from_date}")
     from_date = utc_str_to_datetime(utc=from_date)
     print(f"from_date = {from_date}")
-    nikkis = get_nikkis(user_id=user_id, from_date=from_date,
+    nikkis = get_nikkis(user_id=created_by, from_date=from_date,
                         number_of_nikki=number_ob_nikki)
+
     return nikkis.to_json(ensure_ascii=False)
 
 
