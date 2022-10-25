@@ -1,5 +1,4 @@
   <template>
-  <!-- todo: script/nikki の関数達を使ってnikkiデータを取得し、表示する -->
   <v-dialog
     v-model="dialog"
     transition="dialog-bottom-transition"

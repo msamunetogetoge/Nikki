@@ -34,6 +34,10 @@ export class UrlBuilder {
         return builtUrl
     }
 
+    public buildUrl(): string {
+        return this.apiUrl + this.baseUrl
+    }
+
 }
 
 

@@ -23,28 +23,82 @@
             <v-list-item-title v-text="item.title" />
           </v-list-item-content>
         </v-list-item>
+        <!-- Nikki作成ボタン -->
+
+        <v-list-item @click="dialog = true">
+          <v-list-item-action>
+            <v-icon>{{ nikkiCreate.icon }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-text="nikkiCreate.title" />
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app>
       <v-app-bar-nav-icon v-if="!permanent" @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
     </v-app-bar>
+
     <v-main>
       <v-container>
-        <Nuxt />
+        <Nuxt v-if="resetFlag" ref="component" />
+        <v-dialog
+          v-model="dialog"
+          transition="dialog-bottom-transition"
+          max-width="600"
+        >
+          <v-card>
+            <v-card-title> Nikkiを作成 </v-card-title>
+            <v-card-text>
+              <form>
+                <v-text-field
+                  v-model="createdAtDisplay"
+                  label="作成日"
+                  readonly
+                ></v-text-field>
+                <v-text-field
+                  v-model="nikkiTitle"
+                  label="タイトル"
+                ></v-text-field>
+                <v-text-field v-model="content" label="本文"></v-text-field>
+                <v-text-field v-model="summary" label="要約"></v-text-field>
+                <!-- goodness を入力するところは0~10までの自然数のみ受け付けるようにする -->
+                <v-text-field v-model="goodness" label="良さ"></v-text-field>
+              </form>
+            </v-card-text>
+            <v-card-actions class="justify-end">
+              <v-btn color="primary" @click="postNikki">保存</v-btn>
+              <v-btn @click="dialog = false">閉じる</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-container>
     </v-main>
+
     <v-footer :absolute="!fixed" app>
       <span>&copy; {{ new Date().getFullYear() }}</span>
     </v-footer>
   </v-app>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { postNikki, createNikki } from '../script/nikki'
+export default defineComponent({
   name: 'DefaultLayout',
   data() {
     return {
+      // nikki作成の為の変数
+      createdAtDisplay: new Date().toLocaleDateString('ja-japanese'),
+      createdAt: new Date().toUTCString(),
+      summary: '',
+      content: '',
+      nikkiTitle: '',
+      goodness: 10,
+      createdBy: 0, // todo:createdByはstoreから取得する
+      // nikki作成の為の変数終わり
+      dialog: false,
       clipped: false,
       drawer: false,
       permanent: window.innerWidth > 768,
@@ -55,23 +109,46 @@ export default {
           title: 'Home',
           to: '/home',
         },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire',
-        },
       ],
+      nikkiCreate: {
+        icon: 'mdi-notebook-plus',
+        title: 'Nikki',
+      },
       miniVariant: false,
       title: 'Nikki',
     }
   },
   mounted() {
+    this.nikkiTitle = this.createdAtDisplay + 'のNikki'
+    // 画面の大きさが変わった時に、自動でレイアウトを変更する
     window.addEventListener('resize', this.calculateWindowWidth)
   },
   methods: {
     calculateWindowWidth() {
       this.permanent = window.innerWidth > 768
     },
+    async postNikki() {
+      const nikki = createNikki(
+        null,
+        this.createdAt,
+        this.createdBy,
+        this.nikkiTitle,
+        this.goodness,
+        this.summary,
+        this.content
+      )
+      try {
+        await postNikki(nikki)
+        // todo:  NikkiList.vue に上にスワイプしたら更新 機能をつける
+      } catch {
+      } finally {
+        this.dialog = false
+        this.nikkiTitle = this.createdAtDisplay + 'のNikki'
+        this.content = ''
+        this.summary = ''
+        this.goodness = 10
+      }
+    },
   },
-}
+})
 </script>
