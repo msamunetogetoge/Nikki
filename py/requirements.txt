@@ -3,4 +3,4 @@ uvicorn[standard]
 pydantic
 dataclasses-json
 sqlalchemy==1.4
-psycopg2
+psycopg2-binary
