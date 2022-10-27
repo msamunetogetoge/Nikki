@@ -1,7 +1,7 @@
 <template>
   <v-card class="overflow-hidden">
     <v-row justify="center" align="center">
-      <v-col cols="8" sm="12">
+      <v-col cols="12" sm="12">
         <nikki-list />
       </v-col>
     </v-row>

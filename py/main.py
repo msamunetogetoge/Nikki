@@ -38,9 +38,9 @@ async def get_nikki(created_by: int, from_date: str, number_ob_nikki: int = 10) 
     Returns:
         List[Nikki]: _description_
     """
-    print(f"from_date = {from_date}")
+
     from_date = utc_str_to_datetime(utc=from_date)
-    print(f"from_date = {from_date}")
+
     nikkis = get_nikkis(user_id=created_by, from_date=from_date,
                         number_of_nikki=number_ob_nikki)
 

@@ -42,7 +42,7 @@
 
     <v-main>
       <v-container>
-        <Nuxt v-if="resetFlag" ref="component" />
+        <Nuxt />
         <v-dialog
           v-model="dialog"
           transition="dialog-bottom-transition"
@@ -139,7 +139,7 @@ export default defineComponent({
       )
       try {
         await postNikki(nikki)
-        // todo:  NikkiList.vue に上にスワイプしたら更新 機能をつける
+        // todo: #4  NikkiList.vue に上にスワイプしたら更新 機能をつける
       } catch {
       } finally {
         this.dialog = false

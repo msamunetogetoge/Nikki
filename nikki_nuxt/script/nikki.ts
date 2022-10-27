@@ -125,9 +125,17 @@ export async function postNikki(nikki: NikkiToBackEnd) {
     const urlBuilder = new UrlBuilder(url)
 
     await axios.post(urlBuilder.buildUrl(), nikki).then(function () {
-        console.log("成功だお")
     }).catch(function (error) {
-        console.log(error)
+        console.error(error)
         throw 'post is failed';
+    })
+}
+
+export async function deleteNikki(nikkiId: number) {
+    const url = "/nikki";
+    const urlBuilder = new UrlBuilder(url, undefined, nikkiId.toString())
+    await axios.delete(urlBuilder.buildByPathParameter()).then().catch(function (error) {
+        console.error(error)
+        throw 'delete is failed';
     })
 }
