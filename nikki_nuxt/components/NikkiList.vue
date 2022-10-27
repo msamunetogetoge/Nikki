@@ -59,11 +59,12 @@
                 label="要約"
                 disabled
               ></v-text-field>
-              <v-text-field
+              <v-textarea
                 v-model="content"
                 label="本文"
                 disabled
-              ></v-text-field>
+                rows="5"
+              ></v-textarea>
             </form>
           </v-card-text>
           <v-card-actions class="justify-end">

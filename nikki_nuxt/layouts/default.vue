@@ -61,9 +61,9 @@
                   v-model="nikkiTitle"
                   label="タイトル"
                 ></v-text-field>
-                <v-text-field v-model="content" label="本文"></v-text-field>
+                <v-textarea v-model="content" label="本文"></v-textarea>
                 <v-text-field v-model="summary" label="要約"></v-text-field>
-                <!-- goodness を入力するところは0~10までの自然数のみ受け付けるようにする -->
+                <!--todo: #10 goodness を入力するところは0~10までの自然数のみ受け付けるようにする -->
                 <v-text-field v-model="goodness" label="良さ"></v-text-field>
               </form>
             </v-card-text>
