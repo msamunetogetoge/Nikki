@@ -63,7 +63,6 @@
                 ></v-text-field>
                 <v-textarea v-model="content" label="本文"></v-textarea>
                 <v-text-field v-model="summary" label="要約"></v-text-field>
-                <!--todo: #10 goodness を入力するところは0~10までの自然数のみ受け付けるようにする -->
                 <v-slider
                   v-model="goodness"
                   color="orange lightnen-2"
@@ -74,7 +73,6 @@
                   thumb-label
                   persistent-hint
                 ></v-slider>
-                <!-- <v-text-field v-model="goodness" label="良さ"></v-text-field> -->
               </form>
             </v-card-text>
             <v-card-actions class="justify-end">
