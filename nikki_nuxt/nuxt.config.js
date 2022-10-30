@@ -1,5 +1,8 @@
 import colors from 'vuetify/es5/util/colors'
 
+const deploymentEnv = process.env.NUXT_ENV_DEPLOYMENT || 'development';
+const environment = require(`./.env.${deploymentEnv}.js`);
+
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
@@ -49,9 +52,10 @@ export default {
     baseURL: '/',
     proxy: true,
   },
+  // todo: devとreleaseでproxyの設定変える
   proxy: {
     '/api/': {
-      target: 'http://127.0.0.1:8000',
+      target: `${environment.API_URL}`,
       pathRewrite: { '^/api/': '/' }
     }
   },
