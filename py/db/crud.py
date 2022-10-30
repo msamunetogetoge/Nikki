@@ -1,10 +1,11 @@
 from datetime import datetime
 import logging
+from unicodedata import name
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from db.model import Nikki, Nikkis
+from db.model import Nikki, Nikkis, User, _User
 from db.dbconfig import DATABASE_URI
 
 
@@ -94,3 +95,80 @@ def remove_nikki(nikki_id: int) -> None or NoResultFound:
     except NoResultFound as no_result:
         logging.error(no_result)
         raise no_result
+
+
+def try_get_one_user(user_id: str) -> None or Exception:
+    """DBにuserの情報があるか検索する。user_id, passwordのペアで検索して、一つだけデータが取得出来たらNoneを返す。
+
+    Args:
+        user_name (str): User.user_id
+        password (str): User.password
+
+    Raises:
+        no_result: データが一つも取得できないか、二つ以上取得出来た時にraise
+
+    Returns:
+        None or Exception: okかエラー
+    """
+    session = Session()
+    try:
+        _ = session.query(User).filter(User.user_id == user_id).one()
+
+    except NoResultFound as no_result:
+        logging.error(no_result)
+        raise no_result
+    except MultipleResultsFound as multi_result:
+        logging.error(multi_result)
+        raise multi_result
+    finally:
+        session.close()
+    return
+
+
+def try_login(user_id: str, password: str) -> None or Exception:
+    """DBにuserの情報があるか検索する。user_id, passwordのペアで検索して、一つだけデータが取得出来たらNoneを返す。
+
+    Args:
+        user_name (str): User.user_id
+        password (str): User.password
+
+    Raises:
+        no_result: データが一つも取得できないか、二つ以上取得出来た時にraise
+
+    Returns:
+        None or Exception: okかエラー
+    """
+    session = Session()
+    try:
+        _ = session.query(User).filter(User.user_id == user_id).filter(
+            User.password == password).one()
+        session.close()
+        return
+    except NoResultFound as no_result:
+        logging.error(no_result)
+        raise no_result
+    except MultipleResultsFound as multi_result:
+        logging.error(multi_result)
+        raise multi_result
+
+
+def add_user(user_info: _User):
+    """ ユーザーを登録する。
+
+    Args:
+        user_info (_User):  ユーザー情報
+
+    Raises:
+        e: 登録エラー
+    """
+    session = Session()
+    user = User(id=None, user_id=user_info.user_id,
+                user_name=user_info.user_name, password=user_info.password)
+    session.add(user)
+    try:
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
