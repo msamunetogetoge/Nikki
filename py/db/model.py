@@ -136,6 +136,16 @@ class _User(BaseModel):
         orm_mode = True
 
 
+class Login(BaseModel):
+    """loginの可否判定に使うクラス
+
+    Args:
+        BaseModel (_type_): 
+    """
+    user_id: str
+    password: str
+
+
 class PublicNikki(Base):
     __tablename__ = 'public_nikki'
     user_id = Column(Integer, primary_key=True)
