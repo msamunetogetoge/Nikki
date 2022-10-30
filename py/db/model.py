@@ -73,7 +73,7 @@ def api_to_orm(_nikki: _Nikki) -> Nikki or ValueError:
     try:
         created_at = utc_str_to_datetime(_nikki.created_at)
     except ValueError as error_of_utc_str_to_datetime:
-        raise (error_of_utc_str_to_datetime)
+        raise error_of_utc_str_to_datetime
     nikki = Nikki(id=_nikki.id,
                   created_by=_nikki.created_by,
                   title=_nikki.title,
@@ -117,12 +117,15 @@ class User(Base):
     user_name = Column(String, nullable=False)
     password = Column(String, nullable=False)
 
+    def __repr__(self):
+        return f'<User id={self.id},user_id={self.user_id}, user_name={self.user_name}>'
+
 
 class _User(BaseModel):
     """pydantic でUserを扱う為のクラス
 
     """
-    id: int
+    id: int or None = None
     user_id: str
     user_name: str
     password: str
