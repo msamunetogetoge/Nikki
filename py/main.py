@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from db.model import Nikki, _Nikki, User, _User, Nikkis, utc_str_to_datetime, api_to_orm
+from db.model import Nikki, _Nikki, Login, _User, Nikkis, utc_str_to_datetime, api_to_orm
 from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login
 
 app = FastAPI()
@@ -111,8 +111,8 @@ async def register_user(user: _User) -> HTTPStatus:
                             detail=error_of_add_user.__str__)
 
 
-@app.get("/user")
-async def find_user(user_id: str, password: str) -> HTTPStatus:
+@app.post("/login")
+async def login(user_info: Login) -> HTTPStatus:
     """
     ユーザーを検索する。一件だけデータが取得出来たら成功を返す。
 
@@ -121,11 +121,11 @@ async def find_user(user_id: str, password: str) -> HTTPStatus:
         HTTPResponse: 成功なら200, 失敗なら500
     """
     try:
-        try_login(user_id, password)
+        try_login(user_info.user_id, user_info.password)
         return HTTPStatus.OK
     except NoResultFound as no_result:
         raise HTTPException(HTTPStatus.BAD_REQUEST,
-                            detail="No Result Founf") from no_result
+                            detail="No Result Found") from no_result
     except MultipleResultsFound as multi_result:
         raise HTTPException(HTTPStatus.BAD_REQUEST,
                             detail="Multi Result Found") from multi_result
