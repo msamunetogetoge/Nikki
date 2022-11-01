@@ -139,6 +139,8 @@ class _User(BaseModel):
 @dataclass_json
 @dataclass
 class UserStore():
+    """nuxt側でユーザー情報を格納する為に使う
+    """
     id: int
     user_id: str
     user_name: str
