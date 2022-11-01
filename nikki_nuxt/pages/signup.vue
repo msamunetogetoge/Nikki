@@ -5,6 +5,12 @@
         <v-card-title class="headline">Nikkiに登録しましょう </v-card-title>
         <v-card-text>
           <v-text-field
+            v-model="userId"
+            label="ユーザーID"
+            :rules="[rules.required]"
+          >
+          </v-text-field>
+          <v-text-field
             v-model="userName"
             label="ユーザー名"
             :rules="[rules.required]"
@@ -47,6 +53,7 @@ export default defineComponent({
     return {
       showPassword1: false,
       showPassword2: false,
+      userId: '',
       userName: '',
       password1: '',
       password2: '',
@@ -60,7 +67,7 @@ export default defineComponent({
   },
   methods: {
     // todo: #15 ユーザー登録処理script/user.tsに書く
-    async registerUser(userName: string, password: string) {
+    async registerUser(userId: string, userName: string, password: string) {
       await alert('touroku!')
     },
   },
