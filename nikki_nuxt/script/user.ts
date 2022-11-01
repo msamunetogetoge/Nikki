@@ -18,14 +18,7 @@ interface UserId {
     user_id: string
 }
 
-/**
- * nuxtのstoreに保存する情報を格納するinterface
- */
-interface UserStore {
-    id: number
-    user_id: string
-    user_name: string
-}
+
 /**
  *  user 操作の為のapi url
  */
@@ -66,14 +59,5 @@ export async function isExistUser(userId: string): Promise<boolean> {
 
     return isExist
 
-
-}
-
-export function saveToStrore(id: number, userId: string, userName: string) {
-    const userInfo: UserStore = {
-        id,
-        user_id: userId,
-        user_name
-    }
 
 }

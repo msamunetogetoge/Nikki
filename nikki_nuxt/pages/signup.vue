@@ -59,7 +59,7 @@ export default defineComponent({
     }
   },
   methods: {
-    // todo: ユーザー登録処理script/user.tsに書く
+    // todo: #15 ユーザー登録処理script/user.tsに書く
     async registerUser(userName: string, password: string) {
       await alert('touroku!')
     },
