@@ -118,7 +118,7 @@ async def login(user_info: Login) -> UserStore or HTTPException:
 
 
     Returns:
-        HTTPResponse: 成功なら200, 失敗なら500
+        UserStore or HTTPException: 成功ならUserStoreに情報を格納して返す。 失敗したらHttpExceptionで400を返す
     """
     try:
         print(user_info)
