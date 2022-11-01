@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from db.model import Nikki, Nikkis, User, _User
+from db.model import Nikki, Nikkis, User, _User, UserStore
 from db.dbconfig import DATABASE_URI
 
 
@@ -125,7 +125,7 @@ def try_get_one_user(user_id: str) -> None or Exception:
     return
 
 
-def try_login(user_id: str, password: str) -> None or Exception:
+def try_login(user_id: str, password: str) -> UserStore or Exception:
     """DBにuserの情報があるか検索する。user_id, passwordのペアで検索して、一つだけデータが取得出来たらNoneを返す。
 
     Args:
@@ -136,14 +136,14 @@ def try_login(user_id: str, password: str) -> None or Exception:
         no_result: データが一つも取得できないか、二つ以上取得出来た時にraise
 
     Returns:
-        None or Exception: okかエラー
+        UserStore or Exception: userの情報かエラー
     """
     session = Session()
     try:
-        _ = session.query(User).filter(User.user_id == user_id).filter(
+        user_info = session.query(User).filter(User.user_id == user_id).filter(
             User.password == password).one()
         session.close()
-        return
+        return UserStore(id=user_info.id, user_id=user_info.user_id, user_name=user_info.user_name)
     except NoResultFound as no_result:
         logging.error(no_result)
         raise no_result

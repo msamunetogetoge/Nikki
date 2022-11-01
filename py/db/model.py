@@ -136,6 +136,14 @@ class _User(BaseModel):
         orm_mode = True
 
 
+@dataclass_json
+@dataclass
+class UserStore():
+    id: int
+    user_id: str
+    user_name: str
+
+
 class Login(BaseModel):
     """loginの可否判定に使うクラス
 
