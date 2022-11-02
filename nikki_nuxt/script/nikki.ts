@@ -13,8 +13,8 @@ interface NikkiToApi {
 
 export interface NikkiFromApi {
     id: number
-    createdAt: number // milliseconds を与える事に注意
-    createdBy: number
+    created_at: number // milliseconds を与える事に注意
+    created_by: number
     title: string
     goodness: number
     summary: string
@@ -62,8 +62,8 @@ export class NikkiFromBackEnd {
 export function createNullNikki(): NikkiFromBackEnd {
     const nikki: NikkiFromApi = {
         id: 0,
-        createdAt: 0,
-        createdBy: 0,
+        created_at: 0,
+        created_by: 0,
         title: "",
         summary: "",
         content: "",
