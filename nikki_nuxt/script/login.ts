@@ -21,8 +21,6 @@ export interface UserStore {
     user_name: string
 }
 
-// todo:loginのテストをする。
-
 /**
  * login 処理。成功なら何も返さず、失敗なら例外をthrowする。
  * @param userId  ユーザーID
@@ -43,7 +41,6 @@ export async function login(userId: string, password: string): Promise<UserStore
     await axios.post(urlBuilder.buildUrl(), loginInfo).then(
         function (response: AxiosResponse<UserStore>) {
             userInfo = response.data
-            console.log(response.data)
 
         }
     ).catch(function (error) {
