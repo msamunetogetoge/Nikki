@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from datetime import datetime
+from enum import unique
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.sql import func
+from sqlalchemy.schema import UniqueConstraint
 from typing import List
 
 from pydantic import BaseModel
@@ -104,6 +106,8 @@ def utc_str_to_datetime(utc: str) -> datetime or ValueError:
 
         raise error_of_strptime
 
+# todo: user_id にunique=True を追加したのでマイグレーションする
+
 
 class User(Base):
     """DBにユーザー情報を格納する為のモデル
@@ -113,7 +117,7 @@ class User(Base):
     """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String, nullable=False)
+    user_id = Column(String, nullable=False, unique=True)
     user_name = Column(String, nullable=False)
     password = Column(String, nullable=False)
 

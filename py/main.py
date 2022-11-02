@@ -10,7 +10,7 @@ import logging
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from sqlalchemy.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
 from db.model import Nikki, _Nikki, Login, _User, Nikkis, UserStore, utc_str_to_datetime, api_to_orm
 from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login
@@ -106,9 +106,12 @@ async def register_user(user: _User) -> HTTPStatus:
     try:
         add_user(user_info=user)
         return HTTPStatus.OK
-    except Exception as error_of_add_user:
+    except IntegrityError as user_id_already_exist:
+        raise HTTPException(HTTPStatus.BAD_REQUEST,
+                            detail="既に存在するユーザーID") from user_id_already_exist
+    except Exception as exc:
         raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR,
-                            detail=error_of_add_user.__str__)
+                            detail="api側でエラーが発生") from exc
 
 
 @app.post("/login")
@@ -133,7 +136,7 @@ async def login(user_info: Login) -> UserStore or HTTPException:
 
 
 @app.get("/user/{user_id}")
-async def is_exist_user_id(user_id: str) -> bool:
+async def is_exist_user_id(user_id: str) -> HTTPStatus or HTTPException:
     """ 既に存在するユーザーIDか調べる
 
     Args:
