@@ -115,15 +115,25 @@ export default defineComponent({
       summary: '',
     }
   },
+  /**
+   * ログインした人が書いたNikkiを取得する
+   */
   async mounted() {
     const date = new Date()
-    this.nikkiList = (await getNikki(date, 0)).nikkis as NikkiFromApi[]
+    const createdBy = this.$accessor.id
+    this.nikkiList = (await getNikki(date, createdBy)).nikkis as NikkiFromApi[]
   },
   methods: {
+    /**
+     * apiからもらう日付データを調整する
+     */
     dateMilliSecondsToString(second: number): string {
       const date = new Date(second * 1000)
       return date.toLocaleDateString('ja-japanese')
     },
+    /**
+     * Nikkiの詳細を表示する
+     */
     displayNikkiDetailCard(nikki: NikkiFromApi) {
       this.title = nikki.title
       this.content = nikki.content
@@ -131,18 +141,24 @@ export default defineComponent({
       this.summary = nikki.summary
       this.dialog = true
     },
+    /**
+     * 削除確認ダイアログを表示する
+     */
     displayDeleteConfirmDialog(deleteId: number, title: string) {
       this.deleteId = deleteId
       this.title = title
       this.deleteDialog = true
     },
+    /**
+     * Nikkiを削除する。
+     * 成否にかかわらずalertで教える。
+     */
     async deleteNikkiFromVue() {
-      console.log('sakujo sitaio ')
       try {
         await deleteNikki(this.deleteId)
-        alert('sakujo!')
+        alert('削除しました')
       } catch {
-        await alert('sippai!')
+        await alert('削除に失敗しました。')
       }
     },
   },
