@@ -43,7 +43,8 @@ export default defineComponent({
     }
   },
   methods: {
-    // todo:home.vueで表示する情報に関する事で、userId ,userNameを参照している場所はを、storeからの参照に書き換える
+    // todo:home.vueで表示する情報に関する事で、userId #27 ,userNameを参照している場所はを、storeからの参照に書き換える
+    // test_dao, testtest でログインして、日記を書いて、別の所に出ないか確認する
     /**
      * ログイン処理をする。
      * 成功すれば、ユーザー情報をstoreにセットして、/home に遷移する
