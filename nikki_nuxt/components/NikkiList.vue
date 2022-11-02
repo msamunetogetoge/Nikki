@@ -137,7 +137,7 @@ export default defineComponent({
     displayNikkiDetailCard(nikki: NikkiFromApi) {
       this.title = nikki.title
       this.content = nikki.content
-      this.createdAt = this.dateMilliSecondsToString(nikki.createdAt)
+      this.createdAt = this.dateMilliSecondsToString(nikki.created_at)
       this.summary = nikki.summary
       this.dialog = true
     },
