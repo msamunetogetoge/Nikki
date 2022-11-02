@@ -5,7 +5,7 @@
       <v-card>
         <v-card-title class="headline">Nikkiへようこそ </v-card-title>
         <v-card-text>
-          <v-text-field v-model="userId" label="ユーザー名"> </v-text-field>
+          <v-text-field v-model="userId" label="ユーザーID"> </v-text-field>
           <v-text-field
             v-model="password"
             label="パスワード"

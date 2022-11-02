@@ -4,39 +4,43 @@
       <v-card>
         <v-card-title class="headline">Nikkiに登録しましょう </v-card-title>
         <v-card-text>
-          <v-text-field
-            v-model="userId"
-            label="ユーザーID"
-            :rules="[rules.required]"
-          >
-          </v-text-field>
-          <v-text-field
-            v-model="userName"
-            label="ユーザー名"
-            :rules="[rules.required]"
-          >
-          </v-text-field>
-          <v-text-field
-            v-model="password1"
-            label="パスワード"
-            :append-icon="showPassword1 ? 'mdi-eye' : 'mdi-eye-off'"
-            :type="showPassword1 ? 'text' : 'password'"
-            :rules="[rules.required, rules.min]"
-            @click:append="showPassword1 = !showPassword1"
-          >
-          </v-text-field>
-          <v-text-field
-            v-model="password2"
-            label="パスワード再入力"
-            :append-icon="showPassword2 ? 'mdi-eye' : 'mdi-eye-off'"
-            :type="showPassword2 ? 'text' : 'password'"
-            :rules="[rules.min, rules.passwordMatch(password1, password2)]"
-            @click:append="showPassword2 = !showPassword2"
-          >
-          </v-text-field>
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-text-field
+              v-model="userId"
+              label="ユーザーID"
+              :rules="[rules.required]"
+            >
+            </v-text-field>
+            <v-text-field
+              v-model="userName"
+              label="ユーザー名"
+              :rules="[rules.required]"
+            >
+            </v-text-field>
+            <v-text-field
+              v-model="password1"
+              label="パスワード"
+              :append-icon="showPassword1 ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="showPassword1 ? 'text' : 'password'"
+              :rules="[rules.required, rules.min]"
+              @click:append="showPassword1 = !showPassword1"
+            >
+            </v-text-field>
+            <v-text-field
+              v-model="password2"
+              label="パスワード再入力"
+              :append-icon="showPassword2 ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="showPassword2 ? 'text' : 'password'"
+              :rules="[rules.min, rules.passwordMatch(password1, password2)]"
+              @click:append="showPassword2 = !showPassword2"
+            >
+            </v-text-field>
+          </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" @click="registerUser"> 登録 </v-btn>
+          <v-btn color="primary" :disabled="!valid" @click="addUser">
+            登録
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-col>
@@ -45,12 +49,15 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { registerUser } from '../script/user'
 
+// todo: バリデーションエラーがある時は、ボタンを使えなくする。
 export default defineComponent({
   name: 'SignUpPage',
   layout: 'simple',
   data() {
     return {
+      valid: true,
       showPassword1: false,
       showPassword2: false,
       userId: '',
@@ -66,9 +73,32 @@ export default defineComponent({
     }
   },
   methods: {
-    // todo: #15 ユーザー登録処理script/user.tsに書く
-    async registerUser(userId: string, userName: string, password: string) {
-      await alert('touroku!')
+    /**
+     * バリデーション
+     */
+    validate() {
+      const formElement: any = this.$refs.form
+      formElement.validate()
+    },
+    /**
+     * ユーザー登録する。
+     * alertで成功、失敗を教える。
+     * todo: #25 400が返ってきた時はユーザーIDが被ってる事を教える
+     */
+    async addUser() {
+      try {
+        await registerUser(
+          undefined,
+          this.userId,
+          this.userName,
+          this.password1
+        )
+        alert('登録しました。登録内容でログインしてください。')
+        this.$router.push('/')
+      } catch (error) {
+        console.error(error)
+        alert('登録に失敗しました。')
+      }
     },
   },
 })
