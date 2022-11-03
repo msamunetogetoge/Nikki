@@ -69,6 +69,10 @@ export default defineComponent({
       this.$accessor.setUserId(this.userId)
       this.$accessor.setUserName(this.userName)
       this.$accessor.login()
+      // storeに保存するとページを更新した時に消えるのでsessionStorageにも保存しておく
+      sessionStorage.setItem('id', this.$accessor.id.toString())
+      sessionStorage.setItem('useId', this.$accessor.userId)
+      sessionStorage.setItem('useName', this.$accessor.userName)
     },
   },
 })

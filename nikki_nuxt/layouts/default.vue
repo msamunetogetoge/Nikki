@@ -91,6 +91,7 @@
 </template>
 
 <script lang="ts">
+import { initId } from '../store/index'
 import { defineComponent } from 'vue'
 import { postNikki, createNikki } from '../script/nikki'
 export default defineComponent({
@@ -104,7 +105,7 @@ export default defineComponent({
       content: '',
       nikkiTitle: '',
       goodness: 10,
-      createdBy: 0, // todo:createdByはstoreから取得する
+      createdBy: 0,
       // nikki作成の為の変数終わり
       dialog: false,
       clipped: false,
@@ -128,6 +129,13 @@ export default defineComponent({
   },
   mounted() {
     this.nikkiTitle = this.createdAtDisplay + 'のNikki'
+    // storeの値が更新されて消えた時はsessionStorageから取得する
+    if (this.$accessor.id === initId) {
+      this.createdBy = Number(sessionStorage.getItem('id'))
+    } else {
+      this.createdBy = this.$accessor.id
+    }
+
     // 画面の大きさが変わった時に、自動でレイアウトを変更する
     window.addEventListener('resize', this.calculateWindowWidth)
   },
@@ -148,6 +156,7 @@ export default defineComponent({
       try {
         await postNikki(nikki)
         // todo: #4  NikkiList.vue に上にスワイプしたら更新 機能をつける
+        // todo: #32 nikkiを作る際、createdAtを編集できるようにする
       } catch {
       } finally {
         this.dialog = false

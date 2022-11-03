@@ -101,6 +101,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
+import { initId } from '../store'
 export default defineComponent({
   data() {
     return {
@@ -120,10 +121,21 @@ export default defineComponent({
    */
   async mounted() {
     const date = new Date()
-    const createdBy = this.$accessor.id
-    this.nikkiList = (await getNikki(date, createdBy)).nikkis as NikkiFromApi[]
+    this.nikkiList = (await getNikki(date, this.getUserId()))
+      .nikkis as NikkiFromApi[]
   },
   methods: {
+    /**
+     * userIdを取得する。
+     * storeから消えていたら、sessionStorageから取得する
+     */
+    getUserId(): number {
+      if ((this.$accessor.id as number) === initId) {
+        return Number(sessionStorage.getItem('id'))
+      } else {
+        return this.$accessor.id
+      }
+    },
     /**
      * apiからもらう日付データを調整する
      */
