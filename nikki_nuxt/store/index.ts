@@ -1,9 +1,12 @@
 import { getAccessorType, getterTree, mutationTree, actionTree } from 'typed-vuex'
 
-
+/**
+ * storeが初期化されているかどうか、確かめる為の初期値
+ */
+export const initId = -100
 export const state = () => {
     return {
-        id: -100 as number,
+        id: initId as number,
         userId: "" as string,
         userName: "" as string,
         logedIn: false as boolean
