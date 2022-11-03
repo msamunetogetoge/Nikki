@@ -114,6 +114,7 @@ export default defineComponent({
       content: '',
       createdAt: '',
       summary: '',
+      noLoginError: Error('ログインしていません。'),
     }
   },
   /**
@@ -121,19 +122,28 @@ export default defineComponent({
    */
   async mounted() {
     const date = new Date()
-    this.nikkiList = (await getNikki(date, this.getUserId()))
-      .nikkis as NikkiFromApi[]
+    try {
+      const createdBy = (await this.getUserId()) as number
+      this.nikkiList = (await getNikki(date, createdBy))
+        .nikkis as NikkiFromApi[]
+    } catch (error) {
+      alert('ログインしてください。')
+      this.$router.push('/')
+    }
   },
   methods: {
     /**
      * userIdを取得する。
      * storeから消えていたら、sessionStorageから取得する
+     * そもそもログインしていなかったらエラーを返す
      */
-    getUserId(): number {
-      if ((this.$accessor.id as number) === initId) {
+    getUserId(): number | Error {
+      if ((this.$accessor.id as number) !== initId) {
+        return this.$accessor.id
+      } else if (sessionStorage.getItem('id') !== null) {
         return Number(sessionStorage.getItem('id'))
       } else {
-        return this.$accessor.id
+        throw this.noLoginError
       }
     },
     /**

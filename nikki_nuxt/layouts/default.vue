@@ -91,8 +91,8 @@
 </template>
 
 <script lang="ts">
-import { initId } from '../store/index'
 import { defineComponent } from 'vue'
+import { initId } from '../store/index'
 import { postNikki, createNikki } from '../script/nikki'
 export default defineComponent({
   name: 'DefaultLayout',
