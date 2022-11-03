@@ -171,6 +171,8 @@ export default defineComponent({
         alert('削除しました')
       } catch {
         await alert('削除に失敗しました。')
+      } finally {
+        this.deleteDialog = false
       }
     },
   },
