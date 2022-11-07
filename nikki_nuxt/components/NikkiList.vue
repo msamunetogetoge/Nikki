@@ -55,33 +55,6 @@
           :goodness-provided="goodness"
           @close="dialog = false"
         />
-        <!-- <v-card>
-          <v-toolbar color="primary" dark>{{ title }}</v-toolbar>
-          <v-card-text>
-            <form>
-              <v-text-field
-                v-model="createdAt"
-                label="作成日"
-                disabled
-              ></v-text-field>
-
-              <v-text-field
-                v-model="summary"
-                label="要約"
-                disabled
-              ></v-text-field>
-              <v-textarea
-                v-model="content"
-                label="本文"
-                disabled
-                rows="5"
-              ></v-textarea>
-            </form>
-          </v-card-text>
-          <v-card-actions class="justify-end">
-            <v-btn text @click="dialog = false">閉じる</v-btn>
-          </v-card-actions>
-        </v-card> -->
       </v-dialog>
       <!-- 削除確認ダイアログ -->
       <v-dialog
