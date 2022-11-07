@@ -1,4 +1,4 @@
-  <template>
+<template>
   <v-list shaped fill>
     <v-list-item v-for="(item, i) in nikkiList.nikkis" :key="i">
       <v-list-item-content>
@@ -44,7 +44,18 @@
         transition="dialog-bottom-transition"
         max-width="600"
       >
-        <v-card>
+        <nikki-dialog
+          :is-new-nikki-provided="false"
+          :id-provided="id"
+          :created-by-provided="createdBy"
+          :title-provided="title"
+          :summary-provided="summary"
+          :content-provided="content"
+          :created-at-provided="new Date()"
+          :goodness-provided="goodness"
+          @close="dialog = false"
+        />
+        <!-- <v-card>
           <v-toolbar color="primary" dark>{{ title }}</v-toolbar>
           <v-card-text>
             <form>
@@ -70,7 +81,7 @@
           <v-card-actions class="justify-end">
             <v-btn text @click="dialog = false">閉じる</v-btn>
           </v-card-actions>
-        </v-card>
+        </v-card> -->
       </v-dialog>
       <!-- 削除確認ダイアログ -->
       <v-dialog
@@ -101,19 +112,24 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
+import NikkiDialog from '../components/NikkiDialog.vue'
 import { initId } from '../store'
 export default defineComponent({
+  components: { NikkiDialog },
   data() {
     return {
-      dialog: false,
-      deleteDialog: false,
+      dialog: false, // Nikki詳細ダイアログを表示するフラグ
+      deleteDialog: false, // 削除ダイアログを表示するフラグ
       date: new Date(),
       nikkiList: [] as NikkiFromApi[],
+      id: 0,
+      createdBy: 0,
       deleteId: -100,
       title: '',
       content: '',
       createdAt: '',
       summary: '',
+      goodness: 10,
       noLoginError: Error('ログインしていません。'),
     }
   },
@@ -157,10 +173,14 @@ export default defineComponent({
      * Nikkiの詳細を表示する
      */
     displayNikkiDetailCard(nikki: NikkiFromApi) {
+      this.dialog = false
       this.title = nikki.title
+      this.id = nikki.id
+      this.createdBy = nikki.created_by
       this.content = nikki.content
       this.createdAt = this.dateMilliSecondsToString(nikki.created_at)
       this.summary = nikki.summary
+      this.goodness = nikki.goodness
       this.dialog = true
     },
     /**
