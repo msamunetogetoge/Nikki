@@ -11,10 +11,11 @@
           v-model="title"
           label="タイトル"
         ></v-text-field>
+        <!-- 作成日は、datepickerを使うようにしたタイミングで変更可能にする。 -->
         <v-text-field
           v-model="createdAtDisplay"
           label="作成日"
-          :readonly="isNewNikki"
+          readonly
         ></v-text-field>
 
         <v-text-field v-model="summary" label="要約"></v-text-field>
