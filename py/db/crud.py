@@ -55,6 +55,35 @@ def get_nikki(nikki_id: int) -> Nikki or NoResultFound:
         print(no_result)
         raise no_result
 
+# todo:main.py からedit_nikkiを呼ぶようにする。
+
+
+def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:
+    """Nikkiをupdateする。
+
+    Args:
+        nikki (Nikki): Nikkiデータ
+        nikki_id (int): 更新したいNikkiのid
+
+    Raises:
+        no_result: データが取得出来ないときのエラー
+
+    Returns:
+        None or Exception: _description_
+    """
+    session = Session()
+    try:
+        nikki_edit = session.query(Nikki).filter(Nikki.id == nikki_id).one()
+        nikki_edit.summary = nikki.summary
+        nikki_edit.content = nikki.content
+        nikki_edit.goodness = nikki.goodness
+        session.commit()
+        return None
+    except NoResultFound as no_result:
+        logging.error(no_result)
+        print(no_result)
+        raise no_result
+
 
 def add_nikki(nikki: Nikki) -> None or Exception:
     """dbにnikkiを登録する

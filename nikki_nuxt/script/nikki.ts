@@ -131,6 +131,22 @@ export async function postNikki(nikki: NikkiToBackEnd) {
     })
 }
 
+/**
+ * todo: テストして完成させる
+ * Nikkiを編集する。
+ * @param nikki Nikkiのデータ。
+ */
+export async function editNikki(nikki: NikkiToBackEnd) {
+    const url = 'nikki';
+    const urlBuilder = new UrlBuilder(url, undefined, nikki.id?.toString())
+
+    await axios.put(urlBuilder.buildByPathParameter(), nikki).then(function () {
+    }).catch(function (error) {
+        console.error(error)
+        throw 'edit is failed';
+    })
+}
+
 export async function deleteNikki(nikkiId: number) {
     const url = "/nikki";
     const urlBuilder = new UrlBuilder(url, undefined, nikkiId.toString())

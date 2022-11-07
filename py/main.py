@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
 from db.model import Nikki, _Nikki, Login, _User, Nikkis, UserStore, utc_str_to_datetime, api_to_orm
-from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login
+from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki
 
 app = FastAPI()
 
@@ -64,16 +64,21 @@ async def register_nikki(nikki: _Nikki) -> HTTPStatus:
 
 
 @app.put("/nikki/{nikki_id}")
-async def edit_nikki(nikki: _Nikki) -> HTTPResponse:
+async def update_nikki(nikki_id: int, nikki: _Nikki) -> HTTPResponse:
     """nikkiを編集する
 
     Args:
         nikki_id (int): 編集するnikkiのid
 
     Returns:
-        HTTPResponse: 成功なら200, 失敗なら500
+        HTTPResponse: 成功なら200, 失敗なら400
     """
-    return
+    try:
+        nikki = api_to_orm(nikki)
+        edit_nikki(nikki=nikki, nikki_id=nikki_id)
+        return HTTPStatus.ACCEPTED
+    except NoResultFound:
+        HTTPException(HTTPStatus.BAD_REQUEST, "更新失敗")
 
 
 @app.delete("/nikki/{nikki_id}")

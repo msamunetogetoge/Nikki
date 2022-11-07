@@ -24,8 +24,12 @@
           </v-list-item-content>
         </v-list-item>
         <!-- Nikki作成ボタン -->
-
-        <v-list-item @click="dialog = true">
+        <v-list-item
+          @click="
+            dialog = true
+            drawer = !drawer
+          "
+        >
           <v-list-item-action>
             <v-icon>{{ nikkiCreate.icon }}</v-icon>
           </v-list-item-action>
@@ -43,7 +47,7 @@
     <v-main>
       <v-container>
         <Nuxt />
-        <v-dialog
+        <!-- <v-dialog
           v-model="dialog"
           transition="dialog-bottom-transition"
           max-width="600"
@@ -80,6 +84,13 @@
               <v-btn @click="dialog = false">閉じる</v-btn>
             </v-card-actions>
           </v-card>
+        </v-dialog> -->
+        <v-dialog v-model="dialog">
+          <nikki-dialog
+            :is-new-nikki-provided="true"
+            :created-by-provided="createdBy"
+            @close="dialog = false"
+          />
         </v-dialog>
       </v-container>
     </v-main>
@@ -94,8 +105,12 @@
 import { defineComponent } from 'vue'
 import { initId } from '../store/index'
 import { postNikki, createNikki } from '../script/nikki'
+import NikkiDialog from '../components/NikkiDialog.vue'
 export default defineComponent({
   name: 'DefaultLayout',
+  components: {
+    NikkiDialog,
+  },
   data() {
     return {
       // nikki作成の為の変数
