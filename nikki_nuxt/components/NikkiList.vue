@@ -51,7 +51,7 @@
           :title-provided="title"
           :summary-provided="summary"
           :content-provided="content"
-          :created-at-provided="new Date()"
+          :created-at-provided="createdAt"
           :goodness-provided="goodness"
           @close="dialog = false"
         />
@@ -100,7 +100,7 @@ export default defineComponent({
       deleteId: -100,
       title: '',
       content: '',
-      createdAt: '',
+      createdAt: new Date(),
       summary: '',
       goodness: 10,
       noLoginError: Error('ログインしていません。'),
@@ -143,7 +143,7 @@ export default defineComponent({
       return date.toLocaleDateString('ja-japanese')
     },
     /**
-     * Nikkiの詳細を表示する
+     * パラメーターを更新して、Nikkiの詳細を表示する
      */
     displayNikkiDetailCard(nikki: NikkiFromApi) {
       this.dialog = false
@@ -151,7 +151,7 @@ export default defineComponent({
       this.id = nikki.id
       this.createdBy = nikki.created_by
       this.content = nikki.content
-      this.createdAt = this.dateMilliSecondsToString(nikki.created_at)
+      this.createdAt = new Date(nikki.created_at * 1000)
       this.summary = nikki.summary
       this.goodness = nikki.goodness
       this.dialog = true

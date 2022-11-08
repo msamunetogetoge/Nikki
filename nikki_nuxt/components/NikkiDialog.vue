@@ -11,12 +11,37 @@
           v-model="title"
           label="タイトル"
         ></v-text-field>
-        <!-- 作成日は、datepickerを使うようにしたタイミングで変更可能にする。 -->
-        <v-text-field
-          v-model="createdAtDisplay"
-          label="作成日"
-          readonly
-        ></v-text-field>
+        <v-menu
+          ref="menu"
+          v-model="menu"
+          :close-on-content-click="false"
+          :return-value.sync="createdAtISO"
+          transition="scale-transition"
+          offset-y
+          min-width="auto"
+        >
+          <template #activator="{ on, attrs }">
+            <v-text-field
+              v-model="createdAtDisplay"
+              label="作成日"
+              readonly
+              v-bind="attrs"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            v-model="createdAtISO"
+            no-title
+            scrollable
+            :readonly="!isNewNikki"
+          >
+            <v-spacer></v-spacer>
+            <v-btn text color="primary" @click="menu = false"> Cancel </v-btn>
+            <v-btn text color="primary" @click="$refs.menu.save(createdAtISO)">
+              OK
+            </v-btn>
+          </v-date-picker>
+        </v-menu>
 
         <v-text-field v-model="summary" label="要約"></v-text-field>
         <v-textarea v-model="content" label="本文" rows="5"></v-textarea>
@@ -113,6 +138,8 @@ export default defineComponent({
       content: '',
       createdAt: new Date(),
       createdAtDisplay: '',
+      createdAtISO: new Date().toISOString().substr(0, 10), // v-date-picker に渡すdate
+      menu: false,
       goodness: 10,
       nowLoading: false,
     }
@@ -139,8 +166,16 @@ export default defineComponent({
     goodnessProvided(val) {
       this.goodness = val
     },
-    createdAtProvided(val) {
+    createdAtProvided(val: Date) {
       this.createdAt = val
+      this.createdAtDisplay = val.toLocaleDateString('ja-jp')
+      // createAtISOもwatchしているので、ISOStringにした時に時刻がずれないように補正する
+      val.setHours(val.getHours() + 9)
+      this.createdAtISO = val.toISOString().substr(0, 10)
+    },
+
+    createdAtISO(val) {
+      this.createdAt = new Date(val)
       this.createdAtDisplay = (this.createdAt as Date).toLocaleDateString(
         'ja-jp'
       )
@@ -156,13 +191,20 @@ export default defineComponent({
     this.goodness = this.goodnessProvided
     this.createdAt = this.createdAtProvided
     this.createdAtDisplay = (this.createdAt as Date).toLocaleDateString('ja-jp')
+    this.createdAtISO = (this.createdAt as Date).toISOString().substr(0, 10)
   },
 
   // todo: createdAtの部分をv-date-picker にする
   methods: {
+    /**
+     * このコンポーネントを閉じる
+     */
     closeDialog() {
       this.$emit('close')
     },
+    /**
+     * Nikkiを保存する
+     */
     async saveNikki() {
       const dateUtc = this.createdAt.toUTCString()
       const createdBy = () => {
