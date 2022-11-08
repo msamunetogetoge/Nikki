@@ -194,7 +194,8 @@ export default defineComponent({
     this.createdAtISO = (this.createdAt as Date).toISOString().substr(0, 10)
   },
 
-  // todo: createdAtの部分をv-date-picker にする
+  // todo: 2022/11/1, 2022/11/8 に作ったnikki を見ると、作成日が2022/10/31 になったりするので原因を調べる
+  // 同じnikkiを2回開くと直る
   methods: {
     /**
      * このコンポーネントを閉じる
