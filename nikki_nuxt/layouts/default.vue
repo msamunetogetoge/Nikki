@@ -54,6 +54,7 @@
             @close="dialog = false"
           />
         </v-dialog>
+        <nikki-bottun v-if="!permanent" @click="dialog = true" />
       </v-container>
     </v-main>
 
@@ -68,10 +69,13 @@ import { defineComponent } from 'vue'
 import { initId } from '../store/index'
 import { postNikki, createNikki } from '../script/nikki'
 import NikkiDialog from '../components/NikkiDialog.vue'
+import NikkiButton from '../components/NikkiBottun.vue'
+
 export default defineComponent({
   name: 'DefaultLayout',
   components: {
     NikkiDialog,
+    NikkiButton,
   },
   data() {
     return {
@@ -84,12 +88,13 @@ export default defineComponent({
       goodness: 10,
       createdBy: 0,
       // nikki作成の為の変数終わり
-      dialog: false,
-      clipped: false,
-      drawer: false,
-      permanent: window.innerWidth > 768,
-      fixed: false,
+      dialog: false, // nikki作成ダイアログの出現フラグ
+      clipped: false, // 左側にメニューアイコンを出すかのフラグ
+      drawer: false, // メニュー表示のフラグ
+      permanent: window.innerWidth > 768, // スマートフォンかどうかの判別
+      fixed: false, // footer を下に止めておくかのフラグ
       items: [
+        // メニューに表示する項目
         {
           icon: 'mdi-apps',
           title: 'Home',
@@ -113,7 +118,7 @@ export default defineComponent({
       this.createdBy = this.$accessor.id
     }
 
-    // 画面の大きさが変わった時に、自動でレイアウトを変更する
+    // 画面の大きさが変わった時に、自動でレイアウトを変更するイベントを追加
     window.addEventListener('resize', this.calculateWindowWidth)
   },
   methods: {
@@ -133,7 +138,6 @@ export default defineComponent({
       try {
         await postNikki(nikki)
         // todo: #4  NikkiList.vue に上にスワイプしたら更新 機能をつける
-        // todo: #32 nikkiを作る際、createdAtを編集できるようにする
       } catch {
       } finally {
         this.dialog = false
