@@ -181,7 +181,7 @@ def try_login(user_id: str, password: str) -> UserStore or Exception:
         raise multi_result
 
 
-def add_user(user_info: _User):
+def add_user(user_info: _User) -> int:
     """ ユーザーを登録する。
 
     Args:
@@ -196,7 +196,48 @@ def add_user(user_info: _User):
     session.add(user)
     try:
         session.commit()
+        created_user = session.query(User).filter(
+            User.user_id == user.user_id).one()
+        return created_user.id
     except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
+
+
+def remove_user_and_nikki(user_id: str) -> None or Exception:
+    """_summary_
+
+    Args:
+        user_id (str): _description_
+
+    Raises:
+        e: _description_
+
+    Returns:
+        None or Exception: _description_
+    """
+    try:
+        session = Session()
+        user = session.query(User).filter(User.user_id == user_id).one()
+        print(user)
+        id = user.id
+        session.delete(user)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logging.error(e)
+        print(f"remove_user_and_nikki, error={e}")
+        raise e
+    try:
+        nikkis = session.query(Nikki).filter(Nikki.created_by == id)
+        if len(nikkis.all()) == 0:  # データが無い時は処理終了
+            return
+        nikkis.delete()
+        session.commit()
+    except Exception as e:
+        logging.error(e)
         session.rollback()
         raise e
     finally:

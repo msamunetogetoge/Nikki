@@ -112,7 +112,7 @@ export default defineComponent({
   async mounted() {
     const date = new Date()
     try {
-      const createdBy = (await this.getUserId()) as number
+      const createdBy = this.getUserId() as number
       this.nikkiList = (await getNikki(date, createdBy))
         .nikkis as NikkiFromApi[]
     } catch (error) {
@@ -123,14 +123,14 @@ export default defineComponent({
   methods: {
     /**
      * userIdを取得する。
-     * storeから消えていたら、sessionStorageから取得する
      * そもそもログインしていなかったらエラーを返す
      */
     getUserId(): number | Error {
-      if ((this.$accessor.id as number) !== initId) {
+      if (
+        this.$accessor.logedIn === true ||
+        this.$accessor.logedInTrial === true
+      ) {
         return this.$accessor.id
-      } else if (sessionStorage.getItem('id') !== null) {
-        return Number(sessionStorage.getItem('id'))
       } else {
         throw this.noLoginError
       }
