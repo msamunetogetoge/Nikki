@@ -50,3 +50,34 @@ export async function login(userId: string, password: string): Promise<UserStore
     return userInfo
 }
 
+/**
+ * 仮のユーザー情報を取得する。
+ * @returns ランダムな文字列で構成されたUserStore
+ */
+export async function getTrialLoginInfo(): Promise<UserStore> {
+    let userInfo: UserStore = {
+        id: -100,
+        user_id: "",
+        user_name: ""
+    }
+    const urlBuilder = new UrlBuilder("random", undefined, undefined)
+    await axios.get(urlBuilder.buildUrl()).then(
+        function (response: AxiosResponse<UserStore>) {
+            userInfo = response.data
+        }
+    ).catch(function (error) {
+        console.error(error)
+        throw error
+    })
+    return userInfo
+}
+/**
+ * 登録せずに使用しているユーザー情報を削除する。
+ * @param userId  ユーザーのid(user_idでなくてid)
+ */
+export async function deleteTrialLoginUser(userId: string): Promise<void> {
+    const urlBuilder = new UrlBuilder("user", undefined, userId)
+    await axios.delete(urlBuilder.buildByPathParameter()).then().catch(function (error) {
+        throw error
+    })
+}

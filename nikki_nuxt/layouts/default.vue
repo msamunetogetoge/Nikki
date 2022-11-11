@@ -42,6 +42,11 @@
     <v-app-bar :clipped-left="clipped" fixed app>
       <v-app-bar-nav-icon v-if="!permanent" @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
+      <v-spacer> </v-spacer>
+      <v-btn @click="tryLogout">
+        <v-icon> mdi-logout</v-icon>
+        ログアウト
+      </v-btn>
     </v-app-bar>
 
     <v-main>
@@ -68,6 +73,7 @@
 import { defineComponent } from 'vue'
 import { initId } from '../store/index'
 import { postNikki, createNikki } from '../script/nikki'
+import { deleteTrialLoginUser } from '../script/login'
 import NikkiDialog from '../components/NikkiDialog.vue'
 import NikkiButton from '../components/NikkiBottun.vue'
 
@@ -122,9 +128,31 @@ export default defineComponent({
     window.addEventListener('resize', this.calculateWindowWidth)
   },
   methods: {
+    // ログアウト処理をする
+    async tryLogout() {
+      if ((this.$accessor.logedInTrial as boolean) === true) {
+        try {
+          const userId: string = this.$accessor.userId
+          this.$accessor.logoutTrial()
+          await deleteTrialLoginUser(userId)
+          this.$router.push('/')
+        } catch (error) {
+          console.error(error)
+          alert('ログアウト失敗')
+        }
+      } else if ((this.$accessor.logedIn as boolean) === true) {
+        this.$accessor.logout()
+        console.log('ユーザーがログアウトしたよ')
+        this.$router.push('/')
+      } else {
+        alert('予期せぬエラーが発生しました。ログイン画面に戻ります。')
+        this.$router.push('/')
+      }
+    },
     calculateWindowWidth() {
       this.permanent = window.innerWidth > 768
     },
+    // Nikkiを投稿する
     async postNikki() {
       const nikki = createNikki(
         null,

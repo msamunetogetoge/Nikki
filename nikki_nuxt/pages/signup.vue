@@ -51,7 +51,6 @@
 import { defineComponent } from 'vue'
 import { registerUser } from '../script/user'
 
-// todo: バリデーションエラーがある時は、ボタンを使えなくする。
 export default defineComponent({
   name: 'SignUpPage',
   layout: 'simple',

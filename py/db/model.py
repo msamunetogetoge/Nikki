@@ -1,3 +1,5 @@
+import random
+import string
 from dataclasses import dataclass
 from datetime import datetime
 from enum import unique
@@ -138,6 +140,38 @@ class _User(BaseModel):
         """ sqlalchemy model -> pydantic modelの変換を許す設定
         """
         orm_mode = True
+
+
+def create_random_user() -> _User:
+    """ ユーザー登録せずにNikkiを利用したい時、適当なユーザー情報を作る為に使用する。
+    ランダムな文字列([a-zA-Z])を使用してユーザー情報を作成する。user_nameは固定。
+
+    Returns:
+        _User: user_id,password がランダムな文字列なユーザー情報
+    """
+    user_id = get_random_str()
+    password = get_random_str()
+    user_name = "おためしNikkiユーザー"
+    return _User(id=None, user_id=user_id, user_name=user_name, password=password)
+
+# todo get_random_strを完成させる・
+
+
+def get_random_str(min_length=5, max_length=32) -> str:
+    """[a-zA-Z]からランダムに文字を取得して文字列を作成する。文字列の長さは、min_lengthからmax_lengthの間の数字からランダムに選んで決める。
+
+    Args:
+        min_length (int, optional): 文字列の長さの最小値. Defaults to 5.
+        max_length (int, optional): 文字列の長さの最大値. Defaults to 32.
+
+    Returns:
+        str: 生成された文字列
+    """
+    random_str = ""
+    str_length = random.randrange(min_length, max_length)
+    for _ in range(str_length):
+        random_str += random.choice(string.ascii_letters)
+    return random_str
 
 
 @dataclass_json

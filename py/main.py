@@ -12,8 +12,8 @@ from pydantic import BaseModel
 
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
-from db.model import Nikki, _Nikki, Login, _User, Nikkis, UserStore, utc_str_to_datetime, api_to_orm
-from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki
+from db.model import Nikki, _Nikki, Login, _User, Nikkis, UserStore, utc_str_to_datetime, api_to_orm, create_random_user
+from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki
 
 app = FastAPI()
 
@@ -129,7 +129,6 @@ async def login(user_info: Login) -> UserStore or HTTPException:
         UserStore or HTTPException: 成功ならUserStoreに情報を格納して返す。 失敗したらHttpExceptionで400を返す
     """
     try:
-        print(user_info)
         user_store = try_login(user_info.user_id, user_info.password)
         return user_store
     except NoResultFound as no_result:
@@ -155,3 +154,37 @@ async def is_exist_user_id(user_id: str) -> HTTPStatus or HTTPException:
         return True
     except Exception:
         return False
+
+
+@app.delete("/user/{user_id}")
+async def delete_user_and_nikkis(user_id: str) -> HTTPStatus or HTTPException:
+    """ ユーザーと、そのユーザーが作成したNikkiを削除する
+
+    Args:
+        user_id (str): User.user_id
+
+    Returns:
+        HTTPStatus or HTTPException: 成功なら200, 失敗なら400か500
+    """
+    # todo: user,nikki 削除部分を作ってテストする -> nikki_nuxt/pages/index.vue#L102 を見る
+    try:
+        remove_user_and_nikki(user_id=user_id)
+
+        return HTTPStatus.ACCEPTED
+    except Exception as e:
+        print(f"in delete_user_and_nikkis, error = {e}")
+        return HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "ユーザー情報削除失敗")
+
+
+@app.get("/random")
+async def publish_random_user() -> UserStore or HTTPException:
+    try:
+        user = create_random_user()
+        id = add_user(user_info=user)
+        user_store = UserStore(
+            id=id, user_id=user.user_id, user_name=user.user_name)
+        print(f"in publish_Random_user user_info={user_store}")
+        return user_store
+    except Exception as e:
+        print(e)
+        return HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "ランダムなユーザーを払いだすのに失敗した")
