@@ -1,47 +1,35 @@
 steps:
-  # # build dao
-  # - name: "gcr.io/cloud-builders/docker"
-  #   dir: "./py"
-  #   args:
-  #     [
-  #       "build",
-  #       "-t",
-  #       "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy",
-  #       ".",
-  #     ]
-  # # push to artifact
-  # - name: "gcr.io/cloud-builders/docker"
-  #   dir: "./py"
-  #   args:
-  #     [
-  #       "push",
-  #       "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy",
-  #     ]
-  # build submit
+  # build
+  - name: "gcr.io/cloud-builders/docker"
+    dir: "./py"
+    args:
+      [
+        "build",
+        "-t",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy",
+        ".",
+      ]
+  # push to artifact
+  - name: "gcr.io/cloud-builders/docker"
+    dir: "./py"
+    args:
+      [
+        "push",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy",
+      ]
+  # deploy by cloud run
   - name: "gcr.io/cloud-builders/gcloud"
     dir: "./py"
     args:
-      - "builds"
-      - "submit"
+      - "run"
+      - "deploy"
+      - "nikkipy" # cloud run service name
+      - "--image"
+      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy"
       - "--region"
-      - "="
       - "northamerica-northeast1"
-      - "--tag" # cloud run service name
-      - "gcr.io/${PROJECT_ID}/nikkipy"
-      - " ."
-  # deploy by cloud run
-#   - name: "gcr.io/cloud-builders/gcloud"
-#     dir: "./py"
-#     args:
-#       - "run"
-#       - "deploy"
-#       - "nikkipy" # cloud run service name
-#       - "--image"
-#       - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy"
-#       - "--region"
-#       - "northamerica-northeast1"
-#       - "--platform"
-#       - "managed"
-#       - "--allow-unauthenticated"
-# images:
-#   - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+images:
+  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy"
