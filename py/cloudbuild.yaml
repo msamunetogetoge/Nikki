@@ -1,22 +1,33 @@
 steps:
-  # build dao
-  - name: "gcr.io/cloud-builders/docker"
+  # # build dao
+  # - name: "gcr.io/cloud-builders/docker"
+  #   dir: "./py"
+  #   args:
+  #     [
+  #       "build",
+  #       "-t",
+  #       "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy:tag1",
+  #       ".",
+  #     ]
+  # # push to artifact
+  # - name: "gcr.io/cloud-builders/docker"
+  #   dir: "./py"
+  #   args:
+  #     [
+  #       "push",
+  #       "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy:tag1",
+  #     ]
+  # build submit
+  - name: "gcr.io/cloud-builders/gcloud"
     dir: "./py"
     args:
-      [
-        "build",
-        "-t",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy:tag1",
-        ".",
-      ]
-  # push to artifact
-  - name: "gcr.io/cloud-builders/docker"
-    dir: "./py"
-    args:
-      [
-        "push",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy:tag1",
-      ]
+      - "builds"
+      - "submit"
+      - "--tag" # cloud run service name
+      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy:tag1"
+      - "--region"
+      - "northamerica-northeast1"
+      - "."
   # deploy by cloud run
   - name: "gcr.io/cloud-builders/gcloud"
     dir: "./py"
