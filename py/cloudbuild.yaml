@@ -1,10 +1,13 @@
 steps:
+  # todo: 環境変数から、dbconfig.py にDATABASE_URI を設定する or DATABASE_URIが無かったら環境変数から読み込むようにする
   # build
   - name: "gcr.io/cloud-builders/docker"
     dir: "./py"
     args:
       [
         "build",
+        "--build-arg",
+        "DATABASE_URI=${_DATABASE_URI}",
         "-t",
         "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy",
         ".",

@@ -4,11 +4,11 @@ nikki 編集、登録、公開範囲の設定などを処理するapi
 
 
 from http import HTTPStatus
-from typing import Union, List
+
 from http.client import HTTPResponse
 import logging
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+
 
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
@@ -166,7 +166,6 @@ async def delete_user_and_nikkis(user_id: str) -> HTTPStatus or HTTPException:
     Returns:
         HTTPStatus or HTTPException: 成功なら200, 失敗なら400か500
     """
-    # todo: user,nikki 削除部分を作ってテストする -> nikki_nuxt/pages/index.vue#L102 を見る
     try:
         remove_user_and_nikki(user_id=user_id)
 
@@ -180,9 +179,9 @@ async def delete_user_and_nikkis(user_id: str) -> HTTPStatus or HTTPException:
 async def publish_random_user() -> UserStore or HTTPException:
     try:
         user = create_random_user()
-        id = add_user(user_info=user)
+        id_of_user = add_user(user_info=user)
         user_store = UserStore(
-            id=id, user_id=user.user_id, user_name=user.user_name)
+            id=id_of_user, user_id=user.user_id, user_name=user.user_name)
         print(f"in publish_Random_user user_info={user_store}")
         return user_store
     except Exception as e:

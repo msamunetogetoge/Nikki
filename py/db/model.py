@@ -1,14 +1,14 @@
 import random
 import string
+from typing import List
 from dataclasses import dataclass
 from datetime import datetime
-from enum import unique
+
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.sql import func
-from sqlalchemy.schema import UniqueConstraint
-from typing import List
+
 
 from pydantic import BaseModel
 from dataclasses_json import dataclass_json
