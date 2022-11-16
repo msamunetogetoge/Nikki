@@ -85,7 +85,6 @@
 import { defineComponent } from 'vue'
 import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
 import NikkiDialog from '../components/NikkiDialog.vue'
-import { initId } from '../store'
 export default defineComponent({
   components: { NikkiDialog },
   data() {
