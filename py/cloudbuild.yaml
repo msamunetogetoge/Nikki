@@ -6,7 +6,9 @@ steps:
         "build",
         "-t",
         "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy:tag1",
-        "-f ./py/",
+        ".",
+        "-f",
+        "./py/Dockerfile ",
       ]
   # push to artifact
   - name: "gcr.io/cloud-builders/docker"
