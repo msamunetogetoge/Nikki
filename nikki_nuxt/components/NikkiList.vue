@@ -15,23 +15,22 @@
           <v-card-actions>
             <v-list-item class="grow">
               <v-list-item-content>
-                <v-list-item-title>{{
-                  dateMilliSecondsToString(item.created_at)
-                }}</v-list-item-title>
+                {{ dateMilliSecondsToString(item.created_at) }}
+                <v-row align="center" justify="end">
+                  <v-btn
+                    icon
+                    @click="displayDeleteConfirmDialog(item.id, item.title)"
+                  >
+                    <v-icon class="mr-3">mdi-delete </v-icon></v-btn
+                  >
+
+                  <v-icon class="mr-1"> mdi-heart </v-icon>
+                  <span class="subheading mr-2">{{ item.goodness }}</span>
+                  <v-btn text @click="displayNikkiDetailCard(item)">
+                    詳細
+                  </v-btn>
+                </v-row>
               </v-list-item-content>
-
-              <v-row align="center" justify="end">
-                <v-btn
-                  icon
-                  @click="displayDeleteConfirmDialog(item.id, item.title)"
-                >
-                  <v-icon class="mr-3">mdi-delete </v-icon></v-btn
-                >
-
-                <v-icon class="mr-1"> mdi-heart </v-icon>
-                <span class="subheading mr-2">{{ item.goodness }}</span>
-                <v-btn text @click="displayNikkiDetailCard(item)"> 詳細 </v-btn>
-              </v-row>
             </v-list-item>
           </v-card-actions>
         </v-card>
