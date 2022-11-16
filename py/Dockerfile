@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 ARG DATABASE_URI
-ENV DATABASE_URI uri_to_db
+ENV DATABASE_URI ${DATABASE_URI}
 RUN echo ${DATABASE_URI}
 
 RUN pip install --upgrade pip
