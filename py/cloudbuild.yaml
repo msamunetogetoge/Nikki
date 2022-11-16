@@ -1,5 +1,4 @@
 steps:
-  # todo: 環境変数から、dbconfig.py にDATABASE_URI を設定する or DATABASE_URIが無かったら環境変数から読み込むようにする
   # build
   - name: "gcr.io/cloud-builders/docker"
     dir: "./py"
@@ -9,7 +8,7 @@ steps:
         "--build-arg",
         "DATABASE_URI=${_DATABASE_URI}",
         "-t",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy",
         ".",
       ]
   # push to artifact
@@ -18,7 +17,7 @@ steps:
     args:
       [
         "push",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy",
       ]
   # deploy by cloud run
   - name: "gcr.io/cloud-builders/gcloud"
@@ -28,11 +27,11 @@ steps:
       - "deploy"
       - "nikkipy" # cloud run service name
       - "--image"
-      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy"
+      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy"
       - "--region"
       - "northamerica-northeast1"
       - "--platform"
       - "managed"
       - "--allow-unauthenticated"
 images:
-  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkipy"
+  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy"
