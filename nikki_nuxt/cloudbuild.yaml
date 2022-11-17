@@ -8,7 +8,7 @@ steps:
         "--build-arg",
         "PROXY_URL=${_PROXY_URL}",
         "-t",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY_ID}/nikkinuxt",
         ".",
       ]
   # push to artifact
@@ -17,7 +17,7 @@ steps:
     args:
       [
         "push",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY_ID}/nikkinuxt",
       ]
   # deploy by cloud run
   - name: "gcr.io/cloud-builders/gcloud"
@@ -27,11 +27,11 @@ steps:
       - "deploy"
       - "nikkinuxt" # cloud run service name
       - "--image"
-      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt"
+      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY_ID}/nikkinuxt"
       - "--region"
       - "northamerica-northeast1"
       - "--platform"
       - "managed"
       - "--allow-unauthenticated"
 images:
-  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt"
+  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/nikkinuxt"

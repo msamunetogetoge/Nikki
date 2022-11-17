@@ -8,7 +8,7 @@ steps:
         "--build-arg",
         "DATABASE_URI=${_DATABASE_URI}",
         "-t",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY_ID}/nikkipy",
         ".",
       ]
   # push to artifact
@@ -17,7 +17,7 @@ steps:
     args:
       [
         "push",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY_ID}/nikkipy",
       ]
   # deploy by cloud run
   - name: "gcr.io/cloud-builders/gcloud"
@@ -27,11 +27,11 @@ steps:
       - "deploy"
       - "nikkipy" # cloud run service name
       - "--image"
-      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy"
+      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY_ID}/nikkipy"
       - "--region"
       - "northamerica-northeast1"
       - "--platform"
       - "managed"
       - "--allow-unauthenticated"
 images:
-  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy"
+  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY_ID}/nikkipy"
