@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NUXT_ENV_DEPLOYMENT=development nuxt",
+    "dev": "nuxt",
     "build": "nuxt build",
-    "start": "cross-env NUXT_ENV_DEPLOYMENT=production nuxt start",
+    "start": "nuxt start",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext \".js,.ts,.vue\" --ignore-path .gitignore .",
     "lint:prettier": "prettier --check .",
