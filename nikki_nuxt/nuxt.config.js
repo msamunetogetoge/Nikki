@@ -1,7 +1,5 @@
 import colors from 'vuetify/es5/util/colors'
 
-// const deploymentEnv = process.env.NUXT_ENV_DEPLOYMENT || 'development';
-// const environment = require(`./.env.${deploymentEnv}.js`);
 const proxyURL = process.env.PROXY_URL || 'http://localhost:8000'
 
 export default {
