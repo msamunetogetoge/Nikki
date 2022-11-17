@@ -5,15 +5,9 @@ WORKDIR /usr/src/app
 COPY . ./
 
 ARG PROXY_URL
-ENV PROXY_URL ${PROXY_URL} 
-
-# RUN touch './.env.production.js'
-# RUN echo "module.exports = {API_URL: \"${PROXY_URL}\",};" > './.env.production.js'
-# RUN cat './.env.production.js'
+ENV PROXY_URL ${PROXY_URL}
 
 RUN npm install
-
-
 
 EXPOSE 8080
 
