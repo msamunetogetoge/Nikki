@@ -1,0 +1,37 @@
+steps:
+  # build
+  - name: "gcr.io/cloud-builders/docker"
+    dir: "./nikki_nuxt"
+    args:
+      [
+        "build",
+        "--build-arg",
+        "PROXY_URL=${_PROXY_URL}",
+        "-t",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt",
+        ".",
+      ]
+  # push to artifact
+  - name: "gcr.io/cloud-builders/docker"
+    dir: "./nikki_nuxt"
+    args:
+      [
+        "push",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt",
+      ]
+  # deploy by cloud run
+  - name: "gcr.io/cloud-builders/gcloud"
+    dir: "./nikki_nuxt"
+    args:
+      - "run"
+      - "deploy"
+      - "nikkinuxt" # cloud run service name
+      - "--image"
+      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt"
+      - "--region"
+      - "northamerica-northeast1"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+images:
+  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt"
