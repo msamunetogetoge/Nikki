@@ -3,6 +3,10 @@ FROM node:16-slim
 WORKDIR /usr/src/app
 
 COPY . ./
+
+ARG PROXY_URL
+ENV PROXY_URL ${PROXY_URL}
+
 RUN npm install
 
 EXPOSE 8080

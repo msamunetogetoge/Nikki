@@ -1,37 +1,37 @@
 steps:
   # build
   - name: "gcr.io/cloud-builders/docker"
-    dir: "./py"
+    dir: "./nikki_nuxt"
     args:
       [
         "build",
         "--build-arg",
-        "DATABASE_URI=${_DATABASE_URI}",
+        "PROXY_URL=${_PROXY_URL}",
         "-t",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt",
         ".",
       ]
   # push to artifact
   - name: "gcr.io/cloud-builders/docker"
-    dir: "./py"
+    dir: "./nikki_nuxt"
     args:
       [
         "push",
-        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy",
+        "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt",
       ]
   # deploy by cloud run
   - name: "gcr.io/cloud-builders/gcloud"
-    dir: "./py"
+    dir: "./nikki_nuxt"
     args:
       - "run"
       - "deploy"
-      - "nikkipy" # cloud run service name
+      - "nikkinuxt" # cloud run service name
       - "--image"
-      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy"
+      - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt"
       - "--region"
       - "northamerica-northeast1"
       - "--platform"
       - "managed"
       - "--allow-unauthenticated"
 images:
-  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkipy"
+  - "northamerica-northeast1-docker.pkg.dev/${PROJECT_ID}/test/nikkinuxt"
