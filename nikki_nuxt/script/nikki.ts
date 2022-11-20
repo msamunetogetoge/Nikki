@@ -60,16 +60,16 @@ export class NikkiFromBackEnd {
  * @returns {NikkiFromBackEnd}
  */
 export function createNullNikki(): NikkiFromBackEnd {
-    const nikki: NikkiFromApi = {
-        id: 0,
-        created_at: 0,
-        created_by: 0,
-        title: "",
-        summary: "",
-        content: "",
-        goodness: 0
-    }
-    return new NikkiFromBackEnd([nikki])
+    // const nikki: NikkiFromApi = {
+    //     id: 0,
+    //     created_at: 0,
+    //     created_by: 0,
+    //     title: "",
+    //     summary: "",
+    //     content: "",
+    //     goodness: 0
+    // }
+    return new NikkiFromBackEnd([])
 }
 /**
  * api からnikkiデータを取得する。
@@ -77,7 +77,7 @@ export function createNullNikki(): NikkiFromBackEnd {
  * @param maxLength {number} 何件取り出すか
  * @return {Promise<NikkiFromBackEnd[]>}
  */
-export async function getNikki(fromDate: Date, createdBy: number): Promise<NikkiFromBackEnd> {
+export async function getNikki(fromDate: Date, createdBy: number): Promise<Array<NikkiFromApi>> {
     const dateUtc = fromDate.toUTCString()
     const query: Query[] = [{
         key: "from_date",
@@ -96,7 +96,7 @@ export async function getNikki(fromDate: Date, createdBy: number): Promise<Nikki
     }).catch(function (response: AxiosError) {
         console.error(response.message);
     })
-    return nikkiData
+    return nikkiData.nikkis
 }
 
 /**
