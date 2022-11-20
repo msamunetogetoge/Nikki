@@ -1,43 +1,48 @@
 <template>
-  <v-list shaped fill>
-    <v-list-item v-for="(item, i) in nikkiList.nikkis" :key="i">
-      <v-list-item-content>
-        <v-card class="mx-auto" color="cyan lighten-5" max-width="800">
-          <v-card-title>
-            <v-icon large left> mdi-fountain-pen-tip </v-icon>
-            <span class="text-h6 font-weight-light">{{ item.title }}</span>
-          </v-card-title>
+  <v-row>
+    <v-col>
+      <v-list shaped fill>
+        <v-list-item v-for="(item, i) in nikkiList" :key="i">
+          <v-list-item-content>
+            <v-card class="mx-auto" color="cyan lighten-5" max-width="800">
+              <v-card-title>
+                <v-icon large left> mdi-fountain-pen-tip </v-icon>
+                <span class="text-h6 font-weight-light">{{ item.title }}</span>
+              </v-card-title>
 
-          <v-card-text class="text-h5 font-weight-bold">
-            {{ item.summary }}
-          </v-card-text>
+              <v-card-text class="text-h5 font-weight-bold">
+                {{ item.summary }}
+              </v-card-text>
 
-          <v-card-actions>
-            <v-list-item class="grow">
-              <v-list-item-content>
-                <v-list-item-title>{{
-                  dateMilliSecondsToString(item.created_at)
-                }}</v-list-item-title>
-              </v-list-item-content>
+              <v-card-actions>
+                <v-list-item class="grow">
+                  <v-list-item-content>
+                    <v-list-item-title>{{
+                      dateMilliSecondsToString(item.created_at)
+                    }}</v-list-item-title>
+                  </v-list-item-content>
 
-              <v-row align="center" justify="end">
-                <v-btn
-                  icon
-                  @click="displayDeleteConfirmDialog(item.id, item.title)"
-                >
-                  <v-icon class="mr-3">mdi-delete </v-icon></v-btn
-                >
+                  <v-row align="center" justify="end">
+                    <v-btn
+                      icon
+                      @click="displayDeleteConfirmDialog(item.id, item.title)"
+                    >
+                      <v-icon class="mr-3">mdi-delete </v-icon></v-btn
+                    >
 
-                <v-icon class="mr-1"> mdi-heart </v-icon>
-                <span class="subheading mr-2">{{ item.goodness }}</span>
-                <v-btn text @click="displayNikkiDetailCard(item)"> 詳細 </v-btn>
-              </v-row>
-            </v-list-item>
-          </v-card-actions>
-        </v-card>
-      </v-list-item-content>
-    </v-list-item>
-    <v-row>
+                    <v-icon class="mr-1"> mdi-heart </v-icon>
+                    <span class="subheading mr-2">{{ item.goodness }}</span>
+                    <v-btn text @click="displayNikkiDetailCard(item)">
+                      詳細
+                    </v-btn>
+                  </v-row>
+                </v-list-item>
+              </v-card-actions>
+            </v-card>
+          </v-list-item-content>
+        </v-list-item>
+        <v-row> </v-row>
+      </v-list>
       <!-- 詳細表示ダイアログ -->
       <v-dialog
         v-model="dialog"
@@ -74,8 +79,15 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-    </v-row>
-  </v-list>
+      <v-layout justify-center align-center class="my-4">
+        <v-progress-circular v-if="isLoading" indeterminate />
+        <div v-if="!isLastNikki" v-intersect="onIntersect"></div>
+        <v-card v-else>
+          <v-card-text> 最後のNikkiです </v-card-text>
+        </v-card>
+      </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 
@@ -86,15 +98,16 @@
 import { defineComponent } from 'vue'
 import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
 import NikkiDialog from '../components/NikkiDialog.vue'
-import { initId } from '../store'
 export default defineComponent({
   components: { NikkiDialog },
   data() {
     return {
+      isLastNikki: false, // nikkiを更に読み込んだ時に、取ってこれるNikkiが0だった時のフラグ
+      isLoading: false, // nikkkiを更に読み込む時、読み込み中を表す為のフラグ
       dialog: false, // Nikki詳細ダイアログを表示するフラグ
       deleteDialog: false, // 削除ダイアログを表示するフラグ
       date: new Date(),
-      nikkiList: [] as NikkiFromApi[],
+      nikkiList: [] as Array<NikkiFromApi>,
       id: 0,
       createdBy: 0,
       deleteId: -100,
@@ -113,14 +126,51 @@ export default defineComponent({
     const date = new Date()
     try {
       const createdBy = this.getUserId() as number
-      this.nikkiList = (await getNikki(date, createdBy))
-        .nikkis as NikkiFromApi[]
+      this.createdBy = createdBy
+      const nikki = await getNikki(date, createdBy)
+      this.nikkiList = JSON.parse(JSON.stringify(nikki)).nikkis // vue でobserverになってしまうので、こうしてる
     } catch (error) {
       alert('ログインしてください。')
       this.$router.push('/')
     }
   },
   methods: {
+    /**
+     * 最下部まで到達した時に、さらにNikkiデータを読み込む関数。
+     * データはNikkiFromApi.created_at - 1日を頼りに読み込む。
+     */
+    async onIntersect(
+      _entries: IntersectionObserverEntry[],
+      _observer: IntersectionObserver,
+      isIntersecting: boolean
+    ): Promise<void> {
+      // 処理したくない時の早期リターン
+      if (!isIntersecting || this.nikkiList.length === 0) return
+      this.isLoading = true
+      try {
+        // 最下部のnikkiのcreated_atを取得する
+        const lastDateMicroSeconds =
+          this.nikkiList[this.nikkiList.length - 1].created_at
+        // number -> Dateに変換
+        const lastDate = new Date(lastDateMicroSeconds * 1000)
+        // 最下部のNikkiの1日前の日付を取得
+        lastDate.setDate(lastDate.getDate() - 1)
+
+        const moreNikkiList = await getNikki(lastDate, this.createdBy)
+        const moreNikki = JSON.parse(JSON.stringify(moreNikkiList)) // observer になってしまうので戻す処理
+
+        // 前に持ってきたデータが最古のNikkiなのでフラグを立てる
+        if (moreNikki.nikkis.length === 0) {
+          this.isLastNikki = true
+          return
+        }
+        this.nikkiList = this.nikkiList.concat(moreNikki.nikkis)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        this.isLoading = false
+      }
+    },
     /**
      * userIdを取得する。
      * そもそもログインしていなかったらエラーを返す
