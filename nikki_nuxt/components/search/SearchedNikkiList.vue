@@ -1,8 +1,8 @@
 <template>
-  <v-row>
+  <v-row v-if="searchComplete">
     <v-col>
       <v-list shaped fill>
-        <v-list-item v-for="(item, i) in nikkiList" :key="i">
+        <v-list-item v-for="(item, i) in seachedNikkiList" :key="i">
           <v-list-item-content>
             <v-card class="mx-auto" color="cyan lighten-5" max-width="800">
               <v-card-title>
@@ -96,10 +96,26 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { NikkiFromApi, getNikki, deleteNikki } from '../../script/nikki'
+import { NikkiFromApi, deleteNikki } from '../../script/nikki'
 import NikkiDialog from '../../components/NikkiDialog.vue'
+import { SearchParams } from '../../script/search'
 export default defineComponent({
+  // todo: NikkiList.vueをコピーしただけなので直す
   components: { NikkiDialog },
+  props: {
+    searchComplete: {
+      type: Boolean,
+      default: () => {
+        return false
+      },
+    },
+    seachedNikkiList: {
+      type: Array,
+      default: () => {
+        return [] as Array<NikkiFromApi>
+      },
+    },
+  },
   data() {
     return {
       isLastNikki: false, // nikkiを更に読み込んだ時に、取ってこれるNikkiが0だった時のフラグ
@@ -107,7 +123,6 @@ export default defineComponent({
       dialog: false, // Nikki詳細ダイアログを表示するフラグ
       deleteDialog: false, // 削除ダイアログを表示するフラグ
       date: new Date(),
-      nikkiList: [] as Array<NikkiFromApi>,
       id: 0,
       createdBy: 0,
       deleteId: -100,
@@ -117,60 +132,23 @@ export default defineComponent({
       summary: '',
       goodness: 10,
       noLoginError: Error('ログインしていません。'),
+      searchParams: new SearchParams(),
     }
   },
   /**
-   * ログインした人が書いたNikkiを取得する
+   * ログインした人の情報をsearchParamsにセットする
    */
-  async mounted() {
-    const date = new Date()
+  mounted() {
     try {
       const createdBy = this.getUserId() as number
       this.createdBy = createdBy
-      const nikki = await getNikki(date, createdBy)
-      this.nikkiList = JSON.parse(JSON.stringify(nikki)).nikkis // vue でobserverになってしまうので、こうしてる
+      this.searchParams.created_by = this.createdBy
     } catch (error) {
       alert('ログインしてください。')
       this.$router.push('/')
     }
   },
   methods: {
-    /**
-     * 最下部まで到達した時に、さらにNikkiデータを読み込む関数。
-     * データはNikkiFromApi.created_at - 1日を頼りに読み込む。
-     */
-    async onIntersect(
-      _entries: IntersectionObserverEntry[],
-      _observer: IntersectionObserver,
-      isIntersecting: boolean
-    ): Promise<void> {
-      // 処理したくない時の早期リターン
-      if (!isIntersecting || this.nikkiList.length === 0) return
-      this.isLoading = true
-      try {
-        // 最下部のnikkiのcreated_atを取得する
-        const lastDateMicroSeconds =
-          this.nikkiList[this.nikkiList.length - 1].created_at
-        // number -> Dateに変換
-        const lastDate = new Date(lastDateMicroSeconds * 1000)
-        // 最下部のNikkiの1日前の日付を取得
-        lastDate.setDate(lastDate.getDate() - 1)
-
-        const moreNikkiList = await getNikki(lastDate, this.createdBy)
-        const moreNikki = JSON.parse(JSON.stringify(moreNikkiList)) // observer になってしまうので戻す処理
-
-        // 前に持ってきたデータが最古のNikkiなのでフラグを立てる
-        if (moreNikki.nikkis.length === 0) {
-          this.isLastNikki = true
-          return
-        }
-        this.nikkiList = this.nikkiList.concat(moreNikki.nikkis)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        this.isLoading = false
-      }
-    },
     /**
      * userIdを取得する。
      * そもそもログインしていなかったらエラーを返す

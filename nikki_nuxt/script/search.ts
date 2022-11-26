@@ -1,28 +1,24 @@
-// todo: class SearchParams  を作る
-// todo: axios.post("/search/nikki", searchParams) -> Array<NikkiFromApi> をする関数を作る
+// todo: axios.post("/search/nikki", searchParams) -> Array<NikkiFromApi> をする関数を作る->テストする
 
 
 
 import axios from "axios"
 
 import { UrlBuilder } from "./url"
-
-import { initId } from "~/store"
 import { NikkiFromApi } from "./nikki"
 
+import { initId } from "~/store"
+
+
 export class SearchParams {
-    created_by: number | undefined
-    to_date: Date | undefined
+    created_by: number
+    to_date: Date
     from_date: Date | undefined
-    title_or_contens: string | undefined
-    goodness_min: number | undefined
-    goodness_max: number | undefined
-    constructor(createdBy: number | undefined, toDate: Date = new Date(), fromDate: Date | undefined, titleOrContents: string | undefined, goodnessMin: number | undefined, goodnessMax: number | undefined) {
-        if (createdBy === undefined) {
-            this.created_by = initId
-        } else {
-            createdBy = this.created_by
-        }
+    title_or_contens: string
+    goodness_min: number
+    goodness_max: number
+    constructor(createdBy: number = initId, toDate: Date = new Date(), fromDate: Date | undefined = undefined, titleOrContents: string = "", goodnessMin: number = 0, goodnessMax: number = 10) {
+        this.created_by = createdBy
         this.to_date = toDate
         this.from_date = fromDate
         this.title_or_contens = titleOrContents
