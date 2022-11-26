@@ -1,25 +1,22 @@
 <template>
-  <div>
-    <v-text-field
-      v-model="text"
-      label="タイトルや内容から検索します。"
-      append-icon="mdi-magnify-plus"
-      @click:append="showDetail"
-      @keypress.enter="search"
-    >
-      <!-- mdi-magnify-plus を表示、クリックしたらshowDetail, enterkey を押したらsearch -->
-    </v-text-field>
-  </div>
+  <v-text-field
+    v-model="text"
+    solo
+    label="タイトルや内容から検索します。"
+    append-icon="mdi-magnify-plus"
+    @click:append="showDetail"
+    @keypress.enter="search"
+  >
+  </v-text-field>
 </template>
 
 
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'TextSearchComponent',
-
   data() {
     return {
       text: '',

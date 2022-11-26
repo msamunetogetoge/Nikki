@@ -1,5 +1,5 @@
 <template>
-  <v-row v-if="searchComplete">
+  <v-row>
     <v-col>
       <v-list shaped fill>
         <v-list-item v-for="(item, i) in seachedNikkiList" :key="i">
@@ -103,12 +103,6 @@ export default defineComponent({
   // todo: NikkiList.vueをコピーしただけなので直す
   components: { NikkiDialog },
   props: {
-    searchComplete: {
-      type: Boolean,
-      default: () => {
-        return false
-      },
-    },
     seachedNikkiList: {
       type: Array,
       default: () => {
@@ -131,38 +125,15 @@ export default defineComponent({
       createdAt: new Date(),
       summary: '',
       goodness: 10,
-      noLoginError: Error('ログインしていません。'),
+
       searchParams: new SearchParams(),
     }
   },
   /**
    * ログインした人の情報をsearchParamsにセットする
    */
-  mounted() {
-    try {
-      const createdBy = this.getUserId() as number
-      this.createdBy = createdBy
-      this.searchParams.created_by = this.createdBy
-    } catch (error) {
-      alert('ログインしてください。')
-      this.$router.push('/')
-    }
-  },
+  mounted() {},
   methods: {
-    /**
-     * userIdを取得する。
-     * そもそもログインしていなかったらエラーを返す
-     */
-    getUserId(): number | Error {
-      if (
-        this.$accessor.logedIn === true ||
-        this.$accessor.logedInTrial === true
-      ) {
-        return this.$accessor.id
-      } else {
-        throw this.noLoginError
-      }
-    },
     /**
      * apiからもらう日付データを調整する
      */

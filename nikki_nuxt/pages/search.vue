@@ -1,39 +1,38 @@
 <template>
-  <v-card class="overflow-hidden">
-    <v-row>
-      <!-- TextSearch.vue を配置 $emit でエンターキー押下を検知する, $emit で検索条件追加ボタン押下を検知してDetailSearch.vue を開く -->
-      <text-search
-        @showDetail="detail = !detail"
-        @search="searchNikki"
-        @updateText="updateText"
-    /></v-row>
-    <v-row v-if="detail"
-      ><!-- DetailSearch.vue を配置 $emit で検索ボタン押下を検知する -->
-      <detail-search />
-    </v-row>
-    <v-row>
-      <searched-nikki-list
-        :search-complete="searchCompolete"
-        :seached-nikki-list="nikkiList"
-      />
-    </v-row>
+  <v-card>
+    <!-- TextSearch.vue を配置 $emit でエンターキー押下を検知する, $emit で検索条件追加ボタン押下を検知してDetailSearch.vue を開く -->
+    <text-search
+      @showDetail="detail = !detail"
+      @search="excecuteSearch"
+      @updateText="updateText"
+    />
+
+    <!-- DetailSearch.vue を配置 $emit で検索ボタン押下を検知する -->
+    <!-- v-datepickerをコンポーネント化して使用する -->
+    <detail-search v-if="detail" @search="excecuteSearch" />
+
+    <searched-nikki-list
+      v-if="searchComplete"
+      :seached-nikki-list="nikkiList"
+    />
   </v-card>
 </template>
 
 
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import SearchedNikkiList from '../components/search/SearchedNikkiList.vue'
 import TextSearch from '../components/search/TextSearch.vue'
 import DetailSearch from '../components/search/DetailSearch.vue'
 import { NikkiFromApi } from '../script/nikki'
-import { SearchParams } from '../script/search'
+import { SearchParams, getNikkiByParams } from '../script/search'
 
-export default Vue.extend({
+export default defineComponent({
   // rodo: エラー出てるので直す
   name: 'SearchComponent',
   components: { SearchedNikkiList, TextSearch, DetailSearch },
+  layout: 'search',
 
   data() {
     return {
@@ -41,9 +40,20 @@ export default Vue.extend({
       searchComplete: false,
       detail: false,
       searchParams: new SearchParams(),
+      noLoginError: Error('ログインしていません。'),
     }
   },
-  mounted() {},
+  // ログインしていたら、searchParams にidをセットする
+  mounted() {
+    if (
+      this.$accessor.logedIn === true ||
+      this.$accessor.logedInTrial === true
+    ) {
+      this.searchParams.created_by = this.$accessor.id
+    } else {
+      throw this.noLoginError
+    }
+  },
   methods: {
     updateText(text: string) {
       this.searchParams.title_or_contents = text
@@ -52,18 +62,20 @@ export default Vue.extend({
       searchParamsFromChild: SearchParams | undefined
     ): Promise<Array<NikkiFromApi>> {
       if (searchParamsFromChild !== undefined) {
-        alert('not undefined')
+        this.searchParams.to_date = searchParamsFromChild.to_date
+        this.searchParams.from_date = searchParamsFromChild.from_date
+        this.searchParams.goodness_min = searchParamsFromChild.goodness_min
+        this.searchParams.goodness_max = searchParamsFromChild.goodness_max
+        console.log(searchParamsFromChild)
       }
-      alert('検索！')
-
-      return await []
-      // this.searchParams を使って検索する
+      const nikkiList = getNikkiByParams(this.searchParams)
+      return await nikkiList
     },
     async excecuteSearch(searchParamsFromChild: SearchParams | undefined) {
       // this.search() -> this.nikkiList
       const nikkiList = await this.search(searchParamsFromChild)
-      console.log(nikkiList)
       this.nikkiList = nikkiList
+      this.searchComplete = true
     },
   },
 })
