@@ -1,6 +1,5 @@
 import random
 import string
-from typing import List
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -44,7 +43,7 @@ class Nikki(Base):
 class Nikkis():
     """ Nikkiクラスのリスト
     """
-    nikkis: List[Nikki]
+    nikkis: list[Nikki]
 
 
 class _Nikki(BaseModel):
@@ -107,8 +106,6 @@ def utc_str_to_datetime(utc: str) -> datetime or ValueError:
     except ValueError as error_of_strptime:
 
         raise error_of_strptime
-
-# todo: user_id にunique=True を追加したのでマイグレーションする
 
 
 class User(Base):
