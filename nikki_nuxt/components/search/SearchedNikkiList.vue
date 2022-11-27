@@ -79,13 +79,6 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-layout justify-center align-center class="my-4">
-        <v-progress-circular v-if="isLoading" indeterminate />
-        <div v-if="!isLastNikki" v-intersect="onIntersect"></div>
-        <v-card v-else>
-          <v-card-text> 最後のNikkiです </v-card-text>
-        </v-card>
-      </v-layout>
     </v-col>
   </v-row>
 </template>
@@ -100,7 +93,6 @@ import { NikkiFromApi, deleteNikki } from '../../script/nikki'
 import NikkiDialog from '../../components/NikkiDialog.vue'
 import { SearchParams } from '../../script/search'
 export default defineComponent({
-  // todo: NikkiList.vueをコピーしただけなので直す
   components: { NikkiDialog },
   props: {
     seachedNikkiList: {
@@ -112,7 +104,6 @@ export default defineComponent({
   },
   data() {
     return {
-      isLastNikki: false, // nikkiを更に読み込んだ時に、取ってこれるNikkiが0だった時のフラグ
       isLoading: false, // nikkkiを更に読み込む時、読み込み中を表す為のフラグ
       dialog: false, // Nikki詳細ダイアログを表示するフラグ
       deleteDialog: false, // 削除ダイアログを表示するフラグ
@@ -129,9 +120,6 @@ export default defineComponent({
       searchParams: new SearchParams(),
     }
   },
-  /**
-   * ログインした人の情報をsearchParamsにセットする
-   */
   mounted() {},
   methods: {
     /**
