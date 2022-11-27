@@ -72,7 +72,6 @@ def search_nikkis(search_params: NikkiSearchParams) -> Nikkis | ValueError:
             from_date <= Nikki.created_at)
     if search_params.title_or_contents is not None:
         title_or_contents = search_params.title_or_contents
-        print(title_or_contents)
         queryed_nikkis = queryed_nikkis.filter(or_(Nikki.content.contains(title_or_contents),
                                                    Nikki.title.contains(
                                                        title_or_contents),

@@ -62,7 +62,7 @@ def search_nikki_detail(search_params: NikkiSearchParams) -> Nikkis:
 
     try:
         nikkis = search_nikkis(search_params)
-        return nikkis
+        return nikkis.to_json(ensure_ascii=False)
     except Exception as exception_of_search_nikki:
         print(exception_of_search_nikki)
         return HTTPException(HTTPStatus.BAD_REQUEST, detail=exception_of_search_nikki)
