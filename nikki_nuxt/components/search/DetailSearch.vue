@@ -55,10 +55,12 @@ export default defineComponent({
     }
   },
   watch: {
+    // text-fieldに数字が与えられたら、変な数字を数字に直して表示し、親に教える。
     goodnessMin(val: number) {
       this.goodnessMin = Number(val)
       this.$emit('updateGoodnessMin', this.goodnessMin)
     },
+    // text-fieldに数字が与えられたら、変な数字を数字に直して表示し、親に教える。
     goodnessMax(val: number) {
       this.goodnessMax = Number(val)
       this.$emit('updateGoodnessMax', this.goodnessMax)
@@ -66,10 +68,12 @@ export default defineComponent({
   },
   mounted() {},
   methods: {
+    // datepickerから日付をもらったらフォーマットして、親に教える。
     setFromDate(fromDate: Date) {
       const fromDateUTCString = fromDate.toUTCString()
       this.$emit('updateFromDate', fromDateUTCString)
     },
+    // datepickerから日付をもらったらフォーマットして、親に教える。
     setToDate(toDate: Date) {
       const toDateUTCString = toDate.toUTCString()
       this.$emit('updateToDate', toDateUTCString)

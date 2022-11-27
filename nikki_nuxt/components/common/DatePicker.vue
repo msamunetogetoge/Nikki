@@ -29,22 +29,25 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
+    // datapickerを使えるようにするかのフラグ false->使わない
     isReadOnly: {
       type: Boolean,
       default: () => {
         return false
       },
     },
+    // datapickerに与える初期値
     dateProvided: {
       type: Date,
       default: () => {
         return new Date()
       },
     },
+    // datepicker のラベル
     datePickerLabel: {
       type: String,
       default: () => {
-        return 'Label'
+        return ''
       },
     },
   },
@@ -58,6 +61,7 @@ export default defineComponent({
     }
   },
   watch: {
+    // 初期値を貰ったらセットする。
     dateProvided(val: Date) {
       this.date = val
       this.dateDisplay = val.toLocaleDateString('ja-jp')
@@ -65,7 +69,7 @@ export default defineComponent({
       val.setHours(val.getHours() + 9)
       this.dateISO = val.toISOString().substr(0, 10)
     },
-
+    // datepickerで日付を変更したら親に教える。 Date型で値を渡す。
     dateISO(val) {
       this.date = new Date(val)
       this.dateDisplay = (this.date as Date).toLocaleDateString('ja-jp')

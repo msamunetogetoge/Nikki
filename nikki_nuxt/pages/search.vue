@@ -1,14 +1,14 @@
 <template>
   <v-card>
-    <!-- TextSearch.vue を配置 $emit でエンターキー押下を検知する, $emit で検索条件追加ボタン押下を検知してDetailSearch.vue を開く -->
+    <!-- エンターキー押下を検知し検索する。 検索条件追加ボタン押下を検知してDetailSearch.vue を開く -->
     <text-search
       @showDetail="detail = !detail"
       @search="excecuteSearch"
       @updateText="updateText"
     />
 
-    <!-- DetailSearch.vue を配置 $emit で検索ボタン押下を検知する -->
-    <!-- v-datepickerをコンポーネント化して使用する -->
+    <!-- 検索ボタン押下を検知し検索する -->
+    <!-- searchParamsにセットする値が更新されたら検知して更新する -->
     <detail-search
       v-if="detail"
       @search="excecuteSearch"
@@ -17,7 +17,7 @@
       @updateGoodnessMin="setGoodnessMin"
       @updateGoodnessMax="setGoodnessMax"
     />
-
+    <!-- 検索が完了したらv-ifにtrueを渡す。 -->
     <searched-nikki-list
       v-if="searchComplete"
       :seached-nikki-list="nikkiList"
@@ -36,7 +36,6 @@ import { NikkiFromApi } from '../script/nikki'
 import { SearchParams, getNikkiByParams } from '../script/search'
 
 export default defineComponent({
-  // rodo: エラー出てるので直す
   name: 'SearchComponent',
   components: { SearchedNikkiList, TextSearch, DetailSearch },
   layout: 'search',
@@ -62,9 +61,12 @@ export default defineComponent({
     }
   },
   methods: {
+    // <text-search />のテキストフィールドの値の更新を検知して、searchParamsにセットする
     updateText(text: string) {
       this.searchParams.title_or_contents = text
     },
+
+    // <detail-search /> の値の更新を検知して、searchParamsにセットする。start
     setToDate(toDate: string) {
       this.searchParams.to_date = toDate
     },
@@ -77,6 +79,9 @@ export default defineComponent({
     setGoodnessMax(goodnessMax: number) {
       this.searchParams.goodness_max = goodnessMax
     },
+    // <detail-search /> の値の更新を検知して、searchParamsにセットする。end
+
+    // 検索を実行してthis.nikkiListに与える値を取得する。
     async search(
       searchParamsFromChild: SearchParams | undefined
     ): Promise<Array<NikkiFromApi>> {
@@ -85,13 +90,12 @@ export default defineComponent({
         this.searchParams.from_date = searchParamsFromChild.from_date
         this.searchParams.goodness_min = searchParamsFromChild.goodness_min
         this.searchParams.goodness_max = searchParamsFromChild.goodness_max
-        console.log(searchParamsFromChild)
       }
       const nikkiList = getNikkiByParams(this.searchParams)
       return await nikkiList
     },
+    // 検索を実行してthis.nikkiListに与える。
     async excecuteSearch(searchParamsFromChild: SearchParams | undefined) {
-      // this.search() -> this.nikkiList
       const nikkiList = await this.search(searchParamsFromChild)
       this.nikkiList = nikkiList
       this.searchComplete = true
