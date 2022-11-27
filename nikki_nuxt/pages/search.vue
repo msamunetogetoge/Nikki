@@ -9,7 +9,14 @@
 
     <!-- DetailSearch.vue を配置 $emit で検索ボタン押下を検知する -->
     <!-- v-datepickerをコンポーネント化して使用する -->
-    <detail-search v-if="detail" @search="excecuteSearch" />
+    <detail-search
+      v-if="detail"
+      @search="excecuteSearch"
+      @updateToDate="setToDate"
+      @updateFromDate="setFromDate"
+      @updateGoodnessMin="setGoodnessMin"
+      @updateGoodnessMax="setGoodnessMax"
+    />
 
     <searched-nikki-list
       v-if="searchComplete"
@@ -57,6 +64,18 @@ export default defineComponent({
   methods: {
     updateText(text: string) {
       this.searchParams.title_or_contents = text
+    },
+    setToDate(toDate: string) {
+      this.searchParams.to_date = toDate
+    },
+    setFromDate(fromDate: string) {
+      this.searchParams.from_date = fromDate
+    },
+    setGoodnessMin(goodnessMin: number) {
+      this.searchParams.goodness_min = goodnessMin
+    },
+    setGoodnessMax(goodnessMax: number) {
+      this.searchParams.goodness_max = goodnessMax
     },
     async search(
       searchParamsFromChild: SearchParams | undefined
