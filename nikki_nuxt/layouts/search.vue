@@ -105,7 +105,7 @@ export default defineComponent({
         },
         {
           icon: 'mdi-magnify',
-          title: 'search',
+          title: 'Search',
           to: '/search',
         },
       ],
