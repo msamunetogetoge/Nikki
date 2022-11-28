@@ -1,16 +1,36 @@
 from datetime import datetime
+from dataclasses import dataclass
 import logging
-from unicodedata import name
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from db.model import Nikki, Nikkis, User, _User, UserStore
+from db.model import Nikki, Nikkis, User, _User, UserStore, utc_str_to_datetime
 from db.dbconfig import DATABASE_URI
 
 
 engine = create_engine(DATABASE_URI)
 Session = sessionmaker(engine)
+
+
+@dataclass
+class NikkiSearchParams:
+    """
+        created_by (int): User.id Nikki作成者
+        to_date (str): Nikki作成日to
+        from_date (str|None, optional): Nikki作成日from. Defaults to None.
+        title_or_contents (str|None, optional): Nikki.title, Nikki.content, Nikki.summary. Defaults to None.
+        goodness_min (int, optional): Nikki.goodness 最低. Defaults to 0.
+        goodness_max (int, optional): Nikki.goodness 最高. Defaults to 10.
+        number_of_nikki (int, optional): Nikkiを何件まで取得するか. Defaults to 50.
+    """
+    created_by: int
+    to_date: str
+    from_date: str | None = None
+    title_or_contents: str | None = None
+    goodness_min: int = 0
+    goodness_max: int = 10
+    number_of_nikki: int = 50
 
 
 def get_nikkis(user_id: int, from_date: datetime, number_of_nikki: int = 10) -> Nikkis:
@@ -26,10 +46,45 @@ def get_nikkis(user_id: int, from_date: datetime, number_of_nikki: int = 10) -> 
     """
     session = Session()
     queryed_nikkis = session.query(Nikki).filter(
-        Nikki.created_at <= from_date).filter(Nikki.created_by == user_id).order_by(Nikki.created_at.desc()).limit(number_of_nikki)
-    nikkis = Nikkis(nikkis=list())
-    for nikki in queryed_nikkis:
-        nikkis.nikkis.append(nikki)
+        Nikki.created_at <= from_date).filter(Nikki.created_by == user_id).order_by(Nikki.created_at.desc()).limit(number_of_nikki).all()
+    nikkis = Nikkis(nikkis=queryed_nikkis)
+    return nikkis
+
+
+def search_nikkis(search_params: NikkiSearchParams) -> Nikkis | ValueError:
+    """ もらったsearchp_aramsでNikkiを検索する。
+
+    Args:
+
+    Returns:
+        Nikkis: 検索に引っかかったNikki. from_date, to_dateのフォーマットが変な時はValueError
+    """
+    session = Session()
+    to_date = utc_str_to_datetime(utc=search_params.to_date)
+    queryed_nikkis = session.query(Nikki).filter(
+        Nikki.created_by == search_params.created_by).filter(Nikki.created_at <= to_date)
+    if search_params.from_date is not None:
+        from_date = search_params.from_date
+        from_date = utc_str_to_datetime(utc=from_date)
+        queryed_nikkis = queryed_nikkis.filter(
+            from_date <= Nikki.created_at)
+    if search_params.title_or_contents is not None:
+        title_or_contents = search_params.title_or_contents
+        queryed_nikkis = queryed_nikkis.filter(or_(Nikki.content.contains(title_or_contents),
+                                                   Nikki.title.contains(
+                                                       title_or_contents),
+                                                   Nikki.summary.contains(title_or_contents))
+                                               )
+    if search_params.goodness_min != 0:
+        queryed_nikkis = queryed_nikkis.filter(
+            search_params.goodness_min <= Nikki.goodness)
+    if search_params.goodness_max != 10:
+        queryed_nikkis = queryed_nikkis.filter(
+            Nikki.goodness <= search_params.goodness_max)
+    queryed_nikkis = queryed_nikkis.order_by(Nikki.created_at.desc())
+    queryed_nikkis = queryed_nikkis.limit(search_params.number_of_nikki).all()
+
+    nikkis = Nikkis(nikkis=queryed_nikkis)
     return nikkis
 
 
@@ -54,8 +109,6 @@ def get_nikki(nikki_id: int) -> Nikki or NoResultFound:
         logging.error(no_result)
         print(no_result)
         raise no_result
-
-# todo:main.py からedit_nikkiを呼ぶようにする。
 
 
 def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:

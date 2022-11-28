@@ -106,6 +106,11 @@ export default defineComponent({
           title: 'Home',
           to: '/home',
         },
+        {
+          icon: 'mdi-magnify',
+          title: 'Search',
+          to: '/search',
+        },
       ],
       nikkiCreate: {
         icon: 'mdi-notebook-plus',

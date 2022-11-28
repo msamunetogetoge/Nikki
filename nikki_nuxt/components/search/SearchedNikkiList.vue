@@ -2,7 +2,7 @@
   <v-row>
     <v-col>
       <v-list shaped fill>
-        <v-list-item v-for="(item, i) in nikkiList" :key="i">
+        <v-list-item v-for="(item, i) in seachedNikkiList" :key="i">
           <v-list-item-content>
             <v-card class="mx-auto" color="cyan lighten-5" max-width="800">
               <v-card-title>
@@ -79,13 +79,6 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-layout justify-center align-center class="my-4">
-        <v-progress-circular v-if="isLoading" indeterminate />
-        <div v-if="!isLastNikki" v-intersect="onIntersect"></div>
-        <v-card v-else>
-          <v-card-text> 最後のNikkiです </v-card-text>
-        </v-card>
-      </v-layout>
     </v-col>
   </v-row>
 </template>
@@ -96,95 +89,36 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
-import NikkiDialog from '../components/NikkiDialog.vue'
+import { NikkiFromApi, deleteNikki } from '../../script/nikki'
+import NikkiDialog from '../../components/NikkiDialog.vue'
 export default defineComponent({
   components: { NikkiDialog },
+  props: {
+    seachedNikkiList: {
+      type: Array,
+      default: () => {
+        return [] as Array<NikkiFromApi>
+      },
+    },
+  },
   data() {
     return {
-      isLastNikki: false, // nikkiを更に読み込んだ時に、取ってこれるNikkiが0だった時のフラグ
-      isLoading: false, // nikkkiを更に読み込む時、読み込み中を表す為のフラグ
       dialog: false, // Nikki詳細ダイアログを表示するフラグ
       deleteDialog: false, // 削除ダイアログを表示するフラグ
-      date: new Date(),
-      nikkiList: [] as Array<NikkiFromApi>,
+      deleteId: -100, // 削除ダイアログで使うNiikiのid
+      // NikkiDialog で使うデータ
       id: 0,
       createdBy: 0,
-      deleteId: -100,
       title: '',
       content: '',
       createdAt: new Date(),
       summary: '',
       goodness: 10,
-      noLoginError: Error('ログインしていません。'),
+      // NikkiDialog で使うデータ終わり
     }
   },
-  /**
-   * ログインした人が書いたNikkiを取得する
-   */
-  async mounted() {
-    const date = new Date()
-    try {
-      const createdBy = this.getUserId() as number
-      this.createdBy = createdBy
-      const nikki = await getNikki(date, createdBy)
-      this.nikkiList = JSON.parse(JSON.stringify(nikki)).nikkis // vue でobserverになってしまうので、こうしてる
-    } catch (error) {
-      alert('ログインしてください。')
-      this.$router.push('/')
-    }
-  },
+  mounted() {},
   methods: {
-    /**
-     * 最下部まで到達した時に、さらにNikkiデータを読み込む関数。
-     * データはNikkiFromApi.created_at - 1日を頼りに読み込む。
-     */
-    async onIntersect(
-      _entries: IntersectionObserverEntry[],
-      _observer: IntersectionObserver,
-      isIntersecting: boolean
-    ): Promise<void> {
-      // 処理したくない時の早期リターン
-      if (!isIntersecting || this.nikkiList.length === 0) return
-      this.isLoading = true
-      try {
-        // 最下部のnikkiのcreated_atを取得する
-        const lastDateMicroSeconds =
-          this.nikkiList[this.nikkiList.length - 1].created_at
-        // number -> Dateに変換
-        const lastDate = new Date(lastDateMicroSeconds * 1000)
-        // 最下部のNikkiの1日前の日付を取得
-        lastDate.setDate(lastDate.getDate() - 1)
-
-        const moreNikkiList = await getNikki(lastDate, this.createdBy)
-        const moreNikki = JSON.parse(JSON.stringify(moreNikkiList)) // observer になってしまうので戻す処理
-
-        // 前に持ってきたデータが最古のNikkiなのでフラグを立てる
-        if (moreNikki.nikkis.length === 0) {
-          this.isLastNikki = true
-          return
-        }
-        this.nikkiList = this.nikkiList.concat(moreNikki.nikkis)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        this.isLoading = false
-      }
-    },
-    /**
-     * userIdを取得する。
-     * そもそもログインしていなかったらエラーを返す
-     */
-    getUserId(): number | Error {
-      if (
-        this.$accessor.logedIn === true ||
-        this.$accessor.logedInTrial === true
-      ) {
-        return this.$accessor.id
-      } else {
-        throw this.noLoginError
-      }
-    },
     /**
      * apiからもらう日付データを調整する
      */

@@ -4,7 +4,6 @@ nikki 編集、登録、公開範囲の設定などを処理するapi
 
 
 from http import HTTPStatus
-
 from http.client import HTTPResponse
 import logging
 from fastapi import FastAPI, HTTPException
@@ -13,7 +12,7 @@ from fastapi import FastAPI, HTTPException
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
 from db.model import Nikki, _Nikki, Login, _User, Nikkis, UserStore, utc_str_to_datetime, api_to_orm, create_random_user
-from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki
+from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, NikkiSearchParams
 
 app = FastAPI()
 
@@ -47,6 +46,28 @@ async def get_nikki(created_by: int, from_date: str, number_ob_nikki: int = 10) 
     return nikkis.to_json(ensure_ascii=False)
 
 
+@app.post("/search/nikki")
+def search_nikki_detail(search_params: NikkiSearchParams) -> Nikkis:
+    """色々なパラメーターを指定して、Nikkiを検索する。
+    from_date, to_dateは、from_date ~ to_date の間に作成したNikkiを取得するのに使う。
+    from_date, to_dateはjsのDate.toUtcString() で変換されたフォーマット("%a, %d %b %Y %H:%M:%S %Z")でないとエラーになる
+
+    Args:
+        search_params: 検索パラメータ
+
+    Returns:
+        Nikkis: 検索に引っかかったNikki
+    """
+    nikkis = Nikkis([])
+
+    try:
+        nikkis = search_nikkis(search_params)
+        return nikkis.to_json(ensure_ascii=False)
+    except Exception as exception_of_search_nikki:
+        print(exception_of_search_nikki)
+        return HTTPException(HTTPStatus.BAD_REQUEST, detail=exception_of_search_nikki)
+
+
 @app.post("/nikki")
 async def register_nikki(nikki: _Nikki) -> HTTPStatus:
     """
@@ -60,7 +81,7 @@ async def register_nikki(nikki: _Nikki) -> HTTPStatus:
         return HTTPStatus.OK
     except Exception as e:
         logging.error(e)
-        raise HTTPException(HTTPStatus.BAD_REQUEST, detail=e.__str__)
+        raise HTTPException(HTTPStatus.BAD_REQUEST, detail=e)
 
 
 @app.put("/nikki/{nikki_id}")
