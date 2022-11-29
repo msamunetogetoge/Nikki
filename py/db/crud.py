@@ -234,7 +234,7 @@ def try_login(user_id: str, password: str) -> UserStore or Exception:
         raise multi_result
 
 
-def add_user(user_info: _User) -> int:
+def add_user(user_info: _User) -> int or Exception:
     """ ユーザーを登録する。
 
     Args:

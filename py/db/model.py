@@ -200,6 +200,8 @@ class PublicNikki(Base):
 
 # table 作成
 def create_table():
+    """テーブル作成
+    """
     try:
         Base.metadata.create_all(engine)
         print("create table")
