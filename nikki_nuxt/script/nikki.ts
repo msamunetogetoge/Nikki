@@ -99,26 +99,7 @@ export async function getNikki(fromDate: Date, createdBy: number): Promise<Array
     return nikkiData.nikkis
 }
 
-/**
- * 
- * @param id nikkiのid(nikki作成時はnullで良い)
- * @param createdAt nikki作成日 Date.toUtcString() の書式で渡す
- * @param createdBy nikki を作成したユーザーのid
- * @param title nikkiのタイトル
- * @param goodness 0~10 10が最高
- * @param summary 要約(null で渡しても良くして、contentからapi側で自動作成できるようにするかも) 140字まで
- * @param content nikkiの中身
- * @returns NikkiToBackEnd インスタンス
- */
-export function createNikki(id: number | null, createdAt: string,
-    createdBy: number,
-    title: string,
-    goodness: number,
-    summary: string,
-    content: string): NikkiToBackEnd {
-    return new NikkiToBackEnd(id, createdAt, createdBy, title, goodness, summary, content)
 
-}
 
 export async function postNikki(nikki: NikkiToBackEnd) {
     const url = 'nikki';
@@ -132,8 +113,7 @@ export async function postNikki(nikki: NikkiToBackEnd) {
 }
 
 /**
- * todo: テストして完成させる
- * Nikkiを編集する。
+ * Nikkiをもらったパラメータでupdateする。
  * @param nikki Nikkiのデータ。
  */
 export async function editNikki(nikki: NikkiToBackEnd) {

@@ -71,7 +71,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { initId } from '../store/index'
-import { postNikki, createNikki } from '../script/nikki'
 import { deleteTrialLoginUser } from '../script/login'
 import NikkiDialog from '../components/NikkiDialog.vue'
 
@@ -152,29 +151,6 @@ export default defineComponent({
     },
     calculateWindowWidth() {
       this.permanent = window.innerWidth > 768
-    },
-    // Nikkiを投稿する
-    async postNikki() {
-      const nikki = createNikki(
-        null,
-        this.createdAt,
-        this.createdBy,
-        this.nikkiTitle,
-        this.goodness,
-        this.summary,
-        this.content
-      )
-      try {
-        await postNikki(nikki)
-        // todo: #4  NikkiList.vue に上にスワイプしたら更新 機能をつける
-      } catch {
-      } finally {
-        this.dialog = false
-        this.nikkiTitle = this.createdAtDisplay + 'のNikki'
-        this.content = ''
-        this.summary = ''
-        this.goodness = 10
-      }
     },
   },
 })

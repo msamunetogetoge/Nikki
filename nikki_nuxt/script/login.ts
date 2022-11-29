@@ -73,7 +73,7 @@ export async function getTrialLoginInfo(): Promise<UserStore> {
 }
 /**
  * 登録せずに使用しているユーザー情報を削除する。
- * @param userId  ユーザーのid(user_idでなくてid)
+ * @param userId  ユーザーのid(User.user_id)
  */
 export async function deleteTrialLoginUser(userId: string): Promise<void> {
     const urlBuilder = new UrlBuilder("user", undefined, userId)
