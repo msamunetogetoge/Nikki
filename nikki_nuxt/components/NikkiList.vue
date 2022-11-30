@@ -98,6 +98,7 @@
 import { defineComponent } from 'vue'
 import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
 import NikkiDialog from '../components/NikkiDialog.vue'
+import { initId } from '../store'
 export default defineComponent({
   components: { NikkiDialog },
   data() {
@@ -109,7 +110,7 @@ export default defineComponent({
       date: new Date(),
       nikkiList: [] as Array<NikkiFromApi>,
       id: 0,
-      createdBy: 0,
+      createdBy: initId,
       deleteId: -100,
       title: '',
       content: '',
@@ -125,7 +126,7 @@ export default defineComponent({
   async mounted() {
     const date = new Date()
     try {
-      const createdBy = this.getUserId() as number
+      const createdBy = this.getUserId() as string
       this.createdBy = createdBy
       const nikki = await getNikki(date, createdBy)
       this.nikkiList = JSON.parse(JSON.stringify(nikki)).nikkis // vue でobserverになってしまうので、こうしてる
@@ -175,7 +176,7 @@ export default defineComponent({
      * userIdを取得する。
      * そもそもログインしていなかったらエラーを返す
      */
-    getUserId(): number | Error {
+    getUserId(): string | Error {
       if (
         this.$accessor.logedIn === true ||
         this.$accessor.logedInTrial === true

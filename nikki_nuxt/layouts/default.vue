@@ -74,6 +74,7 @@ import { defineComponent } from 'vue'
 import { deleteTrialLoginUser } from '../script/login'
 import NikkiDialog from '../components/NikkiDialog.vue'
 import NikkiButton from '../components/NikkiBottun.vue'
+import { initId } from '../store'
 
 export default defineComponent({
   name: 'DefaultLayout',
@@ -90,7 +91,7 @@ export default defineComponent({
       content: '',
       nikkiTitle: '',
       goodness: 10,
-      createdBy: 0,
+      createdBy: initId,
       // nikki作成の為の変数終わり
       dialog: false, // nikki作成ダイアログの出現フラグ
       clipped: false, // 左側にメニューアイコンを出すかのフラグ

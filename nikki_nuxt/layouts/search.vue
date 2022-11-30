@@ -88,7 +88,7 @@ export default defineComponent({
       content: '',
       nikkiTitle: '',
       goodness: 10,
-      createdBy: 0,
+      createdBy: initId,
       // nikki作成の為の変数終わり
       dialog: false, // nikki作成ダイアログの出現フラグ
       clipped: false, // 左側にメニューアイコンを出すかのフラグ
@@ -118,12 +118,7 @@ export default defineComponent({
   },
   mounted() {
     this.nikkiTitle = this.createdAtDisplay + 'のNikki'
-    // storeの値が更新されて消えた時はsessionStorageから取得する
-    if (this.$accessor.id === initId) {
-      this.createdBy = Number(sessionStorage.getItem('id'))
-    } else {
-      this.createdBy = this.$accessor.id
-    }
+    this.createdBy = this.$accessor.id
 
     // 画面の大きさが変わった時に、自動でレイアウトを変更するイベントを追加
     window.addEventListener('resize', this.calculateWindowWidth)

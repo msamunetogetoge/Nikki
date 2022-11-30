@@ -91,6 +91,7 @@
 import { defineComponent } from 'vue'
 import { NikkiFromApi, deleteNikki } from '../../script/nikki'
 import NikkiDialog from '../../components/NikkiDialog.vue'
+import { initId } from '../../store'
 export default defineComponent({
   components: { NikkiDialog },
   props: {
@@ -108,7 +109,7 @@ export default defineComponent({
       deleteId: -100, // 削除ダイアログで使うNiikiのid
       // NikkiDialog で使うデータ
       id: 0,
-      createdBy: 0,
+      createdBy: initId,
       title: '',
       content: '',
       createdAt: new Date(),

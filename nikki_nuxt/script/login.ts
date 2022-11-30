@@ -16,7 +16,7 @@ interface Login {
  * nuxtのstoreに保存する情報を格納するinterface
  */
 export interface UserStore {
-    id: number
+    id: string
     user_id: string
     user_name: string
 }
@@ -29,7 +29,7 @@ export interface UserStore {
  */
 export async function login(userId: string, password: string): Promise<UserStore> {
     let userInfo: UserStore = {
-        id: -100,
+        id: "",
         user_id: userId,
         user_name: ""
     }
@@ -56,7 +56,7 @@ export async function login(userId: string, password: string): Promise<UserStore
  */
 export async function getTrialLoginInfo(): Promise<UserStore> {
     let userInfo: UserStore = {
-        id: -100,
+        id: "",
         user_id: "",
         user_name: ""
     }

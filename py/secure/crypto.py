@@ -13,8 +13,9 @@ from Crypto import Random
 if os.environ.get('_ENCRYPTO_KEY_') is not None:
     SECRET_KEY = os.environ['_ENCRYPTO_KEY_']
 else:
-    SECRET_KEY = ''.join([random.choice(string.ascii_letters + string.digits)
-                          for i in range(32)])
+    SECRET_KEY = ''.join("a"
+                         for i in range(32))
+print(SECRET_KEY)
 
 
 class AESCipher(object):
@@ -77,13 +78,21 @@ class AESCipher(object):
         Returns:
             int | ValueError: 複合化されたintか、エラー.
         """
-        enc = base64.b64decode(enc)
-        iv = enc[:AES.block_size]
-        cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        data = Padding.unpad(cipher.decrypt(
-            enc[AES.block_size:]), AES.block_size, 'pkcs7')
-        dec = data.decode('utf-8')
         try:
+            enc = base64.b64decode(enc)
+            iv = enc[:AES.block_size]
+            cipher = AES.new(self.key, AES.MODE_CBC, iv)
+            data = Padding.unpad(cipher.decrypt(
+                enc[AES.block_size:]), AES.block_size, 'pkcs7')
+            dec = data.decode('utf-8')
+
             return int(dec)
         except ValueError as value_error:
+            print(value_error)
             raise value_error
+        except Exception as e:
+            print(e)
+            raise e
+
+
+CIPHER = AESCipher(key=SECRET_KEY)

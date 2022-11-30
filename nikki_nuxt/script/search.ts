@@ -20,13 +20,13 @@ import { initId } from "~/store"
  * @注意 from_date, to_date はapiに渡す時はDate.toUTCString()でフォーマットすること。
  */
 export class SearchParams {
-    created_by: number
+    created_by: string
     to_date: string
     from_date: string | undefined
     title_or_contents: string
     goodness_min: number
     goodness_max: number
-    constructor(createdBy: number = initId, toDate: Date = new Date(), fromDate: Date | undefined = undefined, titleOrContents: string = "", goodnessMin: number = 0, goodnessMax: number = 10) {
+    constructor(createdBy: string = initId, toDate: Date = new Date(), fromDate: Date | undefined = undefined, titleOrContents: string = "", goodnessMin: number = 0, goodnessMax: number = 10) {
         this.created_by = createdBy
         this.to_date = toDate.toUTCString()
         this.from_date = (fromDate === undefined) ? undefined : fromDate.toUTCString()

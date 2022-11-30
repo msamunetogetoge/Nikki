@@ -122,7 +122,7 @@ export default defineComponent({
       },
     },
     createdByProvided: {
-      type: Number,
+      type: String,
       default: () => {
         return null
       },
@@ -132,7 +132,7 @@ export default defineComponent({
     return {
       id: 0,
       isNewNikki: false,
-      createdBy: 0,
+      createdBy: initId,
       title: '',
       summary: '',
       content: '',
