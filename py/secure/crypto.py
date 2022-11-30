@@ -67,3 +67,23 @@ class AESCipher(object):
         data = Padding.unpad(cipher.decrypt(
             enc[AES.block_size:]), AES.block_size, 'pkcs7')
         return data.decode('utf-8')
+
+    def decrypt_to_int(self, enc: bytes) -> int | ValueError:
+        """
+            intに複合化する。intにするのに失敗した時は、ValueErrorを返す
+        Args:
+            enc (bytes): 暗号化されたbytes
+
+        Returns:
+            int | ValueError: 複合化されたintか、エラー.
+        """
+        enc = base64.b64decode(enc)
+        iv = enc[:AES.block_size]
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        data = Padding.unpad(cipher.decrypt(
+            enc[AES.block_size:]), AES.block_size, 'pkcs7')
+        dec = data.decode('utf-8')
+        try:
+            return int(dec)
+        except ValueError as value_error:
+            raise value_error
