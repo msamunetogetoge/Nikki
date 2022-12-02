@@ -200,7 +200,6 @@ export default defineComponent({
       this.dialog = false
       this.title = nikki.title
       this.id = nikki.id
-      this.createdBy = nikki.created_by
       this.content = nikki.content
       this.createdAt = new Date(nikki.created_at * 1000)
       this.summary = nikki.summary

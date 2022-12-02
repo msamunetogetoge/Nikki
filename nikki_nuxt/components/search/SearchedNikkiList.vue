@@ -115,11 +115,35 @@ export default defineComponent({
       createdAt: new Date(),
       summary: '',
       goodness: 10,
+      noLoginError: Error('ログインしていません。'),
+
       // NikkiDialog で使うデータ終わり
     }
   },
-  mounted() {},
+  mounted() {
+    try {
+      const createdBy = this.getUserId() as string
+      this.createdBy = createdBy
+    } catch (error) {
+      alert('ログインしてください。')
+      this.$router.push('/')
+    }
+  },
   methods: {
+    /**
+     * userIdを取得する。
+     * そもそもログインしていなかったらエラーを返す
+     */
+    getUserId(): string | Error {
+      if (
+        this.$accessor.logedIn === true ||
+        this.$accessor.logedInTrial === true
+      ) {
+        return this.$accessor.id
+      } else {
+        throw this.noLoginError
+      }
+    },
     /**
      * apiからもらう日付データを調整する
      */
@@ -134,7 +158,6 @@ export default defineComponent({
       this.dialog = false
       this.title = nikki.title
       this.id = nikki.id
-      this.createdBy = nikki.created_by
       this.content = nikki.content
       this.createdAt = new Date(nikki.created_at * 1000)
       this.summary = nikki.summary

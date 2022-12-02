@@ -36,20 +36,17 @@ def get_nikki(created_by: str, from_date: str, number_ob_nikki: int = 10) -> Nik
         max_length (10, optional): _description_. Defaults to 10.
 
     Returns:
-        List[Nikki]: _description_
+        List[Nikki]: 検索結果のNikkiのリスト
     """
     try:
         from_date = utc_str_to_datetime(utc=from_date)
-        print(f"created_by={created_by}")
-        print(f"byte created_by={bytes(created_by, 'utf-8')}")
-
+        created_by = created_by.replace(" ", "+")  # + が " "になってるので変換する
         created_by: int = CIPHER.decrypt_to_int(bytes(created_by, 'utf-8'))
 
         nikkis = get_nikkis(user_id=created_by, from_date=from_date,
                             number_of_nikki=number_ob_nikki)
         return nikkis.to_json(ensure_ascii=False)
     except Exception as value_error:
-        print(value_error)
         raise HTTPException(HTTPStatus.BAD_REQUEST,
                             "データの改ざんがあった") from value_error
 

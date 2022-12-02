@@ -13,9 +13,9 @@ from Crypto import Random
 if os.environ.get('_ENCRYPTO_KEY_') is not None:
     SECRET_KEY = os.environ['_ENCRYPTO_KEY_']
 else:
-    SECRET_KEY = ''.join("a"
-                         for i in range(32))
-print(SECRET_KEY)
+    SECRET_KEY = ''.join(
+        [random.choice(string.ascii_letters + string.digits) for i in range(32)])
+    raise Exception("設定が変だよ")
 
 
 class AESCipher(object):

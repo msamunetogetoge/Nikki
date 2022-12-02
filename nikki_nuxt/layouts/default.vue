@@ -122,7 +122,6 @@ export default defineComponent({
   mounted() {
     this.nikkiTitle = this.createdAtDisplay + 'のNikki'
     this.createdBy = this.$accessor.id
-
     // 画面の大きさが変わった時に、自動でレイアウトを変更するイベントを追加
     window.addEventListener('resize', this.calculateWindowWidth)
   },
@@ -141,7 +140,6 @@ export default defineComponent({
         }
       } else if ((this.$accessor.logedIn as boolean) === true) {
         this.$accessor.logout()
-        console.log('ユーザーがログアウトしたよ')
         this.$router.push('/')
       } else {
         alert('予期せぬエラーが発生しました。ログイン画面に戻ります。')

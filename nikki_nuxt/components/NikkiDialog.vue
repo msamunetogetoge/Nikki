@@ -208,21 +208,10 @@ export default defineComponent({
      */
     async saveNikki() {
       const dateUtc = this.createdAt.toUTCString()
-      const createdBy = () => {
-        if (
-          this.createdBy === null ||
-          this.createdBy === undefined ||
-          this.createdBy === initId
-        ) {
-          throw new Error('ログインしてください')
-        } else {
-          return this.createdBy
-        }
-      }
       const nikki: NikkiToBackEnd = new NikkiToBackEnd(
         this.id,
         dateUtc,
-        createdBy(),
+        this.createdBy,
         this.title,
         this.goodness,
         this.summary,

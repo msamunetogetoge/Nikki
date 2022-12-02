@@ -60,6 +60,7 @@ class NikkiSearchParamsEncrypted:
         Returns:
             NikkiSearchParams:
         """
+        self.created_by = self.created_by.replace(" ", "+")
         created_by = CIPHER.decrypt_to_int(bytes(self.created_by, "utf-8"))
         return NikkiSearchParams(created_by, self.to_date, self.from_date, self.title_or_contents, self.goodness_min, self.goodness_max)
 
