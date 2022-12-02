@@ -224,7 +224,7 @@ export default defineComponent({
         try {
           await postNikki(nikki)
         } catch {
-          alert('登録に失敗しました・')
+          alert('登録に失敗しました。ログインしなおしてみてください。')
         } finally {
           this.nowLoading = false
           this.$emit('close')
@@ -234,7 +234,7 @@ export default defineComponent({
         try {
           await editNikki(nikki)
         } catch {
-          alert('登録に失敗しました・')
+          alert('登録に失敗しました。ログインしなおしてみてください。')
         } finally {
           this.nowLoading = false
           this.$emit('close')
