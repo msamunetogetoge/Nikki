@@ -1,5 +1,3 @@
-import string
-import random
 import os
 import hashlib
 import base64
@@ -8,14 +6,11 @@ from Crypto.Cipher import AES
 from Crypto import Random
 
 
-# todo: gcpから定数値をもらうようにする。-> 環境変数にあるか調べる -> 無ければ適当な値を生成する
-
 if os.environ.get('_ENCRYPTO_KEY_') is not None:
     SECRET_KEY = os.environ['_ENCRYPTO_KEY_']
 else:
     SECRET_KEY = ''.join(
-        [random.choice(string.ascii_letters + string.digits) for i in range(32)])
-    raise Exception("設定が変だよ")
+        ["a" for i in range(32)])
 
 
 class AESCipher(object):
