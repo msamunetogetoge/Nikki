@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from dataclasses_json import dataclass_json
 
 from db.dbconfig import DATABASE_URI
+from secure.crypto import CIPHER
 
 
 engine = create_engine(DATABASE_URI)
@@ -51,7 +52,7 @@ class _Nikki(BaseModel):
 
     """
     id: int = None
-    created_by: int
+    created_by: str
     title: str
     goodness: int
     summary: str
@@ -75,10 +76,11 @@ def api_to_orm(_nikki: _Nikki) -> Nikki or ValueError:
     """
     try:
         created_at = utc_str_to_datetime(_nikki.created_at)
+        created_by = CIPHER.decrypt_to_int(bytes(_nikki.created_by, "utf-8"))
     except ValueError as error_of_utc_str_to_datetime:
         raise error_of_utc_str_to_datetime
     nikki = Nikki(id=_nikki.id,
-                  created_by=_nikki.created_by,
+                  created_by=created_by,
                   title=_nikki.title,
                   goodness=_nikki.goodness,
                   summary=_nikki.summary,
@@ -151,8 +153,6 @@ def create_random_user() -> _User:
     user_name = "おためしNikkiユーザー"
     return _User(id=None, user_id=user_id, user_name=user_name, password=password)
 
-# todo get_random_strを完成させる・
-
 
 def get_random_str(min_length=5, max_length=32) -> str:
     """[a-zA-Z]からランダムに文字を取得して文字列を作成する。文字列の長さは、min_lengthからmax_lengthの間の数字からランダムに選んで決める。
@@ -176,7 +176,7 @@ def get_random_str(min_length=5, max_length=32) -> str:
 class UserStore():
     """nuxt側でユーザー情報を格納する為に使う
     """
-    id: int
+    id: bytes
     user_id: str
     user_name: str
 
@@ -200,6 +200,8 @@ class PublicNikki(Base):
 
 # table 作成
 def create_table():
+    """テーブル作成
+    """
     try:
         Base.metadata.create_all(engine)
         print("create table")

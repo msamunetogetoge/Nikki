@@ -1,3 +1,4 @@
+from secure.crypto import CIPHER
 from datetime import datetime
 from dataclasses import dataclass
 import logging
@@ -31,6 +32,37 @@ class NikkiSearchParams:
     goodness_min: int = 0
     goodness_max: int = 10
     number_of_nikki: int = 50
+
+
+@dataclass
+class NikkiSearchParamsEncrypted:
+    """
+        created_byが暗号化された
+        created_by (str): User.id Nikki作成者
+        to_date (str): Nikki作成日to
+        from_date (str|None, optional): Nikki作成日from. Defaults to None.
+        title_or_contents (str|None, optional): Nikki.title, Nikki.content, Nikki.summary. Defaults to None.
+        goodness_min (int, optional): Nikki.goodness 最低. Defaults to 0.
+        goodness_max (int, optional): Nikki.goodness 最高. Defaults to 10.
+        number_of_nikki (int, optional): Nikkiを何件まで取得するか. Defaults to 50.
+    """
+    created_by: str
+    to_date: str
+    from_date: str | None = None
+    title_or_contents: str | None = None
+    goodness_min: int = 0
+    goodness_max: int = 10
+    number_of_nikki: int = 50
+
+    def toDecrypted(self) -> NikkiSearchParams:
+        """created_by をintに複合化して、NikkiSearchParamsを作成する
+
+        Returns:
+            NikkiSearchParams:
+        """
+        self.created_by = self.created_by.replace(" ", "+")
+        created_by = CIPHER.decrypt_to_int(bytes(self.created_by, "utf-8"))
+        return NikkiSearchParams(created_by, self.to_date, self.from_date, self.title_or_contents, self.goodness_min, self.goodness_max)
 
 
 def get_nikkis(user_id: int, from_date: datetime, number_of_nikki: int = 10) -> Nikkis:
@@ -225,7 +257,8 @@ def try_login(user_id: str, password: str) -> UserStore or Exception:
         user_info = session.query(User).filter(User.user_id == user_id).filter(
             User.password == password).one()
         session.close()
-        return UserStore(id=user_info.id, user_id=user_info.user_id, user_name=user_info.user_name)
+        userid = CIPHER.encrypt(str(user_info.id))
+        return UserStore(id=userid, user_id=user_info.user_id, user_name=user_info.user_name)
     except NoResultFound as no_result:
         logging.error(no_result)
         raise no_result
@@ -234,7 +267,7 @@ def try_login(user_id: str, password: str) -> UserStore or Exception:
         raise multi_result
 
 
-def add_user(user_info: _User) -> int:
+def add_user(user_info: _User) -> int or Exception:
     """ ユーザーを登録する。
 
     Args:
