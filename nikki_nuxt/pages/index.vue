@@ -57,7 +57,7 @@ export default defineComponent({
         this.userId = userInfo.user_id
         this.id = userInfo.id
         this.userName = userInfo.user_name
-        await this.setUserInfo()
+        this.setUserInfo()
         this.$router.push('/home')
       } catch (error) {
         alert('login失敗')
@@ -72,7 +72,7 @@ export default defineComponent({
         this.userId = userInfo.user_id
         this.id = userInfo.id
         this.userName = userInfo.user_name
-        await this.setTrialUserInfo()
+        this.setTrialUserInfo()
         this.$router.push('/home')
       } catch (error) {
         console.error(error)
