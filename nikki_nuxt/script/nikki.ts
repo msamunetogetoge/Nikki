@@ -4,7 +4,7 @@ import { UrlBuilder, Query } from "./url"
 interface NikkiToApi {
     id: number | null
     created_at: string
-    created_by: number
+    created_by: string
     title: string
     goodness: number
     summary: string
@@ -14,7 +14,7 @@ interface NikkiToApi {
 export interface NikkiFromApi {
     id: number
     created_at: number // milliseconds を与える事に注意
-    created_by: number
+    created_by: string
     title: string
     goodness: number
     summary: string
@@ -23,12 +23,12 @@ export interface NikkiFromApi {
 export class NikkiToBackEnd implements NikkiToApi {
     id: number | null
     created_at: string // Date.ToUtcString() で変換したstring
-    created_by: number
+    created_by: string
     title: string
     goodness: number
     summary: string
     content: string
-    constructor(id: number | null, createdAt: string, createdBy: number, title: string, goodness: number, summary: string, content: string) {
+    constructor(id: number | null, createdAt: string, createdBy: string, title: string, goodness: number, summary: string, content: string) {
         this.id = id
         this.created_at = createdAt
         this.created_by = createdBy
@@ -77,14 +77,14 @@ export function createNullNikki(): NikkiFromBackEnd {
  * @param maxLength {number} 何件取り出すか
  * @return {Promise<NikkiFromBackEnd[]>}
  */
-export async function getNikki(fromDate: Date, createdBy: number): Promise<Array<NikkiFromApi>> {
+export async function getNikki(fromDate: Date, createdBy: string): Promise<Array<NikkiFromApi>> {
     const dateUtc = fromDate.toUTCString()
     const query: Query[] = [{
         key: "from_date",
         value: dateUtc
     }, {
         key: "created_by",
-        value: createdBy.toString()
+        value: createdBy
     }]
     const builder = new UrlBuilder('/nikki', query, undefined)
     const url = builder.buildByQuery()
@@ -99,26 +99,7 @@ export async function getNikki(fromDate: Date, createdBy: number): Promise<Array
     return nikkiData.nikkis
 }
 
-/**
- * 
- * @param id nikkiのid(nikki作成時はnullで良い)
- * @param createdAt nikki作成日 Date.toUtcString() の書式で渡す
- * @param createdBy nikki を作成したユーザーのid
- * @param title nikkiのタイトル
- * @param goodness 0~10 10が最高
- * @param summary 要約(null で渡しても良くして、contentからapi側で自動作成できるようにするかも) 140字まで
- * @param content nikkiの中身
- * @returns NikkiToBackEnd インスタンス
- */
-export function createNikki(id: number | null, createdAt: string,
-    createdBy: number,
-    title: string,
-    goodness: number,
-    summary: string,
-    content: string): NikkiToBackEnd {
-    return new NikkiToBackEnd(id, createdAt, createdBy, title, goodness, summary, content)
 
-}
 
 export async function postNikki(nikki: NikkiToBackEnd) {
     const url = 'nikki';
@@ -132,8 +113,7 @@ export async function postNikki(nikki: NikkiToBackEnd) {
 }
 
 /**
- * todo: テストして完成させる
- * Nikkiを編集する。
+ * Nikkiをもらったパラメータでupdateする。
  * @param nikki Nikkiのデータ。
  */
 export async function editNikki(nikki: NikkiToBackEnd) {

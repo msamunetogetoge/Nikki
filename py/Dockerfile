@@ -1,6 +1,8 @@
 FROM python:3.10-slim
 ARG DATABASE_URI
 ENV DATABASE_URI ${DATABASE_URI}
+ARG _ENCRYPTO_KEY_
+ENV _ENCRYPTO_KEY_ ${_ENCRYPTO_KEY_}
 
 RUN pip install --upgrade pip
 COPY . /app

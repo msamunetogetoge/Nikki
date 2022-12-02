@@ -71,11 +71,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { initId } from '../store/index'
-import { postNikki, createNikki } from '../script/nikki'
 import { deleteTrialLoginUser } from '../script/login'
 import NikkiDialog from '../components/NikkiDialog.vue'
 import NikkiButton from '../components/NikkiBottun.vue'
+import { initId } from '../store'
 
 export default defineComponent({
   name: 'DefaultLayout',
@@ -92,7 +91,7 @@ export default defineComponent({
       content: '',
       nikkiTitle: '',
       goodness: 10,
-      createdBy: 0,
+      createdBy: initId,
       // nikki作成の為の変数終わり
       dialog: false, // nikki作成ダイアログの出現フラグ
       clipped: false, // 左側にメニューアイコンを出すかのフラグ
@@ -122,13 +121,7 @@ export default defineComponent({
   },
   mounted() {
     this.nikkiTitle = this.createdAtDisplay + 'のNikki'
-    // storeの値が更新されて消えた時はsessionStorageから取得する
-    if (this.$accessor.id === initId) {
-      this.createdBy = Number(sessionStorage.getItem('id'))
-    } else {
-      this.createdBy = this.$accessor.id
-    }
-
+    this.createdBy = this.$accessor.id
     // 画面の大きさが変わった時に、自動でレイアウトを変更するイベントを追加
     window.addEventListener('resize', this.calculateWindowWidth)
   },
@@ -147,7 +140,6 @@ export default defineComponent({
         }
       } else if ((this.$accessor.logedIn as boolean) === true) {
         this.$accessor.logout()
-        console.log('ユーザーがログアウトしたよ')
         this.$router.push('/')
       } else {
         alert('予期せぬエラーが発生しました。ログイン画面に戻ります。')
@@ -156,29 +148,6 @@ export default defineComponent({
     },
     calculateWindowWidth() {
       this.permanent = window.innerWidth > 768
-    },
-    // Nikkiを投稿する
-    async postNikki() {
-      const nikki = createNikki(
-        null,
-        this.createdAt,
-        this.createdBy,
-        this.nikkiTitle,
-        this.goodness,
-        this.summary,
-        this.content
-      )
-      try {
-        await postNikki(nikki)
-        // todo: #4  NikkiList.vue に上にスワイプしたら更新 機能をつける
-      } catch {
-      } finally {
-        this.dialog = false
-        this.nikkiTitle = this.createdAtDisplay + 'のNikki'
-        this.content = ''
-        this.summary = ''
-        this.goodness = 10
-      }
     },
   },
 })

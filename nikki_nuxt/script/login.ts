@@ -16,7 +16,7 @@ interface Login {
  * nuxtのstoreに保存する情報を格納するinterface
  */
 export interface UserStore {
-    id: number
+    id: string
     user_id: string
     user_name: string
 }
@@ -29,7 +29,7 @@ export interface UserStore {
  */
 export async function login(userId: string, password: string): Promise<UserStore> {
     let userInfo: UserStore = {
-        id: -100,
+        id: "",
         user_id: userId,
         user_name: ""
     }
@@ -56,7 +56,7 @@ export async function login(userId: string, password: string): Promise<UserStore
  */
 export async function getTrialLoginInfo(): Promise<UserStore> {
     let userInfo: UserStore = {
-        id: -100,
+        id: "",
         user_id: "",
         user_name: ""
     }
@@ -73,7 +73,7 @@ export async function getTrialLoginInfo(): Promise<UserStore> {
 }
 /**
  * 登録せずに使用しているユーザー情報を削除する。
- * @param userId  ユーザーのid(user_idでなくてid)
+ * @param userId  ユーザーのid(User.user_id)
  */
 export async function deleteTrialLoginUser(userId: string): Promise<void> {
     const urlBuilder = new UrlBuilder("user", undefined, userId)

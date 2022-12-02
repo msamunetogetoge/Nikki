@@ -3,6 +3,7 @@ nikki 編集、登録、公開範囲の設定などを処理するapi
 """
 
 
+from secure.crypto import CIPHER
 from http import HTTPStatus
 from http.client import HTTPResponse
 import logging
@@ -12,7 +13,7 @@ from fastapi import FastAPI, HTTPException
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
 from db.model import Nikki, _Nikki, Login, _User, Nikkis, UserStore, utc_str_to_datetime, api_to_orm, create_random_user
-from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, NikkiSearchParams
+from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, NikkiSearchParams, NikkiSearchParamsEncrypted
 
 app = FastAPI()
 
@@ -28,26 +29,30 @@ async def root() -> dict:
 
 
 @app.get("/nikki")
-async def get_nikki(created_by: int, from_date: str, number_ob_nikki: int = 10) -> Nikkis:
+def get_nikki(created_by: str, from_date: str, number_ob_nikki: int = 10) -> Nikkis:
     """nikkiを取得する。
     Args:
         from_date (str): '%a, %d %b %Y %H:%M:%S %Z' フォーマットのdatetimeに変換されるstr
         max_length (10, optional): _description_. Defaults to 10.
 
     Returns:
-        List[Nikki]: _description_
+        List[Nikki]: 検索結果のNikkiのリスト
     """
+    try:
+        from_date = utc_str_to_datetime(utc=from_date)
+        created_by = created_by.replace(" ", "+")  # + が " "になってるので変換する
+        created_by: int = CIPHER.decrypt_to_int(bytes(created_by, 'utf-8'))
 
-    from_date = utc_str_to_datetime(utc=from_date)
-
-    nikkis = get_nikkis(user_id=created_by, from_date=from_date,
-                        number_of_nikki=number_ob_nikki)
-
-    return nikkis.to_json(ensure_ascii=False)
+        nikkis = get_nikkis(user_id=created_by, from_date=from_date,
+                            number_of_nikki=number_ob_nikki)
+        return nikkis.to_json(ensure_ascii=False)
+    except Exception as value_error:
+        raise HTTPException(HTTPStatus.BAD_REQUEST,
+                            "データの改ざんがあった") from value_error
 
 
 @app.post("/search/nikki")
-def search_nikki_detail(search_params: NikkiSearchParams) -> Nikkis:
+def search_nikki_detail(search_params_encrypted: NikkiSearchParamsEncrypted) -> Nikkis:
     """色々なパラメーターを指定して、Nikkiを検索する。
     from_date, to_dateは、from_date ~ to_date の間に作成したNikkiを取得するのに使う。
     from_date, to_dateはjsのDate.toUtcString() で変換されたフォーマット("%a, %d %b %Y %H:%M:%S %Z")でないとエラーになる
@@ -61,11 +66,12 @@ def search_nikki_detail(search_params: NikkiSearchParams) -> Nikkis:
     nikkis = Nikkis([])
 
     try:
+        search_params = search_params_encrypted.toDecrypted()
         nikkis = search_nikkis(search_params)
         return nikkis.to_json(ensure_ascii=False)
     except Exception as exception_of_search_nikki:
         print(exception_of_search_nikki)
-        return HTTPException(HTTPStatus.BAD_REQUEST, detail=exception_of_search_nikki)
+        return HTTPException(HTTPStatus.BAD_REQUEST, detail="検索に失敗した")
 
 
 @app.post("/nikki")
@@ -81,7 +87,7 @@ async def register_nikki(nikki: _Nikki) -> HTTPStatus:
         return HTTPStatus.OK
     except Exception as e:
         logging.error(e)
-        raise HTTPException(HTTPStatus.BAD_REQUEST, detail=e)
+        raise HTTPException(HTTPStatus.BAD_REQUEST, detail="登録に失敗した")
 
 
 @app.put("/nikki/{nikki_id}")
@@ -99,7 +105,7 @@ async def update_nikki(nikki_id: int, nikki: _Nikki) -> HTTPResponse:
         edit_nikki(nikki=nikki, nikki_id=nikki_id)
         return HTTPStatus.ACCEPTED
     except NoResultFound:
-        HTTPException(HTTPStatus.BAD_REQUEST, "更新失敗")
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "更新失敗")
 
 
 @app.delete("/nikki/{nikki_id}")
@@ -116,8 +122,9 @@ async def delete_nikki(nikki_id: int) -> HTTPResponse:
         remove_nikki(nikki_id=nikki_id)
         return HTTPStatus.OK
     except Exception as error_of_delete_nikki:
+        print(error_of_delete_nikki)
         raise HTTPException(HTTPStatus.BAD_REQUEST,
-                            detail=error_of_delete_nikki.__str__)
+                            detail="削除に失敗した")
 
 
 @app.post("/user")
@@ -151,6 +158,7 @@ async def login(user_info: Login) -> UserStore or HTTPException:
     """
     try:
         user_store = try_login(user_info.user_id, user_info.password)
+        print(user_store)
         return user_store
     except NoResultFound as no_result:
         raise HTTPException(HTTPStatus.BAD_REQUEST,
@@ -201,6 +209,7 @@ async def publish_random_user() -> UserStore or HTTPException:
     try:
         user = create_random_user()
         id_of_user = add_user(user_info=user)
+        id_of_user = CIPHER.encrypt(str(id_of_user))
         user_store = UserStore(
             id=id_of_user, user_id=user.user_id, user_name=user.user_name)
         print(f"in publish_Random_user user_info={user_store}")

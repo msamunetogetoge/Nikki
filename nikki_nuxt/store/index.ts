@@ -3,7 +3,7 @@ import { getAccessorType, getterTree, mutationTree, actionTree } from 'typed-vue
 /**
  * storeが初期化されているかどうか、確かめる為の初期値
  */
-export const initId = -100
+export const initId = ""
 // localStorageのデータを扱う時に使うkey
 const LOGIN = "login"
 const LOGINTRIAL = "loginTrial"
@@ -21,7 +21,7 @@ function stringToBoolean(bool: string): boolean {
 
 export const state = () => {
     return {
-        id: initId as number,
+        id: initId as string,
         userId: "" as string,
         userName: "" as string,
         logedIn: false as boolean,
@@ -35,7 +35,7 @@ export const getters = getterTree(state, {
     id: state => {
         const Id = localStorage.getItem(ID)
         if (Id != null) {
-            return Number(Id)
+            return Id
         } else {
             return state.id
         }
@@ -75,9 +75,9 @@ export const getters = getterTree(state, {
 })
 
 export const mutations = mutationTree(state, {
-    setId(state, id: number): void {
+    setId(state, id: string): void {
         state.id = id
-        localStorage.setItem(ID, id.toString())
+        localStorage.setItem(ID, id)
     },
     setUserId(state, userId: string): void {
         state.userId = userId

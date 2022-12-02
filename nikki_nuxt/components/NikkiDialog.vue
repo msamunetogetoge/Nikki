@@ -122,7 +122,7 @@ export default defineComponent({
       },
     },
     createdByProvided: {
-      type: Number,
+      type: String,
       default: () => {
         return null
       },
@@ -132,7 +132,7 @@ export default defineComponent({
     return {
       id: 0,
       isNewNikki: false,
-      createdBy: 0,
+      createdBy: initId,
       title: '',
       summary: '',
       content: '',
@@ -208,21 +208,10 @@ export default defineComponent({
      */
     async saveNikki() {
       const dateUtc = this.createdAt.toUTCString()
-      const createdBy = () => {
-        if (
-          this.createdBy === null ||
-          this.createdBy === undefined ||
-          this.createdBy === initId
-        ) {
-          throw new Error('ログインしてください')
-        } else {
-          return this.createdBy
-        }
-      }
       const nikki: NikkiToBackEnd = new NikkiToBackEnd(
         this.id,
         dateUtc,
-        createdBy(),
+        this.createdBy,
         this.title,
         this.goodness,
         this.summary,

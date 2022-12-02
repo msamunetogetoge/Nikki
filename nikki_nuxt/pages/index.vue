@@ -28,6 +28,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { login, UserStore, getTrialLoginInfo } from '../script/login'
+import { initId } from '../store'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -36,7 +37,7 @@ export default defineComponent({
     return {
       showPassword: false,
       userId: '',
-      id: -10,
+      id: initId,
       logedIn: false,
       userName: '',
       password: '',
@@ -56,7 +57,7 @@ export default defineComponent({
         this.userId = userInfo.user_id
         this.id = userInfo.id
         this.userName = userInfo.user_name
-        await this.setUserInfo()
+        this.setUserInfo()
         this.$router.push('/home')
       } catch (error) {
         alert('login失敗')
@@ -71,7 +72,7 @@ export default defineComponent({
         this.userId = userInfo.user_id
         this.id = userInfo.id
         this.userName = userInfo.user_name
-        await this.setTrialUserInfo()
+        this.setTrialUserInfo()
         this.$router.push('/home')
       } catch (error) {
         console.error(error)

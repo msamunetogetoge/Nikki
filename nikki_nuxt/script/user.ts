@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios"
+import axios from "axios"
 import { UrlBuilder } from "./url"
 
 /**
@@ -42,7 +42,6 @@ export async function registerUser(id: number | undefined, userId: string, userN
     }
     const urlBuilder = new UrlBuilder(url)
     await axios.post(urlBuilder.buildUrl(), user).then().catch(function (error) {
-        console.log(error)
         throw error
     })
 }
