@@ -209,7 +209,7 @@ async def publish_random_user() -> UserStore or HTTPException:
     try:
         user = create_random_user()
         id_of_user = add_user(user_info=user)
-        id_of_user = CIPHER.encrypt(id_of_user)
+        id_of_user = CIPHER.encrypt(str(id_of_user))
         user_store = UserStore(
             id=id_of_user, user_id=user.user_id, user_name=user.user_name)
         print(f"in publish_Random_user user_info={user_store}")
