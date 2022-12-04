@@ -128,6 +128,7 @@ export default defineComponent({
     try {
       const createdBy = this.getUserId() as string
       this.createdBy = createdBy
+      console.log('in nikkiList mounted, ' + this.createdBy)
       const nikki = await getNikki(date, createdBy)
       this.nikkiList = JSON.parse(JSON.stringify(nikki)).nikkis // vue でobserverになってしまうので、こうしてる
     } catch (error) {

@@ -3,7 +3,7 @@ import string
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.sql import func
@@ -108,6 +108,31 @@ def utc_str_to_datetime(utc: str) -> datetime or ValueError:
     except ValueError as error_of_strptime:
 
         raise error_of_strptime
+
+
+class Tag(Base):
+    """DBにユーザーが作成したタグを保存するテーブル
+
+    Args:
+        Base (_type_): _description_
+    """
+    __tablename__ = 'tag'
+    id = Column(Integer, primary_key=True, index=True)
+    created_by = Column(Integer, nullable=False)
+    name = Column(String(50), nullable=False)
+    __table_args__ = (UniqueConstraint("created_by", "name",
+                                       name="created_by_name_unique_constraint"),)
+
+
+class NikkiTag(Base):
+    """Nikkiとtagを結びつけるテーブル
+
+    Args:
+        Base (_type_): _description_
+    """
+    __tablename__ = "nikkitag"
+    niiki_id = Column(Integer, primary_key=True)
+    tag_id = Column(Integer, primary_key=True)
 
 
 class User(Base):
