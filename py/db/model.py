@@ -3,9 +3,9 @@ import string
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, DateTime, UniqueConstraint, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
@@ -23,6 +23,28 @@ Base = declarative_base()
 
 # table 定義
 
+# todo:https://docs.sqlalchemy.org/en/14/orm/basic_relationships.html#many-to-many
+# を読んで nikkis, users の中間テーブルにする
+
+
+nikkitag_table = Table(  # nikkis とtag の中間テーブル
+    "nikkitag",
+    Base.metadata,
+    Column("nikki_id", ForeignKey("nikki.id"), primary_key=True),
+    Column("tag_id", ForeignKey("tag.id"), primary_key=True),
+)
+
+
+# class NikkiTag(Base):
+#     """Nikkiとtagを結びつけるテーブル
+
+#     Args:
+#         Base (_type_): _description_
+#     """
+#     __tablename__ = "nikkitag"
+#     niiki_id = Column(Integer, ForeignKey("nikkis.id"), primary_key=True)
+#     tag_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+
 
 @dataclass_json
 @dataclass
@@ -37,14 +59,85 @@ class Nikki(Base):
     summary: str = Column(String, nullable=False)
     content: str = Column(String, nullable=False)
     created_at: datetime = Column(DateTime(timezone=False), default=func.now())
+    tags = relationship("Tag", secondary=nikkitag_table,
+                        back_populates="nikkis")
+
+    def __repr__(self) -> str:
+        return f"<id={self.id}, created_by={self.created_by},title={self.title},tags={[tag.name for tag in self.tags]}>"
+
+
+@dataclass_json
+@dataclass
+class _Tag():
+    """ nuxt に渡す時に使うtagの情報
+    """
+    id: int
+    name: str
+
+
+class Tag(Base):
+    """DBにユーザーが作成したタグを保存するテーブル
+
+    Args:
+        Base (_type_): _description_
+    """
+    __tablename__ = 'tag'
+    id = Column(Integer, primary_key=True, index=True)
+    created_by = Column(Integer, nullable=False)
+    name = Column(String(50), nullable=False)
+    nikkis = relationship("Nikki", secondary=nikkitag_table,
+                          back_populates="tags")
+    __table_args__ = (UniqueConstraint("created_by", "name",
+                                       name="created_by_name_unique_constraint"),)
+
+    def tofront(self) -> _Tag:
+        """front側で使う_Tagに変換する
+
+        Returns:
+            _Tag: Tagからidとnameを抜き出したもの
+        """
+        return _Tag(id=self.id, name=self.name)
+
+    def __repr__(self) -> str:
+        return f"<id={self.id}, created_by={self.created_by}, name={self.name}, nikkis={[nikki.id for nikki in self.nikkis]}>"
+
+
+class User(Base):
+    """DBにユーザー情報を格納する為のモデル
+
+    Args:
+        Base (_type_): _description_
+    """
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, nullable=False, unique=True)
+    user_name = Column(String, nullable=False)
+    password = Column(String, nullable=False)
+
+    def __repr__(self):
+        return f'<User id={self.id},user_id={self.user_id}, user_name={self.user_name}>'
+
+
+@dataclass_json
+@dataclass
+class NikkiWithTag:
+    """ frontにNikkiを返すときに使うクラス
+    """
+    id: int  # nikki.id
+    created_by: int
+    title: str
+    goodness: int
+    content: str
+    created_at: datetime
+    tag: list[_Tag]
 
 
 @dataclass_json
 @dataclass
 class Nikkis():
-    """ Nikkiクラスのリスト
+    """ NikkiWithTagクラスのリスト
     """
-    nikkis: list[Nikki]
+    nikkis: list[NikkiWithTag]
 
 
 class _Nikki(BaseModel):
@@ -108,47 +201,6 @@ def utc_str_to_datetime(utc: str) -> datetime or ValueError:
     except ValueError as error_of_strptime:
 
         raise error_of_strptime
-
-
-class Tag(Base):
-    """DBにユーザーが作成したタグを保存するテーブル
-
-    Args:
-        Base (_type_): _description_
-    """
-    __tablename__ = 'tag'
-    id = Column(Integer, primary_key=True, index=True)
-    created_by = Column(Integer, nullable=False)
-    name = Column(String(50), nullable=False)
-    __table_args__ = (UniqueConstraint("created_by", "name",
-                                       name="created_by_name_unique_constraint"),)
-
-
-class NikkiTag(Base):
-    """Nikkiとtagを結びつけるテーブル
-
-    Args:
-        Base (_type_): _description_
-    """
-    __tablename__ = "nikkitag"
-    niiki_id = Column(Integer, primary_key=True)
-    tag_id = Column(Integer, primary_key=True)
-
-
-class User(Base):
-    """DBにユーザー情報を格納する為のモデル
-
-    Args:
-        Base (_type_): _description_
-    """
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String, nullable=False, unique=True)
-    user_name = Column(String, nullable=False)
-    password = Column(String, nullable=False)
-
-    def __repr__(self):
-        return f'<User id={self.id},user_id={self.user_id}, user_name={self.user_name}>'
 
 
 class _User(BaseModel):
