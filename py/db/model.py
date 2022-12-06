@@ -68,13 +68,6 @@ class Nikki(Base):
 
 @dataclass_json
 @dataclass
-class _Tag():
-    """ nuxt に渡す時に使うtagの情報
-    """
-    id: int
-    name: str
-
-
 class Tag(Base):
     """DBにユーザーが作成したタグを保存するテーブル
 
@@ -89,14 +82,6 @@ class Tag(Base):
                           back_populates="tags")
     __table_args__ = (UniqueConstraint("created_by", "name",
                                        name="created_by_name_unique_constraint"),)
-
-    def tofront(self) -> _Tag:
-        """front側で使う_Tagに変換する
-
-        Returns:
-            _Tag: Tagからidとnameを抜き出したもの
-        """
-        return _Tag(id=self.id, name=self.name)
 
     def __repr__(self) -> str:
         return f"<id={self.id}, created_by={self.created_by}, name={self.name}, nikkis={[nikki.id for nikki in self.nikkis]}>"
@@ -135,9 +120,9 @@ class NikkiWithTag:
 @dataclass_json
 @dataclass
 class Nikkis():
-    """ NikkiWithTagクラスのリスト
+    """ Nikkiクラスのリスト
     """
-    nikkis: list[NikkiWithTag]
+    nikkis: list[Nikki]
 
 
 class _Nikki(BaseModel):
@@ -151,11 +136,23 @@ class _Nikki(BaseModel):
     summary: str
     content: str
     created_at: str
+    tags: list[Tag]
 
     class Config:
         """ sqlalchemy model -> pydantic modelの変換を許す設定
         """
         orm_mode = True
+
+
+@dataclass_json
+@dataclass
+class _Tag(BaseModel):
+    """ apiで使うTag
+    """
+    id: int
+    name: str
+    created_by: int
+    nikkis: list[Nikki]
 
 
 def api_to_orm(_nikki: _Nikki) -> Nikki or ValueError:
@@ -178,7 +175,9 @@ def api_to_orm(_nikki: _Nikki) -> Nikki or ValueError:
                   goodness=_nikki.goodness,
                   summary=_nikki.summary,
                   content=_nikki.content,
-                  created_at=created_at)
+                  created_at=created_at,
+                  )
+    nikki.tags = _nikki.tags
     return nikki
 
 
