@@ -12,8 +12,8 @@ from fastapi import FastAPI, HTTPException
 
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
-from db.model import Nikki, _Nikki, Login, _User, Nikkis, UserStore, utc_str_to_datetime, api_to_orm, create_random_user
-from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, NikkiSearchParams, NikkiSearchParamsEncrypted
+from db.model import Nikki, _Nikki, Login, _User, Nikkis, UserStore, utc_str_to_datetime, api_to_orm, create_random_user, Tags, _Tags
+from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, NikkiSearchParams, NikkiSearchParamsEncrypted, get_tags, register_tags, delete_tag
 
 app = FastAPI()
 
@@ -66,7 +66,7 @@ def search_nikki_detail(search_params_encrypted: NikkiSearchParamsEncrypted) -> 
     nikkis = Nikkis([])
 
     try:
-        search_params = search_params_encrypted.toDecrypted()
+        search_params = search_params_encrypted.to_decrypted()
         nikkis = search_nikkis(search_params)
         return nikkis.to_json(ensure_ascii=False)
     except Exception as exception_of_search_nikki:
@@ -125,6 +125,67 @@ async def delete_nikki(nikki_id: int) -> HTTPResponse:
         print(error_of_delete_nikki)
         raise HTTPException(HTTPStatus.BAD_REQUEST,
                             detail="削除に失敗した")
+
+
+@app.get("/tag")
+def get_tag(created_by: str) -> Tags:
+    """nikkiを取得する。
+    Args:
+        created_by : 暗号化されたUser.id
+
+    Returns:
+        List[Nikki]: 検索結果のNikkiのリスト
+    """
+    try:
+        created_by = created_by.replace(" ", "+")  # + が " "になってるので変換する
+        created_by: int = CIPHER.decrypt_to_int(bytes(created_by, 'utf-8'))
+
+        tags = get_tags(user_id=created_by)
+        return tags.to_json(ensure_ascii=False)
+    except Exception as value_error:
+        raise HTTPException(HTTPStatus.BAD_REQUEST,
+                            "データの改ざんがあった") from value_error
+
+
+@app.post("/tag")
+def post_tag(tags: _Tags) -> None | HTTPException:
+    """tagを保存する。(updateも含む?)
+        todo: sqlalchemy の仕様を確認した方がいい。単純にadd_allが駄目なら put で(個別に)アップデート専用にするか、アップデートはしない。
+    Args:
+        tags (_Tags): tagのリスト
+
+    Raises:
+        e: 失敗したらHttpExceptionでBadRequestを返す
+    """
+    try:
+        decrypted_tags: Tags = tags.to_decrypted()
+        register_tags(decrypted_tags)
+        return
+    except Exception as register_failed:
+        raise HTTPException(HTTPStatus.BAD_REQUEST,
+                            "登録に失敗した") from register_failed
+
+
+@app.post("/tag/delete")
+def delete_tags(tag_ids: list[int]) -> None | HTTPException:
+    """タグのid(Tag.id)のリストからタグを削除する。
+    delete でなくてpostなのに注意。
+
+    Args:
+        tag_ids (list[int]): タグのid(Tag.id)のリスト
+
+    Raises:
+        HTTPException: 削除失敗
+
+    Returns:
+        None | HTTPException: 成功ならNone(HttpStatus.Ok?)
+    """
+    try:
+        delete_tag(tag_ids)
+        return
+    except Exception as delete_failed:
+        raise HTTPException(HTTPStatus.BAD_REQUEST,
+                            "削除に失敗した") from delete_failed
 
 
 @app.post("/user")

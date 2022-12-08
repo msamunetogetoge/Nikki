@@ -87,6 +87,14 @@ class Tag(Base):
         return f"<id={self.id}, created_by={self.created_by}, name={self.name}, nikkis={[nikki.id for nikki in self.nikkis]}>"
 
 
+@dataclass_json
+@dataclass
+class Tags():
+    """Tagのリスト
+    """
+    tags: list[Tag]
+
+
 class User(Base):
     """DBにユーザー情報を格納する為のモデル
 
@@ -101,20 +109,6 @@ class User(Base):
 
     def __repr__(self):
         return f'<User id={self.id},user_id={self.user_id}, user_name={self.user_name}>'
-
-
-@dataclass_json
-@dataclass
-class NikkiWithTag:
-    """ frontにNikkiを返すときに使うクラス
-    """
-    id: int  # nikki.id
-    created_by: int
-    title: str
-    goodness: int
-    content: str
-    created_at: datetime
-    tag: list[_Tag]
 
 
 @dataclass_json
@@ -153,6 +147,32 @@ class _Tag(BaseModel):
     name: str
     created_by: int
     nikkis: list[Nikki]
+
+
+class _Tags(BaseModel):
+    """ front側からもらうtagのリスト。created_by が暗号化されている。
+
+    Args:
+        BaseModel (_type_): _description_
+    """
+    tags: list[_Tag]
+
+    def to_decrypted(self) -> Tags:
+        """
+        created_by を複合化して、_Tag -> Tagに変換する
+
+        Returns:
+            Tags: tagのリスト
+        """
+        tags = list()
+        for _tag in self.tags:
+            created_by = _tag.created_by.replace(
+                " ", "+")  # + が " "になってるので変換する
+            created_by: int = CIPHER.decrypt_to_int(bytes(created_by, 'utf-8'))
+            tag = Tag(id=_tag.id, name=_tag.name, created_by=created_by)
+            tags.append(tag)
+        tags = Tags(tags=[tags])
+        return tags
 
 
 def api_to_orm(_nikki: _Nikki) -> Nikki or ValueError:
