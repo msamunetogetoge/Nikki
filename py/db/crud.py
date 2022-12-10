@@ -1,14 +1,19 @@
-from secure.crypto import CIPHER
+
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import logging
+
+from pydantic import BaseModel, Field
+import pydantic
+
+
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from db.model import Nikki, Nikkis, User, _User, UserStore, utc_str_to_datetime
+from db.model import Nikki, Nikkis, User, _User, UserStore, utc_str_to_datetime, Tag, Tags
 from db.dbconfig import DATABASE_URI
-
+from secure.crypto import CIPHER
 
 engine = create_engine(DATABASE_URI)
 Session = sessionmaker(engine)
@@ -32,10 +37,10 @@ class NikkiSearchParams:
     goodness_min: int = 0
     goodness_max: int = 10
     number_of_nikki: int = 50
+    tags: list[int] = field(default_factory=list)
 
 
-@dataclass
-class NikkiSearchParamsEncrypted:
+class NikkiSearchParamsEncrypted(BaseModel):
     """
         created_byが暗号化された
         created_by (str): User.id Nikki作成者
@@ -45,6 +50,7 @@ class NikkiSearchParamsEncrypted:
         goodness_min (int, optional): Nikki.goodness 最低. Defaults to 0.
         goodness_max (int, optional): Nikki.goodness 最高. Defaults to 10.
         number_of_nikki (int, optional): Nikkiを何件まで取得するか. Defaults to 50.
+        tags: タグのidたち
     """
     created_by: str
     to_date: str
@@ -53,8 +59,9 @@ class NikkiSearchParamsEncrypted:
     goodness_min: int = 0
     goodness_max: int = 10
     number_of_nikki: int = 50
+    tags: list[int] = Field(default_factory=list)
 
-    def toDecrypted(self) -> NikkiSearchParams:
+    def to_decrypted(self) -> NikkiSearchParams:
         """created_by をintに複合化して、NikkiSearchParamsを作成する
 
         Returns:
@@ -62,7 +69,7 @@ class NikkiSearchParamsEncrypted:
         """
         self.created_by = self.created_by.replace(" ", "+")
         created_by = CIPHER.decrypt_to_int(bytes(self.created_by, "utf-8"))
-        return NikkiSearchParams(created_by, self.to_date, self.from_date, self.title_or_contents, self.goodness_min, self.goodness_max)
+        return NikkiSearchParams(created_by, self.to_date, self.from_date, self.title_or_contents, self.goodness_min, self.goodness_max, tags=self.tags)
 
 
 def get_nikkis(user_id: int, from_date: datetime, number_of_nikki: int = 10) -> Nikkis:
@@ -80,6 +87,7 @@ def get_nikkis(user_id: int, from_date: datetime, number_of_nikki: int = 10) -> 
     queryed_nikkis = session.query(Nikki).filter(
         Nikki.created_at <= from_date).filter(Nikki.created_by == user_id).order_by(Nikki.created_at.desc()).limit(number_of_nikki).all()
     nikkis = Nikkis(nikkis=queryed_nikkis)
+    session.close()
     return nikkis
 
 
@@ -113,10 +121,14 @@ def search_nikkis(search_params: NikkiSearchParams) -> Nikkis | ValueError:
     if search_params.goodness_max != 10:
         queryed_nikkis = queryed_nikkis.filter(
             Nikki.goodness <= search_params.goodness_max)
+    if len(search_params.tags) > 0:
+        for tag in queryed_nikkis.tags:
+            queryed_nikkis = queryed_nikkis.filter(tag in Nikki.tags)
     queryed_nikkis = queryed_nikkis.order_by(Nikki.created_at.desc())
     queryed_nikkis = queryed_nikkis.limit(search_params.number_of_nikki).all()
 
     nikkis = Nikkis(nikkis=queryed_nikkis)
+    session.close()
     return nikkis
 
 
@@ -139,8 +151,9 @@ def get_nikki(nikki_id: int) -> Nikki or NoResultFound:
         return nikki
     except NoResultFound as no_result:
         logging.error(no_result)
-        print(no_result)
         raise no_result
+    finally:
+        session.close()
 
 
 def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:
@@ -162,12 +175,14 @@ def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:
         nikki_edit.summary = nikki.summary
         nikki_edit.content = nikki.content
         nikki_edit.goodness = nikki.goodness
+        nikki_edit.tags = nikki.tags
         session.commit()
         return None
     except NoResultFound as no_result:
         logging.error(no_result)
-        print(no_result)
         raise no_result
+    finally:
+        session.close()
 
 
 def add_nikki(nikki: Nikki) -> None or Exception:
@@ -186,6 +201,74 @@ def add_nikki(nikki: Nikki) -> None or Exception:
     except Exception as e:
         session.rollback()
         raise e
+    finally:
+        session.close()
+
+
+def get_tags(user_id: int) -> Tags:
+    """user_id(User.id)と、Tag.created_byとを結び付けてセレクトする。
+
+    Args:
+        user_id (int): User.id
+
+    Returns:
+        Tags: 検索で取得したtag
+    """
+    session = Session()
+    queryed_tags = session.query(Tag).filter(Tag.created_by == user_id).all()
+    tags = Tags(tags=queryed_tags)
+    session.close()
+    return tags
+
+
+def register_tags(tags: Tags) -> None | Exception:
+    """tagを登録する
+
+    Args:
+        tags (Tags): tagたち
+
+    Raises:
+        error_of_register_tag: 登録エラー
+
+    Returns:
+        None | Exception:成功すればNone を返す
+    """
+    session = Session()
+    session.add_all(tags.tags)
+    try:
+        session.commit()
+        return
+    except Exception as error_of_register_tag:
+        session.rollback()
+        raise error_of_register_tag
+    finally:
+        session.close()
+
+
+def delete_tag(tag_ids: list[int]) -> None | Exception:
+    """tagのTag.idのリストからタグを削除する。
+
+    Args:
+        tag_ids (list[int]): list[Tag.id]
+
+    Raises:
+        delete_failed: 削除に失敗したときのエラー
+
+    Returns:
+        None | Exception: 成功すればNoneを返す。
+    """
+    try:
+        session = Session()
+        tags = session.query(Tag).filter(Tag.id.in_(tag_ids))
+        if len(tags.all()) == 0:
+            return
+        tags.delete()
+        session.commit()
+    except Exception as delete_failed:
+        session.rollback()
+        raise delete_failed
+    finally:
+        session.close()
 
 
 def remove_nikki(nikki_id: int) -> None or NoResultFound:
@@ -209,6 +292,8 @@ def remove_nikki(nikki_id: int) -> None or NoResultFound:
     except NoResultFound as no_result:
         logging.error(no_result)
         raise no_result
+    finally:
+        session.close()
 
 
 def try_get_one_user(user_id: str) -> None or Exception:
@@ -256,7 +341,6 @@ def try_login(user_id: str, password: str) -> UserStore or Exception:
     try:
         user_info = session.query(User).filter(User.user_id == user_id).filter(
             User.password == password).one()
-        session.close()
         userid = CIPHER.encrypt(str(user_info.id))
         return UserStore(id=userid, user_id=user_info.user_id, user_name=user_info.user_name)
     except NoResultFound as no_result:
@@ -265,6 +349,8 @@ def try_login(user_id: str, password: str) -> UserStore or Exception:
     except MultipleResultsFound as multi_result:
         logging.error(multi_result)
         raise multi_result
+    finally:
+        session.close()
 
 
 def add_user(user_info: _User) -> int or Exception:
@@ -307,14 +393,12 @@ def remove_user_and_nikki(user_id: str) -> None or Exception:
     try:
         session = Session()
         user = session.query(User).filter(User.user_id == user_id).one()
-        print(user)
         id = user.id
         session.delete(user)
         session.commit()
     except Exception as e:
         session.rollback()
         logging.error(e)
-        print(f"remove_user_and_nikki, error={e}")
         raise e
     try:
         nikkis = session.query(Nikki).filter(Nikki.created_by == id)
