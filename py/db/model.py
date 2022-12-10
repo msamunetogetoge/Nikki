@@ -1,5 +1,6 @@
 import random
 import string
+from typing import List
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -7,6 +8,7 @@ from sqlalchemy import Table, Column, Integer, String, DateTime, UniqueConstrain
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from sqlalchemy.orm import sessionmaker
 
 
 from pydantic import BaseModel
@@ -17,7 +19,7 @@ from secure.crypto import CIPHER
 
 
 engine = create_engine(DATABASE_URI)
-
+Session = sessionmaker(engine)
 
 Base = declarative_base()
 
@@ -70,14 +72,11 @@ class Nikki(Base):
 @dataclass
 class Tag(Base):
     """DBにユーザーが作成したタグを保存するテーブル
-
-    Args:
-        Base (_type_): _description_
     """
     __tablename__ = 'tag'
-    id = Column(Integer, primary_key=True, index=True)
-    created_by = Column(Integer, nullable=False)
-    name = Column(String(50), nullable=False)
+    id: int = Column(Integer, primary_key=True, index=True)
+    created_by: int = Column(Integer, nullable=False)
+    name: str = Column(String(50), nullable=False)
     nikkis = relationship("Nikki", secondary=nikkitag_table,
                           back_populates="tags")
     __table_args__ = (UniqueConstraint("created_by", "name",
@@ -130,7 +129,7 @@ class _Nikki(BaseModel):
     summary: str
     content: str
     created_at: str
-    tags: list[Tag]
+    tags: list[int]  # Tag.id のリスト
 
     class Config:
         """ sqlalchemy model -> pydantic modelの変換を許す設定
@@ -138,15 +137,18 @@ class _Nikki(BaseModel):
         orm_mode = True
 
 
-@dataclass_json
-@dataclass
 class _Tag(BaseModel):
     """ apiで使うTag
     """
-    id: int
+    id: int | None
     name: str
-    created_by: int
-    nikkis: list[Nikki]
+    created_by: str
+    nikkis: List[int]  # Nikki.idのリスト
+
+    class Config:
+        """ sqlalchemy model -> pydantic modelの変換を許す設定
+        """
+        orm_mode = True
 
 
 class _Tags(BaseModel):
@@ -164,15 +166,49 @@ class _Tags(BaseModel):
         Returns:
             Tags: tagのリスト
         """
-        tags = list()
+        tags = []
         for _tag in self.tags:
-            created_by = _tag.created_by.replace(
-                " ", "+")  # + が " "になってるので変換する
+            # + が " "になってるので変換する
+            created_by = _tag.created_by.replace(" ", "+")
             created_by: int = CIPHER.decrypt_to_int(bytes(created_by, 'utf-8'))
-            tag = Tag(id=_tag.id, name=_tag.name, created_by=created_by)
+            tag = Tag()
+            tag.id = _tag.id
+            tag.name = _tag.name
+            tag.created_by = created_by
             tags.append(tag)
-        tags = Tags(tags=[tags])
+            tag.nikkis = get_nikkis_from_ids(_tag.nikkis)
+        tags = Tags(tags=tags)
         return tags
+
+
+def get_nikkis_from_ids(nikkis: list[int]) -> list[Nikki]:
+    """list[Tag.id]から、tagを取得する
+
+    Args:
+        tags (list[int]): Tag.idのリスト
+
+    Returns:
+        list[Tag]: 検索で取得したTagのリスト
+    """
+    session = Session()
+    nikkis = session.query(Nikki).filter(Nikki.id.in_(nikkis)).all()
+    session.close()
+    return nikkis
+
+
+def get_tags_from_ids(tags: list[int]) -> list[Tag]:
+    """list[Tag.id]から、tagを取得する
+
+    Args:
+        tags (list[int]): Tag.idのリスト
+
+    Returns:
+        list[Tag]: 検索で取得したTagのリスト
+    """
+    session = Session()
+    tags = session.query(Tag).filter(Tag.id.in_(tags)).all()
+    session.close()
+    return tags
 
 
 def api_to_orm(_nikki: _Nikki) -> Nikki or ValueError:
@@ -187,6 +223,7 @@ def api_to_orm(_nikki: _Nikki) -> Nikki or ValueError:
     try:
         created_at = utc_str_to_datetime(_nikki.created_at)
         created_by = CIPHER.decrypt_to_int(bytes(_nikki.created_by, "utf-8"))
+        tags = get_tags_from_ids(_nikki.tags)
     except ValueError as error_of_utc_str_to_datetime:
         raise error_of_utc_str_to_datetime
     nikki = Nikki(id=_nikki.id,
@@ -197,7 +234,7 @@ def api_to_orm(_nikki: _Nikki) -> Nikki or ValueError:
                   content=_nikki.content,
                   created_at=created_at,
                   )
-    nikki.tags = _nikki.tags
+    nikki.tags = tags
     return nikki
 
 

@@ -29,7 +29,7 @@ async def root() -> dict:
 
 
 @app.get("/nikki")
-def get_nikki(created_by: str, from_date: str, number_ob_nikki: int = 10) -> Nikkis:
+def get_nikki(created_by: str, from_date: str, number_of_nikki: int = 10) -> Nikkis:
     """nikkiを取得する。
     Args:
         from_date (str): '%a, %d %b %Y %H:%M:%S %Z' フォーマットのdatetimeに変換されるstr
@@ -44,7 +44,7 @@ def get_nikki(created_by: str, from_date: str, number_ob_nikki: int = 10) -> Nik
         created_by: int = CIPHER.decrypt_to_int(bytes(created_by, 'utf-8'))
 
         nikkis = get_nikkis(user_id=created_by, from_date=from_date,
-                            number_of_nikki=number_ob_nikki)
+                            number_of_nikki=number_of_nikki)
         return nikkis.to_json(ensure_ascii=False)
     except Exception as value_error:
         raise HTTPException(HTTPStatus.BAD_REQUEST,
@@ -140,8 +140,8 @@ def get_tag(created_by: str) -> Tags:
         created_by = created_by.replace(" ", "+")  # + が " "になってるので変換する
         created_by: int = CIPHER.decrypt_to_int(bytes(created_by, 'utf-8'))
 
-        tags = get_tags(user_id=created_by)
-        return tags.to_json(ensure_ascii=False)
+        tags: Tags = get_tags(user_id=created_by)
+        return tags
     except Exception as value_error:
         raise HTTPException(HTTPStatus.BAD_REQUEST,
                             "データの改ざんがあった") from value_error
@@ -162,6 +162,7 @@ def post_tag(tags: _Tags) -> None | HTTPException:
         register_tags(decrypted_tags)
         return
     except Exception as register_failed:
+        print(register_failed)
         raise HTTPException(HTTPStatus.BAD_REQUEST,
                             "登録に失敗した") from register_failed
 
@@ -184,6 +185,7 @@ def delete_tags(tag_ids: list[int]) -> None | HTTPException:
         delete_tag(tag_ids)
         return
     except Exception as delete_failed:
+        print(delete_failed)
         raise HTTPException(HTTPStatus.BAD_REQUEST,
                             "削除に失敗した") from delete_failed
 
@@ -219,7 +221,6 @@ async def login(user_info: Login) -> UserStore or HTTPException:
     """
     try:
         user_store = try_login(user_info.user_id, user_info.password)
-        print(user_store)
         return user_store
     except NoResultFound as no_result:
         raise HTTPException(HTTPStatus.BAD_REQUEST,
@@ -273,7 +274,6 @@ async def publish_random_user() -> UserStore or HTTPException:
         id_of_user = CIPHER.encrypt(str(id_of_user))
         user_store = UserStore(
             id=id_of_user, user_id=user.user_id, user_name=user.user_name)
-        print(f"in publish_Random_user user_info={user_store}")
         return user_store
     except Exception as e:
         print(e)
