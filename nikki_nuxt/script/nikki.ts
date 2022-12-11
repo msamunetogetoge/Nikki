@@ -91,7 +91,7 @@ export async function getNikki(fromDate: Date, createdBy: string): Promise<Array
     let nikkiData = createNullNikki();
 
     await axios.get(url).then(function (response) {
-        nikkiData = new NikkiFromBackEnd(JSON.parse(response.data))
+        nikkiData = new NikkiFromBackEnd(response.data)
 
     }).catch(function (response: AxiosError) {
         console.error(response.message);

@@ -4,16 +4,18 @@ from dataclasses import dataclass, field
 import logging
 
 from pydantic import BaseModel, Field
-import pydantic
 
 
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from db.model import Nikki, Nikkis, User, _User, UserStore, utc_str_to_datetime, Tag, Tags
+from db.model import Nikki, User, Tag
+from db.nuxt_model.model import _User, UserStore, utc_str_to_datetime
+# from db.nuxt_model.user import _User, UserStore
+# from db.nuxt_model.nikki import utc_str_to_datetime
 from db.dbconfig import DATABASE_URI
-from secure.crypto import CIPHER
+from secure.crypto import CIPHER, decrypt_from_url_row_to_int
 
 engine = create_engine(DATABASE_URI)
 Session = sessionmaker(engine)
@@ -67,12 +69,11 @@ class NikkiSearchParamsEncrypted(BaseModel):
         Returns:
             NikkiSearchParams:
         """
-        self.created_by = self.created_by.replace(" ", "+")
-        created_by = CIPHER.decrypt_to_int(bytes(self.created_by, "utf-8"))
+        created_by = decrypt_from_url_row_to_int(self.created_by)
         return NikkiSearchParams(created_by, self.to_date, self.from_date, self.title_or_contents, self.goodness_min, self.goodness_max, tags=self.tags)
 
 
-def get_nikkis(user_id: int, from_date: datetime, number_of_nikki: int = 10) -> Nikkis:
+def get_nikkis(user_id: int, from_date: datetime, number_of_nikki: int = 10) -> list[Nikki]:
     """nikkiを取得する、
 
     Args:
@@ -86,12 +87,11 @@ def get_nikkis(user_id: int, from_date: datetime, number_of_nikki: int = 10) -> 
     session = Session()
     queryed_nikkis = session.query(Nikki).filter(
         Nikki.created_at <= from_date).filter(Nikki.created_by == user_id).order_by(Nikki.created_at.desc()).limit(number_of_nikki).all()
-    nikkis = Nikkis(nikkis=queryed_nikkis)
-    session.close()
-    return nikkis
+
+    return queryed_nikkis
 
 
-def search_nikkis(search_params: NikkiSearchParams) -> Nikkis | ValueError:
+def search_nikkis(search_params: NikkiSearchParams) -> list[Nikki] | ValueError:
     """ もらったsearchp_aramsでNikkiを検索する。
 
     Args:
@@ -127,9 +127,7 @@ def search_nikkis(search_params: NikkiSearchParams) -> Nikkis | ValueError:
     queryed_nikkis = queryed_nikkis.order_by(Nikki.created_at.desc())
     queryed_nikkis = queryed_nikkis.limit(search_params.number_of_nikki).all()
 
-    nikkis = Nikkis(nikkis=queryed_nikkis)
-    session.close()
-    return nikkis
+    return queryed_nikkis
 
 
 def get_nikki(nikki_id: int) -> Nikki or NoResultFound:
@@ -205,7 +203,7 @@ def add_nikki(nikki: Nikki) -> None or Exception:
         session.close()
 
 
-def get_tags(user_id: int) -> Tags:
+def get_tags(user_id: int) -> list[Tag]:
     """user_id(User.id)と、Tag.created_byとを結び付けてセレクトする。
 
     Args:
@@ -216,12 +214,11 @@ def get_tags(user_id: int) -> Tags:
     """
     session = Session()
     queryed_tags = session.query(Tag).filter(Tag.created_by == user_id).all()
-    tags = Tags(tags=queryed_tags)
     session.close()
-    return tags
+    return queryed_tags
 
 
-def register_tags(tags: Tags) -> None | Exception:
+def register_tags(tags: list[Tag]) -> None | Exception:
     """tagを登録する
 
     Args:
@@ -234,7 +231,7 @@ def register_tags(tags: Tags) -> None | Exception:
         None | Exception:成功すればNone を返す
     """
     session = Session()
-    session.add_all(tags.tags)
+    session.add_all(tags)
     try:
         session.commit()
         return
