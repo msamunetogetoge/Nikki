@@ -71,7 +71,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import GuruGuru from '../components/GuruGuru.vue'
-import { NikkiToBackEnd, postNikki, editNikki } from '../script/nikki'
+import {
+  NikkiToApi,
+  postNikki,
+  editNikki,
+  NikkiWithTagToApi,
+} from '../script/nikki'
+import { TagToApi } from '../script/tag'
 import { initId } from '../store'
 
 export default defineComponent({
@@ -142,6 +148,7 @@ export default defineComponent({
       menu: false,
       goodness: 10,
       nowLoading: false,
+      tags: [] as Array<TagToApi>,
     }
   },
   /**
@@ -208,21 +215,27 @@ export default defineComponent({
      */
     async saveNikki() {
       const dateUtc = this.createdAt.toUTCString()
-      const nikki: NikkiToBackEnd = new NikkiToBackEnd(
-        this.id,
-        dateUtc,
-        this.createdBy,
-        this.title,
-        this.goodness,
-        this.summary,
-        this.content
-      )
+      const nikki: NikkiToApi = {
+        id: this.id,
+        created_at: dateUtc,
+        created_by: this.createdBy,
+        title: this.title,
+        goodness: this.goodness,
+        summary: this.summary,
+        content: this.content,
+      }
+      const tags: Array<TagToApi> = this.tags
+      const nikkiWithTag: NikkiWithTagToApi = {
+        nikki,
+        tags,
+      }
+
       // グルグル表示
       this.nowLoading = true
       if (this.isNewNikki) {
         // 新規登録
         try {
-          await postNikki(nikki)
+          await postNikki(nikkiWithTag)
         } catch {
           alert('登録に失敗しました。ログインしなおしてみてください。')
         } finally {
@@ -232,7 +245,7 @@ export default defineComponent({
       } else {
         // データ更新
         try {
-          await editNikki(nikki)
+          await editNikki(nikkiWithTag)
         } catch {
           alert('登録に失敗しました。ログインしなおしてみてください。')
         } finally {

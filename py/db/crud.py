@@ -145,7 +145,6 @@ def get_nikki(nikki_id: int) -> Nikki or NoResultFound:
     session = Session()
     try:
         nikki = session.query(Nikki).filter(Nikki.id == nikki_id).one()
-        session.close()
         return nikki
     except NoResultFound as no_result:
         logging.error(no_result)
