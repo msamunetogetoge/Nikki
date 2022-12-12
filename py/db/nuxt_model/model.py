@@ -42,7 +42,7 @@ class _TagIn(BaseModel):
     id: int | None
     name: str
     created_by: str
-    nikkis: list[_NikkiIn]
+    # nikkis: list[_NikkiIn]
 
 
 class NikkiWithTagIn(BaseModel):
@@ -115,7 +115,7 @@ def to_decrypted_nikki(_nikki: NikkiWithTagIn) -> Nikki or ValueError:
         raise error_of_utc_str_to_datetime
     nikki = Nikki(id=_nikki.nikki.id,
                   created_by=created_by,
-                  title=_nikki.title,
+                  title=_nikki.nikki.title,
                   goodness=_nikki.nikki.goodness,
                   summary=_nikki.nikki.summary,
                   content=_nikki.nikki.content,
@@ -168,7 +168,7 @@ def get_nikkis_from_ids(nikkis: list[int]) -> list[Nikki]:
     return nikkis
 
 
-def to_decrypted_tags(tags_in: list[TagWithNikkiIn], ) -> list[Tag]:
+def to_decrypted_tags(tags_in: list[_TagIn], ) -> list[Tag]:
     """
        created_by を複合化して、_Tag -> Tagに変換する
 
@@ -177,15 +177,14 @@ def to_decrypted_tags(tags_in: list[TagWithNikkiIn], ) -> list[Tag]:
        """
     tags = []
     for _tag in tags_in:
-        # + が " "になってるので変換する
-        created_by = decrypt_from_url_row_to_int(_tag.tag.created_by)
+        created_by = decrypt_from_url_row_to_int(_tag.created_by)
         tag = Tag()
-        tag.id = _tag.tag.id
-        tag.name = _tag.tag.name
+        tag.id = _tag.id
+        tag.name = _tag.name
         tag.created_by = created_by
-        nikki_ids = [nikki.id for nikki in _tag.nikkis]
-        nikkis = get_nikkis_from_ids(nikki_ids)
-        tag.nikkis = nikkis
+        # nikki_ids = [nikki.id for nikki in _tag.nikkis]
+        # nikkis = get_nikkis_from_ids(nikki_ids)
+        # tag.nikkis = nikkis
         tags.append(tag)
 
     return tags
