@@ -4,8 +4,6 @@ import string
 
 from dataclasses import dataclass
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 from dataclasses_json import dataclass_json
 
@@ -14,11 +12,6 @@ from pydantic import BaseModel
 from db.model import Nikki, Tag
 from secure.crypto import CIPHER, decrypt_from_url_row_to_int
 
-from db.dbconfig import DATABASE_URI
-
-
-engine = create_engine(DATABASE_URI)
-Session = sessionmaker(engine)
 
 # nikki models
 
@@ -42,7 +35,6 @@ class _TagIn(BaseModel):
     id: int | None
     name: str
     created_by: str
-    # nikkis: list[_NikkiIn]
 
 
 class NikkiWithTagIn(BaseModel):
@@ -153,21 +145,6 @@ class TagWithNikkiIn(BaseModel):
     nikkis: list[_NikkiIn]
 
 
-def get_nikkis_from_ids(nikkis: list[int]) -> list[Nikki]:
-    """list[Tag.id]から、tagを取得する
-
-    Args:
-        tags (list[int]): Tag.idのリスト
-
-    Returns:
-        list[Tag]: 検索で取得したTagのリスト
-    """
-    session = Session()
-    nikkis = session.query(Nikki).filter(Nikki.id.in_(nikkis)).all()
-    session.close()
-    return nikkis
-
-
 def to_decrypted_tags(tags_in: list[_TagIn], ) -> list[Tag]:
     """
        created_by を複合化して、_Tag -> Tagに変換する
@@ -182,9 +159,6 @@ def to_decrypted_tags(tags_in: list[_TagIn], ) -> list[Tag]:
         tag.id = _tag.id
         tag.name = _tag.name
         tag.created_by = created_by
-        # nikki_ids = [nikki.id for nikki in _tag.nikkis]
-        # nikkis = get_nikkis_from_ids(nikki_ids)
-        # tag.nikkis = nikkis
         tags.append(tag)
 
     return tags
