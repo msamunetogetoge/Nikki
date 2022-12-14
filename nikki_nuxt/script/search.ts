@@ -5,7 +5,7 @@
 import axios from "axios"
 
 import { UrlBuilder } from "./url"
-import { NikkiFromApi, NikkiFromBackEnd } from "./nikki"
+import { NikkiFromApi } from "./nikki"
 
 import { initId } from "~/store"
 
@@ -45,12 +45,11 @@ const url = "/search/nikki" // Nikki検索のapiURL
  */
 export async function getNikkiByParams(searchParams: SearchParams): Promise<Array<NikkiFromApi>> {
     const urlBuilder = new UrlBuilder(url)
-    const nikkis: NikkiFromBackEnd = await axios.post(urlBuilder.buildUrl(), searchParams).then(function (response) {
-        return JSON.parse(response.data)
+    const nikkis: Array<NikkiFromApi> = await axios.post(urlBuilder.buildUrl(), searchParams).then(function (response) {
+        return response.data
     }).catch(function (error) {
         throw error
     })
-
-    return nikkis.nikkis
+    return nikkis
 
 }

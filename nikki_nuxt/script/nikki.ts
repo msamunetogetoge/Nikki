@@ -1,7 +1,8 @@
 import axios, { AxiosError } from "axios"
 import { UrlBuilder, Query } from "./url"
+import { TagFromApi, TagToApi } from "./tag"
 
-interface NikkiToApi {
+export interface NikkiToApi {
     id: number | null
     created_at: string
     created_by: string
@@ -9,6 +10,11 @@ interface NikkiToApi {
     goodness: number
     summary: string
     content: string
+}
+
+export interface NikkiWithTagToApi {
+    nikki: NikkiToApi
+    tags: Array<TagToApi>
 }
 
 export interface NikkiFromApi {
@@ -19,63 +25,17 @@ export interface NikkiFromApi {
     goodness: number
     summary: string
     content: string
-}
-export class NikkiToBackEnd implements NikkiToApi {
-    id: number | null
-    created_at: string // Date.ToUtcString() で変換したstring
-    created_by: string
-    title: string
-    goodness: number
-    summary: string
-    content: string
-    constructor(id: number | null, createdAt: string, createdBy: string, title: string, goodness: number, summary: string, content: string) {
-        this.id = id
-        this.created_at = createdAt
-        this.created_by = createdBy
-        this.title = title
-        this.goodness = goodness
-        this.summary = summary
-        this.content = content
-    }
-
-
-    convertCreatedAt(): Date {
-        return new Date(this.created_at)
-    }
-
-}
-
-export class NikkiFromBackEnd {
-    nikkis: NikkiFromApi[]
-    constructor(nikkis: NikkiFromApi[]) {
-        this.nikkis = nikkis
-    }
+    tags: Array<TagFromApi>
 
 }
 
 
 
-/**
- * 情報の無いNikkiのデータを生成する関数
- * @returns {NikkiFromBackEnd}
- */
-export function createNullNikki(): NikkiFromBackEnd {
-    // const nikki: NikkiFromApi = {
-    //     id: 0,
-    //     created_at: 0,
-    //     created_by: 0,
-    //     title: "",
-    //     summary: "",
-    //     content: "",
-    //     goodness: 0
-    // }
-    return new NikkiFromBackEnd([])
-}
 /**
  * api からnikkiデータを取得する。
  * @param fromDate {Data} 取得開始日
  * @param maxLength {number} 何件取り出すか
- * @return {Promise<NikkiFromBackEnd[]>}
+ * @return {Promise<Array<NikkiFromApi>>}
  */
 export async function getNikki(fromDate: Date, createdBy: string): Promise<Array<NikkiFromApi>> {
     const dateUtc = fromDate.toUTCString()
@@ -88,27 +48,27 @@ export async function getNikki(fromDate: Date, createdBy: string): Promise<Array
     }]
     const builder = new UrlBuilder('/nikki', query, undefined)
     const url = builder.buildByQuery()
-    let nikkiData = createNullNikki();
+    let nikkiData: Array<NikkiFromApi> = []
 
     await axios.get(url).then(function (response) {
-        nikkiData = new NikkiFromBackEnd(JSON.parse(response.data))
+        nikkiData = response.data
 
     }).catch(function (response: AxiosError) {
         console.error(response.message);
     })
-    return nikkiData.nikkis
+    return nikkiData
 }
 
 
 
-export async function postNikki(nikki: NikkiToBackEnd) {
+export async function postNikki(nikkiWithTag: NikkiWithTagToApi) {
     const url = 'nikki';
     const urlBuilder = new UrlBuilder(url)
 
-    await axios.post(urlBuilder.buildUrl(), nikki).then(function () {
+    await axios.post(urlBuilder.buildUrl(), nikkiWithTag).then(function () {
     }).catch(function (error) {
         console.error(error)
-        throw 'post is failed';
+        throw new Error('post is failed');
     })
 }
 
@@ -116,14 +76,14 @@ export async function postNikki(nikki: NikkiToBackEnd) {
  * Nikkiをもらったパラメータでupdateする。
  * @param nikki Nikkiのデータ。
  */
-export async function editNikki(nikki: NikkiToBackEnd) {
+export async function editNikki(nikkiWithTag: NikkiWithTagToApi) {
     const url = 'nikki';
-    const urlBuilder = new UrlBuilder(url, undefined, nikki.id?.toString())
-
-    await axios.put(urlBuilder.buildByPathParameter(), nikki).then(function () {
+    const urlBuilder = new UrlBuilder(url, undefined, nikkiWithTag.nikki.id?.toString())
+    console.log(nikkiWithTag)
+    await axios.put(urlBuilder.buildByPathParameter(), nikkiWithTag).then(function () {
     }).catch(function (error) {
         console.error(error)
-        throw 'edit is failed';
+        throw new Error('edit is failed');
     })
 }
 
@@ -132,6 +92,6 @@ export async function deleteNikki(nikkiId: number) {
     const urlBuilder = new UrlBuilder(url, undefined, nikkiId.toString())
     await axios.delete(urlBuilder.buildByPathParameter()).then().catch(function (error) {
         console.error(error)
-        throw 'delete is failed';
+        throw new Error('delete is failed');
     })
 }

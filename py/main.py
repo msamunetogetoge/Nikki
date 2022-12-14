@@ -3,7 +3,7 @@ nikki 編集、登録、公開範囲の設定などを処理するapi
 """
 
 
-from secure.crypto import CIPHER
+from secure.crypto import CIPHER, decrypt_from_url_row_to_int
 from http import HTTPStatus
 from http.client import HTTPResponse
 import logging
@@ -12,7 +12,8 @@ from fastapi import FastAPI, HTTPException
 
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
-from db.model import Nikki, _Nikki, Login, _User, Nikkis, UserStore, utc_str_to_datetime, api_to_orm, create_random_user, Tags, _Tags
+from db.model import Nikki, Tag
+from db.nuxt_model.model import _NikkiOut, to_decrypted_nikki, to_crypted_nikki, NikkiWithTagIn, utc_str_to_datetime, _User, UserStore, Login, create_random_user, _TagOut, to_crypted_tag
 from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, NikkiSearchParams, NikkiSearchParamsEncrypted, get_tags, register_tags, delete_tag
 
 app = FastAPI()
@@ -28,8 +29,8 @@ async def root() -> dict:
     return {"message": "Hello World"}
 
 
-@app.get("/nikki")
-def get_nikki(created_by: str, from_date: str, number_of_nikki: int = 10) -> Nikkis:
+@app.get("/nikki", response_model=list[_NikkiOut])
+def get_nikki(created_by: str, from_date: str, number_of_nikki: int = 10) -> list[_NikkiOut]:
     """nikkiを取得する。
     Args:
         from_date (str): '%a, %d %b %Y %H:%M:%S %Z' フォーマットのdatetimeに変換されるstr
@@ -40,19 +41,22 @@ def get_nikki(created_by: str, from_date: str, number_of_nikki: int = 10) -> Nik
     """
     try:
         from_date = utc_str_to_datetime(utc=from_date)
-        created_by = created_by.replace(" ", "+")  # + が " "になってるので変換する
-        created_by: int = CIPHER.decrypt_to_int(bytes(created_by, 'utf-8'))
+        created_by: int = decrypt_from_url_row_to_int(created_by)
 
         nikkis = get_nikkis(user_id=created_by, from_date=from_date,
                             number_of_nikki=number_of_nikki)
-        return nikkis.to_json(ensure_ascii=False)
+
+        nikkis: list[_NikkiOut] = [to_crypted_nikki(nikki) for nikki in nikkis]
+
+        return nikkis
     except Exception as value_error:
+        print(value_error)
         raise HTTPException(HTTPStatus.BAD_REQUEST,
                             "データの改ざんがあった") from value_error
 
 
-@app.post("/search/nikki")
-def search_nikki_detail(search_params_encrypted: NikkiSearchParamsEncrypted) -> Nikkis:
+@app.post("/search/nikki", response_model=list[_NikkiOut])
+def search_nikki_detail(search_params_encrypted: NikkiSearchParamsEncrypted) -> list[_NikkiOut]:
     """色々なパラメーターを指定して、Nikkiを検索する。
     from_date, to_dateは、from_date ~ to_date の間に作成したNikkiを取得するのに使う。
     from_date, to_dateはjsのDate.toUtcString() で変換されたフォーマット("%a, %d %b %Y %H:%M:%S %Z")でないとエラーになる
@@ -63,25 +67,26 @@ def search_nikki_detail(search_params_encrypted: NikkiSearchParamsEncrypted) -> 
     Returns:
         Nikkis: 検索に引っかかったNikki
     """
-    nikkis = Nikkis([])
+    nikkis = []
 
     try:
         search_params = search_params_encrypted.to_decrypted()
         nikkis = search_nikkis(search_params)
-        return nikkis.to_json(ensure_ascii=False)
+        nikkis: list[_NikkiOut] = [to_crypted_nikki(nikki) for nikki in nikkis]
+        return nikkis
     except Exception as exception_of_search_nikki:
         print(exception_of_search_nikki)
         return HTTPException(HTTPStatus.BAD_REQUEST, detail="検索に失敗した")
 
 
 @app.post("/nikki")
-async def register_nikki(nikki: _Nikki) -> HTTPStatus:
+async def register_nikki(nikki: NikkiWithTagIn) -> HTTPStatus:
     """
     nikki を登録する
     Returns:
         HTTPResponse: 成功なら200, 失敗なら500
     """
-    nikki: Nikki = api_to_orm(nikki)
+    nikki: Nikki = to_decrypted_nikki(nikki)
     try:
         add_nikki(nikki=nikki)
         return HTTPStatus.OK
@@ -91,7 +96,7 @@ async def register_nikki(nikki: _Nikki) -> HTTPStatus:
 
 
 @app.put("/nikki/{nikki_id}")
-async def update_nikki(nikki_id: int, nikki: _Nikki) -> HTTPResponse:
+async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn) -> HTTPResponse:
     """nikkiを編集する
 
     Args:
@@ -101,7 +106,7 @@ async def update_nikki(nikki_id: int, nikki: _Nikki) -> HTTPResponse:
         HTTPResponse: 成功なら200, 失敗なら400
     """
     try:
-        nikki = api_to_orm(nikki)
+        nikki = to_decrypted_nikki(_nikki)
         edit_nikki(nikki=nikki, nikki_id=nikki_id)
         return HTTPStatus.ACCEPTED
     except NoResultFound:
@@ -127,8 +132,8 @@ async def delete_nikki(nikki_id: int) -> HTTPResponse:
                             detail="削除に失敗した")
 
 
-@app.get("/tag")
-def get_tag(created_by: str) -> Tags:
+@app.get("/tag", response_model=list[_TagOut])
+def get_tag(created_by: str) -> list[_TagOut]:
     """nikkiを取得する。
     Args:
         created_by : 暗号化されたUser.id
@@ -137,34 +142,34 @@ def get_tag(created_by: str) -> Tags:
         List[Nikki]: 検索結果のNikkiのリスト
     """
     try:
-        created_by = created_by.replace(" ", "+")  # + が " "になってるので変換する
-        created_by: int = CIPHER.decrypt_to_int(bytes(created_by, 'utf-8'))
-
-        tags: Tags = get_tags(user_id=created_by)
+        created_by: int = decrypt_from_url_row_to_int(created_by)
+        tags: list[Tag] = get_tags(user_id=created_by)
+        tags: list[_TagOut] = [to_crypted_tag(tag) for tag in tags]
         return tags
     except Exception as value_error:
         raise HTTPException(HTTPStatus.BAD_REQUEST,
                             "データの改ざんがあった") from value_error
 
 
-@app.post("/tag")
-def post_tag(tags: _Tags) -> None | HTTPException:
-    """tagを保存する。(updateも含む?)
-        todo: sqlalchemy の仕様を確認した方がいい。単純にadd_allが駄目なら put で(個別に)アップデート専用にするか、アップデートはしない。
-    Args:
-        tags (_Tags): tagのリスト
+# todo: post,put を別々にする
+# @app.post("/tag")
+# def post_tag(tags:_TagIn) -> None | HTTPException:
+#     """tagを保存する。(updateも含む?)
+#         todo: sqlalchemy の仕様を確認した方がいい。単純にadd_allが駄目なら put で(個別に)アップデート専用にするか、アップデートはしない。
+#     Args:
+#         tags (_Tags): tagのリスト
 
-    Raises:
-        e: 失敗したらHttpExceptionでBadRequestを返す
-    """
-    try:
-        decrypted_tags: Tags = tags.to_decrypted()
-        register_tags(decrypted_tags)
-        return
-    except Exception as register_failed:
-        print(register_failed)
-        raise HTTPException(HTTPStatus.BAD_REQUEST,
-                            "登録に失敗した") from register_failed
+#     Raises:
+#         e: 失敗したらHttpExceptionでBadRequestを返す
+#     """
+#     try:
+#         decrypted_tags: Tags = tags.to_decrypted()
+#         register_tags(decrypted_tags)
+#         return
+#     except Exception as register_failed:
+#         print(register_failed)
+#         raise HTTPException(HTTPStatus.BAD_REQUEST,
+#                             "登録に失敗した") from register_failed
 
 
 @app.post("/tag/delete")

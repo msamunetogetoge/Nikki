@@ -91,3 +91,23 @@ class AESCipher(object):
 
 
 CIPHER = AESCipher(key=SECRET_KEY)
+
+
+def decrypt_from_url_row_to_int(row: str) -> int | Exception:
+    """url パラメータで暗号化された文字列を貰った時、intに複合化する。
+
+    Args:
+        row (str): 複合化したい文字列
+
+    Raises:
+        e: エラー
+
+    Returns:
+        int:複合化した結果
+    """
+    row = row.replace(" ", "+")
+    try:
+        int_value = CIPHER.decrypt_to_int(bytes(row, 'utf-8'))
+        return int_value
+    except Exception as e:
+        raise e

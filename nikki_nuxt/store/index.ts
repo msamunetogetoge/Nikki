@@ -34,11 +34,9 @@ export type RootState = ReturnType<typeof state>
 export const getters = getterTree(state, {
     id: state => {
         const Id = localStorage.getItem(ID)
-        console.log("in store getter id=" + Id)
         if (Id != null) {
             return Id
         } else {
-            console.log("in store getter id=" + state.id)
             return state.id
         }
     },
