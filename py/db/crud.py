@@ -7,10 +7,11 @@ from pydantic import BaseModel, Field
 
 
 from sqlalchemy import create_engine, or_
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from db.model import Nikki, User, Tag
+from db.model import Nikki, User, Tag, nikkitag_table
 from db.nuxt_model.model import _User, UserStore, utc_str_to_datetime
 # from db.nuxt_model.user import _User, UserStore
 # from db.nuxt_model.nikki import utc_str_to_datetime
@@ -31,6 +32,7 @@ class NikkiSearchParams:
         goodness_min (int, optional): Nikki.goodness 最低. Defaults to 0.
         goodness_max (int, optional): Nikki.goodness 最高. Defaults to 10.
         number_of_nikki (int, optional): Nikkiを何件まで取得するか. Defaults to 50.
+        tags(list[int], optional): タグのidたち
     """
     created_by: int
     to_date: str
@@ -52,7 +54,7 @@ class NikkiSearchParamsEncrypted(BaseModel):
         goodness_min (int, optional): Nikki.goodness 最低. Defaults to 0.
         goodness_max (int, optional): Nikki.goodness 最高. Defaults to 10.
         number_of_nikki (int, optional): Nikkiを何件まで取得するか. Defaults to 50.
-        tags: タグのidたち
+        tags(list[int], optional): タグのidたち
     """
     created_by: str
     to_date: str
@@ -121,9 +123,9 @@ def search_nikkis(search_params: NikkiSearchParams) -> list[Nikki] | ValueError:
     if search_params.goodness_max != 10:
         queryed_nikkis = queryed_nikkis.filter(
             Nikki.goodness <= search_params.goodness_max)
-    if len(search_params.tags) > 0:
-        for tag in queryed_nikkis.tags:
-            queryed_nikkis = queryed_nikkis.filter(tag in Nikki.tags)
+    # if len(search_params.tags) > 0: todo: tag idでの検索を実装する
+    #     for tag in queryed_nikkis.tags:
+    #         queryed_nikkis = queryed_nikkis.filter(tag in Nikki.tags)
     queryed_nikkis = queryed_nikkis.order_by(Nikki.created_at.desc())
     queryed_nikkis = queryed_nikkis.limit(search_params.number_of_nikki).all()
 
@@ -157,7 +159,7 @@ def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:
     """Nikkiをupdateする。
 
     Args:
-        nikki (Nikki): Nikkiデータ
+        nikki (Nikki): 更新に使う新しいNikkiデータ
         nikki_id (int): 更新したいNikkiのid
 
     Raises:
@@ -168,18 +170,55 @@ def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:
     """
     session = Session()
     try:
+        # 更新されるnikki
         nikki_edit = session.query(Nikki).filter(Nikki.id == nikki_id).one()
+
         nikki_edit.summary = nikki.summary
         nikki_edit.content = nikki.content
         nikki_edit.goodness = nikki.goodness
-        nikki_edit.tags = nikki.tags
+
+        # 変更のあったtagの抽出
+        chenged_tags = list()
+        for tag in nikki_edit.tags:
+            if tag not in nikki.tags:
+                chenged_tags.append(tag)
+        for tag in nikki.tags:
+            if tag not in nikki_edit.tags:
+                chenged_tags.append(tag)
+
+        for tag in chenged_tags:
+            # tagにidが無ければ新規のtagなので、append
+            # appendすると、tag tableにinsertされる
+            if tag.id is None:
+                nikki_edit.tags.append(tag)
+                continue
+            # tagにidがあれば既存のtag
+            _tag = session.query(Tag).filter(Tag.id == tag.id).one()
+            # 更新されるNikkiにはあって、更新に使う新しいNikkiにはないtagなので、removeする
+            if tag in nikki_edit.tags:
+                nikki_edit.tags.remove(tag)
+            # 逆の場合はappendする。query で取ってきたオブジェクトを足すなら、tag tableにinsertは走らない。
+            else:
+                nikki_edit.tags.append(_tag)
+        # 上記のtag抽出 -> append,remove などは同時にできるが、後で読んだ時に分からなくなりそうなので、分けておく
         session.commit()
+
         return None
     except NoResultFound as no_result:
         logging.error(no_result)
         raise no_result
     finally:
         session.close()
+
+
+def subtract_list_try_remove(lst1, lst2):
+    lst = lst1.copy()
+    for e2 in lst2:
+        try:
+            lst.remove(e2)
+        except ValueError:
+            continue
+    return lst
 
 
 def add_nikki(nikki: Nikki) -> None or Exception:

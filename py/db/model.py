@@ -42,8 +42,7 @@ class Nikki(Base):
     summary: str = Column(String, nullable=False)
     content: str = Column(String, nullable=False)
     created_at: datetime = Column(DateTime(timezone=False), default=func.now())
-    tags = relationship("Tag", secondary=nikkitag_table,
-                        back_populates="nikkis")
+    tags = relationship("Tag", secondary=nikkitag_table)
 
     def __repr__(self) -> str:
         return f"<id={self.id}, created_by={self.created_by},title={self.title},tags={[tag.name for tag in self.tags]}>"
@@ -58,13 +57,11 @@ class Tag(Base):
     id: int = Column(Integer, primary_key=True, index=True)
     created_by: int = Column(Integer, nullable=False)
     name: str = Column(String(50), nullable=False)
-    nikkis = relationship("Nikki", secondary=nikkitag_table,
-                          back_populates="tags")
     __table_args__ = (UniqueConstraint("created_by", "name",
                                        name="created_by_name_unique_constraint"),)
 
     def __repr__(self) -> str:
-        return f"<id={self.id}, created_by={self.created_by}, name={self.name}, nikkis={[nikki.id for nikki in self.nikkis]}>"
+        return f"<id={self.id}, created_by={self.created_by}, name={self.name}>"
 
 
 @dataclass_json
