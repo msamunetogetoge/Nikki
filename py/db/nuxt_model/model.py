@@ -54,6 +54,9 @@ class _TagOut(BaseModel):
     name: str
     created_by: str
 
+    class Config:
+        orm_mode = True
+
 
 class _NikkiOut(BaseModel):
     """FastAPIでNuxt側へデータをあげる為のクラス
@@ -67,6 +70,9 @@ class _NikkiOut(BaseModel):
     content: str
     created_at: float
     tags: list[_TagOut]
+
+    class Config:
+        orm_mode = True
 
 
 def utc_str_to_datetime(utc: str) -> datetime or ValueError:

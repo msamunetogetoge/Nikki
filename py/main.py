@@ -47,7 +47,6 @@ def get_nikki(created_by: str, from_date: str, number_of_nikki: int = 10) -> lis
                             number_of_nikki=number_of_nikki)
 
         nikkis: list[_NikkiOut] = [to_crypted_nikki(nikki) for nikki in nikkis]
-
         return nikkis
     except Exception as value_error:
         print(value_error)
