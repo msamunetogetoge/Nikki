@@ -9,4 +9,3 @@ export interface TagFromApi {
     created_by: string
     name: string
 }
-
