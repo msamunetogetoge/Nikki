@@ -5,12 +5,14 @@
     <v-toolbar v-else color="primary" dark></v-toolbar>
     <v-card-text>
       <guru-guru :now-loading="nowLoading" />
+
       <form>
         <v-text-field
           v-if="isNewNikki"
           v-model="title"
           label="タイトル"
         ></v-text-field>
+
         <v-menu
           ref="menu"
           v-model="menu"
@@ -42,7 +44,7 @@
             </v-btn>
           </v-date-picker>
         </v-menu>
-
+        <tag-list :tags="tagsProvided" />
         <v-text-field v-model="summary" label="要約"></v-text-field>
         <v-textarea v-model="content" label="本文" rows="5"></v-textarea>
         <v-slider
@@ -71,20 +73,28 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import GuruGuru from '../components/GuruGuru.vue'
+import TagList from '../components/tag/TagList.vue'
 import {
   NikkiToApi,
   postNikki,
   editNikki,
   NikkiWithTagToApi,
 } from '../script/nikki'
-import { TagToApi } from '../script/tag'
+import { TagToApi, TagFromApi } from '../script/tag'
 import { initId } from '../store'
 
 export default defineComponent({
   components: {
     GuruGuru,
+    TagList,
   },
   props: {
+    tagsProvided: {
+      type: Array,
+      default: () => {
+        return [] as Array<TagFromApi>
+      },
+    },
     isNewNikkiProvided: {
       type: Boolean,
       default: () => {
@@ -148,13 +158,17 @@ export default defineComponent({
       menu: false,
       goodness: 10,
       nowLoading: false,
-      tags: [] as Array<TagToApi>,
+      tags: [] as Array<TagFromApi>,
     }
   },
   /**
    *  親からもらうpropが更新されたら、dataを更新する。
    */
   watch: {
+    tagsProvided(val) {
+      console.log(val)
+      this.tags = val
+    },
     idProvided(val) {
       this.id = val
     },
