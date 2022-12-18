@@ -58,6 +58,7 @@
           :content-provided="content"
           :created-at-provided="createdAt"
           :goodness-provided="goodness"
+          :tags-provided="tags"
           @close="dialog = false"
         />
       </v-dialog>
@@ -92,6 +93,7 @@ import { defineComponent } from 'vue'
 import { NikkiFromApi, deleteNikki } from '../../script/nikki'
 import NikkiDialog from '../../components/NikkiDialog.vue'
 import { initId } from '../../store'
+import { TagFromApi } from '../../script/tag'
 export default defineComponent({
   components: { NikkiDialog },
   props: {
@@ -116,6 +118,7 @@ export default defineComponent({
       summary: '',
       goodness: 10,
       noLoginError: Error('ログインしていません。'),
+      tags: [] as Array<TagFromApi>,
 
       // NikkiDialog で使うデータ終わり
     }
@@ -162,6 +165,7 @@ export default defineComponent({
       this.createdAt = new Date(nikki.created_at * 1000)
       this.summary = nikki.summary
       this.goodness = nikki.goodness
+      this.tags = nikki.tags
       this.dialog = true
     },
     /**

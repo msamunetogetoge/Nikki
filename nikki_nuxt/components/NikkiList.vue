@@ -58,6 +58,7 @@
           :content-provided="content"
           :created-at-provided="createdAt"
           :goodness-provided="goodness"
+          :tags-provided="tags"
           @close="dialog = false"
         />
       </v-dialog>
@@ -99,6 +100,7 @@ import { defineComponent } from 'vue'
 import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
 import NikkiDialog from '../components/NikkiDialog.vue'
 import { initId } from '../store'
+import { TagFromApi } from '../script/tag'
 export default defineComponent({
   components: { NikkiDialog },
   data() {
@@ -109,6 +111,7 @@ export default defineComponent({
       deleteDialog: false, // 削除ダイアログを表示するフラグ
       date: new Date(),
       nikkiList: [] as Array<NikkiFromApi>,
+      tags: [] as Array<TagFromApi>,
       id: 0,
       createdBy: initId,
       deleteId: -100,
@@ -158,14 +161,14 @@ export default defineComponent({
         lastDate.setDate(lastDate.getDate() - 1)
 
         const moreNikkiList = await getNikki(lastDate, this.createdBy)
-        const moreNikki = JSON.parse(JSON.stringify(moreNikkiList)) // observer になってしまうので戻す処理
+        const moreNikki = moreNikkiList // observer になってしまうので戻す処理
 
         // 前に持ってきたデータが最古のNikkiなのでフラグを立てる
-        if (moreNikki.nikkis.length === 0) {
+        if (moreNikki.length === 0) {
           this.isLastNikki = true
           return
         }
-        this.nikkiList = this.nikkiList.concat(moreNikki.nikkis)
+        this.nikkiList = this.nikkiList.concat(moreNikki)
       } catch (error) {
         console.error(error)
       } finally {
@@ -204,6 +207,7 @@ export default defineComponent({
       this.createdAt = new Date(nikki.created_at * 1000)
       this.summary = nikki.summary
       this.goodness = nikki.goodness
+      this.tags = nikki.tags
       this.dialog = true
     },
     /**
