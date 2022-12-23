@@ -8,6 +8,7 @@
             :name-given="tag.name"
             :tag-id="tag.id"
             :created-by="tag.created_by"
+            :added="tag in selectedTags"
             @giveTag="clickedTag"
           />
         </v-list-item-content>
@@ -31,20 +32,26 @@ export default defineComponent({
         return [] as Array<TagFromApi>
       },
     },
+    selectedTags: {
+      type: Array,
+      default: () => {
+        return [] as Array<TagFromApi>
+      },
+    },
   },
   data() {
     return {
       name: '',
     }
   },
+  mounted() {},
   methods: {
     /**
-     * tagを選択済みにする関数
-     * todo: まだ未完成
+     * tag 情報を親に渡す関数。
+     * tag-component からTagToApi がわたってくる
      */
     clickedTag(tag: TagToApi) {
-      console.log('tag is clicked!')
-      console.log(tag)
+      this.$emit('addTag', tag)
     },
   },
 })

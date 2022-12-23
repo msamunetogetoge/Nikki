@@ -2,7 +2,7 @@
   <v-chip
     class="ma-2"
     close
-    color="indigo darken-3"
+    :color="added ? 'secondary' : 'indigo darken-3'"
     outlined
     @click="giveTagInfo"
   >
@@ -33,6 +33,12 @@ export default defineComponent({
         return null
       },
     },
+    added: {
+      type: Boolean,
+      default: () => {
+        return false
+      },
+    },
   },
   data() {
     return {
@@ -58,6 +64,16 @@ export default defineComponent({
         created_by: this.createdBy,
       }
       this.$emit('giveTag', tag)
+    },
+    /**
+     * chip の色を変える関数
+     */
+    isAddedTag() {
+      if (this.added) {
+        return 'secondary'
+      } else {
+        return 'indigo darken-3'
+      }
     },
   },
 })

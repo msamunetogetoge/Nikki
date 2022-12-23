@@ -44,7 +44,7 @@
             </v-btn>
           </v-date-picker>
         </v-menu>
-        <tag-list :tags="tagsProvided" />
+        <tag-dialog :given-tag="tagsProvided" />
         <v-text-field v-model="summary" label="要約"></v-text-field>
         <v-textarea v-model="content" label="本文" rows="5"></v-textarea>
         <v-slider
