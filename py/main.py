@@ -72,6 +72,8 @@ def search_nikki_detail(search_params_encrypted: NikkiSearchParamsEncrypted) -> 
         search_params = search_params_encrypted.to_decrypted()
         nikkis = search_nikkis(search_params)
         nikkis: list[_NikkiOut] = [to_crypted_nikki(nikki) for nikki in nikkis]
+
+        return nikkis
         return nikkis
     except Exception as exception_of_search_nikki:
         print(exception_of_search_nikki)
