@@ -44,7 +44,7 @@
             </v-btn>
           </v-date-picker>
         </v-menu>
-        <tag-dialog :given-tag="tagsProvided" />
+        <tag-dialog :given-tag="tagsProvided" @tagAdded="saveTags" />
         <v-text-field v-model="summary" label="要約"></v-text-field>
         <v-textarea v-model="content" label="本文" rows="5"></v-textarea>
         <v-slider
@@ -181,7 +181,7 @@ export default defineComponent({
       menu: false,
       goodness: 10,
       nowLoading: false,
-      tags: [] as Array<TagFromApi>,
+      tags: [] as Array<TagToApi>,
     }
   },
   /**
@@ -235,11 +235,16 @@ export default defineComponent({
     this.createdAt = this.createdAtProvided
     this.createdAtDisplay = (this.createdAt as Date).toLocaleDateString('ja-jp')
     this.createdAtISO = (this.createdAt as Date).toISOString().substr(0, 10)
+    this.tags = this.tagsProvided as Array<TagFromApi>
+    console.log(this.tags)
   },
 
   // todo: 2022/11/1, 2022/11/8 に作ったnikki を見ると、作成日が2022/10/31 になったりするので原因を調べる
   // 同じnikkiを2回開くと直る
   methods: {
+    saveTags(tags: Array<TagToApi>) {
+      this.tags = tags
+    },
     /**
      * このコンポーネントを閉じる
      */
@@ -265,6 +270,7 @@ export default defineComponent({
         nikki,
         tags,
       }
+      console.log(nikkiWithTag)
 
       // グルグル表示
       this.nowLoading = true

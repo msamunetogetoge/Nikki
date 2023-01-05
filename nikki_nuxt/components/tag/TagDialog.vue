@@ -48,6 +48,7 @@ export default defineComponent({
   methods: {
     tagAdded(tags: Array<TagFromApi>) {
       this.choicedTag = tags
+      this.$emit('tagAdded', this.choicedTag)
     },
   },
 })
