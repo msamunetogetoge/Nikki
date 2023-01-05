@@ -18,11 +18,19 @@ export function tagfromApi2ToApi(tag: TagFromApi): TagToApi {
     return tag
 }
 
-export function tagToApi2FromApi(tag: TagFromApi): TagFromApi {
+export function tagToApi2FromApi(tag: TagToApi): TagFromApi | Error {
     if (tag.id === null) {
         throw new Error("tag.id がnullだった")
     }
-    return tag
+    else {
+        const tagFromApi: TagFromApi = {
+            id: tag.id!,
+            name: tag.name,
+            created_by: tag.created_by
+        }
+        return tagFromApi
+    }
+
 }
 
 const url = "/tag"

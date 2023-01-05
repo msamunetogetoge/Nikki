@@ -1,15 +1,14 @@
 <template>
   <v-card class="mx-auto" max-width="300" tile>
     <v-list dense>
-      <v-subheader>タグ</v-subheader>
       <v-list-item v-for="(tag, i) in tags" :key="i">
         <v-list-item-content>
           <tag-component
             :name-given="tag.name"
             :tag-id="tag.id"
             :created-by="tag.created_by"
-            :added="tag in selectedTags"
-            @giveTag="clickedTag"
+            :added="selectedTags.includes(tag)"
+            @giveTag="addTagToSelectedTags"
           />
         </v-list-item-content>
       </v-list-item>
@@ -18,7 +17,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { TagFromApi, TagToApi } from '../../script/tag'
+import { TagFromApi, TagToApi, tagToApi2FromApi } from '../../script/tag'
 import TagComponent from '../tag/TagComponent.vue'
 
 export default defineComponent({
@@ -32,7 +31,7 @@ export default defineComponent({
         return [] as Array<TagFromApi>
       },
     },
-    selectedTags: {
+    givenselectedTags: {
       type: Array,
       default: () => {
         return [] as Array<TagFromApi>
@@ -41,17 +40,34 @@ export default defineComponent({
   },
   data() {
     return {
+      selectedTags: [] as Array<TagFromApi>,
       name: '',
     }
   },
-  mounted() {},
+  mounted() {
+    this.selectedTags = this.givenselectedTags as Array<TagFromApi>
+  },
   methods: {
     /**
      * tag 情報を親に渡す関数。
      * tag-component からTagToApi がわたってくる
      */
-    clickedTag(tag: TagToApi) {
-      this.$emit('addTag', tag)
+    addTagToSelectedTags(tag: TagToApi) {
+      try {
+        const tagFromApi = tagToApi2FromApi(tag) as TagFromApi
+        console.log('clicked tag')
+        if (this.selectedTags.includes(tagFromApi)) {
+          this.selectedTags = this.selectedTags.filter(
+            (item) => item !== tagFromApi
+          )
+        } else {
+          this.selectedTags.push(tagFromApi)
+        }
+        console.log('taglist emit changeTag')
+        this.$emit('changeTag', this.selectedTags)
+      } catch (error) {
+        console.error(error)
+      }
     },
   },
 })

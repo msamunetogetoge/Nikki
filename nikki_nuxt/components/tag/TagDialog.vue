@@ -1,18 +1,20 @@
 <template>
   <v-card class="mx-auto" max-width="344">
     <v-card-text>
-      <tag-list :tags="givenTag" />
+      <tag-list :tags="choicedTag" />
     </v-card-text>
     <v-card-actions>
       <v-btn text color="deep-purple accent-4" @click="tagChoice = true">
         タグ追加
       </v-btn>
     </v-card-actions>
-    <tag-choice-dialog
-      v-if="tagChoice"
-      :given-tags="givenTag"
-      @close="tagChoice = false"
-    />
+    <v-dialog v-model="tagChoice">
+      <tag-choice-dialog
+        :given-tags="choicedTag"
+        @close="tagChoice = false"
+        @saveTags="tagAdded"
+      />
+    </v-dialog>
   </v-card>
 </template>
 <script lang="ts">
@@ -44,8 +46,8 @@ export default defineComponent({
     this.choicedTag = this.givenTag as Array<TagFromApi>
   },
   methods: {
-    tagAdded(tag: TagFromApi) {
-      this.choicedTag.push(tag)
+    tagAdded(tags: Array<TagFromApi>) {
+      this.choicedTag = tags
     },
   },
 })
