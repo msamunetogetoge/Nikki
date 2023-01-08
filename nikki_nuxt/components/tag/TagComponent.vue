@@ -1,11 +1,5 @@
 <template>
-  <v-chip
-    class="ma-2"
-    close
-    :color="added ? 'secondary' : 'indigo darken-3'"
-    outlined
-    @click="giveTagInfo"
-  >
+  <v-chip class="ma-2" close outlined @click="giveTagInfo">
     {{ name }}
   </v-chip>
 </template>
@@ -64,16 +58,6 @@ export default defineComponent({
         created_by: this.createdBy,
       }
       this.$emit('giveTag', tag)
-    },
-    /**
-     * chip の色を変える関数
-     */
-    isAddedTag() {
-      if (this.added) {
-        return 'secondary'
-      } else {
-        return 'indigo darken-3'
-      }
     },
   },
 })

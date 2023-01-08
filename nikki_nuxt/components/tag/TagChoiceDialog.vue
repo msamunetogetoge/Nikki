@@ -1,9 +1,11 @@
 <template>
   <v-card>
+    <tag-list :tag-list="selectedTags" :is-editable="true" @pop="deleteTag" />
+    <v-divider class="mx-4"></v-divider>
     <tag-list
-      :tags="allTags"
-      :selected-tags="givenTags"
-      @changeTag="changeSelectedTags"
+      :tag-list="notSelectedTags"
+      :is-editable="true"
+      @pop="addTag"
     />
     <v-card-actions>
       <v-btn text color="deep-purple accent-4" @click="tagNikki"> 保存 </v-btn>
@@ -13,14 +15,19 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { TagFromApi, getAllTags } from '../../script/tag'
-import { initId } from '../../store'
+import { TagFromApi, TagToApi, tagToApi2FromApi } from '../../script/tag'
 import TagList from './TagList.vue'
 
 export default defineComponent({
   components: { TagList },
   props: {
-    givenTags: {
+    givenSelectedTags: {
+      type: Array,
+      default: () => {
+        return [] as Array<TagFromApi>
+      },
+    },
+    givenNotSelectedTags: {
       type: Array,
       default: () => {
         return [] as Array<TagFromApi>
@@ -29,42 +36,51 @@ export default defineComponent({
   },
   data() {
     return {
-      allTags: [] as Array<TagFromApi>,
-      createdBy: initId,
       selectedTags: [] as Array<TagFromApi>,
-      noLoginError: Error('ログインしていません。'),
+      notSelectedTags: [] as Array<TagFromApi>,
     }
   },
-  async mounted() {
-    this.createdBy = this.getUserId() as string
-    this.selectedTags = this.givenTags as Array<TagFromApi>
-    try {
-      this.allTags = (await getAllTags(this.createdBy)) as Array<TagFromApi>
-    } catch (error) {
-      alert(error)
-    }
+  mounted() {
+    this.selectedTags = this.givenSelectedTags
+    this.notSelectedTags = this.givenSelectedTags
   },
   methods: {
+    /**
+     * 未選択タグを、選択タグに移動する
+     */
+    addTag(tag: TagToApi) {
+      const tagFromApi = tagToApi2FromApi(tag)
+      this.selectedTags.push(tagFromApi)
+      this.notSelectedTags = this.tagList = this.tagList.filter(
+        (item) => item !== tagFromApi
+      )
+    },
+    /**
+     * 選択多済みタグを、未選択タグに移動する
+     */
+    deleteTag(tag: TagToApi) {
+      const tagFromApi = tagToApi2FromApi(tag)
+      this.notSelectedTags.push(tagFromApi)
+      this.selectedTags = this.tagList = this.tagList.filter(
+        (item) => item !== tagFromApi
+      )
+    },
     // todo: changeSelectedTagsが動いてない
     changeSelectedTags(selectedTags: Array<TagFromApi>): void {
       this.selectedTags = selectedTags
     },
+    /**
+     * tagをNikkiに設定する
+     */
     tagNikki(): void {
       this.$emit('saveTags', this.selectedTags)
       this.closeDialog()
     },
+    /**
+     * このダイアログを閉じる
+     */
     closeDialog(): void {
       this.$emit('close')
-    },
-    getUserId(): string | Error {
-      if (
-        this.$accessor.logedIn === true ||
-        this.$accessor.logedInTrial === true
-      ) {
-        return this.$accessor.id
-      } else {
-        throw this.noLoginError
-      }
     },
   },
 })

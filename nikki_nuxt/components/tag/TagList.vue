@@ -1,14 +1,14 @@
 <template>
   <v-card class="mx-auto" max-width="300" tile>
     <v-list dense>
-      <v-list-item v-for="(tag, i) in tags" :key="i">
+      <v-list-item v-for="(tag, i) in tagList" :key="i">
         <v-list-item-content>
           <tag-component
             :name-given="tag.name"
             :tag-id="tag.id"
             :created-by="tag.created_by"
             :added="selectedTags.includes(tag)"
-            @giveTag="addTagToSelectedTags"
+            @clickTag="popTag"
           />
         </v-list-item-content>
       </v-list-item>
@@ -17,7 +17,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { TagFromApi, TagToApi, tagToApi2FromApi } from '../../script/tag'
+import { TagFromApi, tagfromApi2ToApi, TagToApi } from '../../script/tag'
 import TagComponent from '../tag/TagComponent.vue'
 
 export default defineComponent({
@@ -25,48 +25,43 @@ export default defineComponent({
     TagComponent,
   },
   props: {
-    tags: {
+    givenTagList: {
       type: Array,
       default: () => {
         return [] as Array<TagFromApi>
       },
     },
-    givenselectedTags: {
-      type: Array,
+    isEditable: {
+      type: Boolean,
       default: () => {
-        return [] as Array<TagFromApi>
+        return false
       },
     },
   },
   data() {
     return {
-      selectedTags: [] as Array<TagFromApi>,
-      name: '',
+      tagList: [] as Array<TagToApi>,
     }
   },
   mounted() {
-    this.selectedTags = this.givenselectedTags as Array<TagFromApi>
+    for (let index = 0; index < this.givenTagList.length; index++) {
+      const tag = tagfromApi2ToApi(this.givenTagList[index])
+      this.tagList.push(tag)
+    }
   },
   methods: {
     /**
-     * tag 情報を親に渡す関数。
-     * tag-component からTagToApi がわたってくる
+     * tagListからデータを削除する
+     * 削除したら、削除したタグの情報を
      */
-    addTagToSelectedTags(tag: TagToApi) {
-      try {
-        const tagFromApi = tagToApi2FromApi(tag) as TagFromApi
-        console.log('clicked tag')
-        if (this.selectedTags.includes(tagFromApi)) {
-          this.selectedTags = this.selectedTags.filter(
-            (item) => item !== tagFromApi
-          )
-        } else {
-          this.selectedTags.push(tagFromApi)
+    popTag(tag: TagToApi) {
+      if (this.isEditable) {
+        try {
+          this.tagList = this.tagList.filter((item) => item !== tag)
+          this.$emit('pop', tag)
+        } catch (error) {
+          console.error(error)
         }
-        console.log('taglist emit changeTag')
-        this.$emit('changeTag', this.selectedTags)
-      } catch (error) {
-        console.error(error)
       }
     },
   },
