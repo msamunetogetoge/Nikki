@@ -57,7 +57,7 @@ export default defineComponent({
         name: this.name,
         created_by: this.createdBy,
       }
-      this.$emit('giveTag', tag)
+      this.$emit('clickTag', tag)
     },
   },
 })

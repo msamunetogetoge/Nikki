@@ -7,7 +7,6 @@
             :name-given="tag.name"
             :tag-id="tag.id"
             :created-by="tag.created_by"
-            :added="selectedTags.includes(tag)"
             @clickTag="popTag"
           />
         </v-list-item-content>
@@ -17,7 +16,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { TagFromApi, tagfromApi2ToApi, TagToApi } from '../../script/tag'
+import { TagToApi } from '../../script/tag'
 import TagComponent from '../tag/TagComponent.vue'
 
 export default defineComponent({
@@ -28,7 +27,7 @@ export default defineComponent({
     givenTagList: {
       type: Array,
       default: () => {
-        return [] as Array<TagFromApi>
+        return [] as Array<TagToApi>
       },
     },
     isEditable: {
@@ -43,11 +42,13 @@ export default defineComponent({
       tagList: [] as Array<TagToApi>,
     }
   },
+  watch: {
+    givenTagList(val: Array<TagToApi>) {
+      this.tagList = val
+    },
+  },
   mounted() {
-    for (let index = 0; index < this.givenTagList.length; index++) {
-      const tag = tagfromApi2ToApi(this.givenTagList[index])
-      this.tagList.push(tag)
-    }
+    this.tagList = this.givenTagList as Array<TagToApi>
   },
   methods: {
     /**
@@ -57,7 +58,7 @@ export default defineComponent({
     popTag(tag: TagToApi) {
       if (this.isEditable) {
         try {
-          this.tagList = this.tagList.filter((item) => item !== tag)
+          this.tagList = this.tagList.filter((item) => item.id !== tag.id)
           this.$emit('pop', tag)
         } catch (error) {
           console.error(error)

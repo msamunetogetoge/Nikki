@@ -115,7 +115,7 @@ export default defineComponent({
     tagsProvided: {
       type: Array,
       default: () => {
-        return [] as Array<TagFromApi>
+        return [] as Array<TagToApi>
       },
     },
     isNewNikkiProvided: {

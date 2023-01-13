@@ -42,6 +42,7 @@ export async function getAllTags(userId: string): Promise<Array<TagFromApi> | Er
     const urlBuilder = new UrlBuilder(url, query, undefined)
     const tags = await axios.get(urlBuilder.buildByQuery()).then(
         function (response: AxiosResponse<Array<TagFromApi>>) {
+            console.log("in getAllTags, response data =")
             console.log(response.data)
             return response.data
         }

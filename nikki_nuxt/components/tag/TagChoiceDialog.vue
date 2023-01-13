@@ -1,9 +1,15 @@
 <template>
   <v-card>
-    <tag-list :tag-list="selectedTags" :is-editable="true" @pop="deleteTag" />
-    <v-divider class="mx-4"></v-divider>
+    <v-card-title>選択済</v-card-title>
     <tag-list
-      :tag-list="notSelectedTags"
+      :given-tag-list="selectedTags"
+      :is-editable="true"
+      @pop="deleteTag"
+    />
+    <v-divider class="mx-4"></v-divider>
+    <v-card-title>未選択</v-card-title>
+    <tag-list
+      :given-tag-list="notSelectedTags"
       :is-editable="true"
       @pop="addTag"
     />
@@ -15,7 +21,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { TagFromApi, TagToApi, tagToApi2FromApi } from '../../script/tag'
+import { TagToApi } from '../../script/tag'
 import TagList from './TagList.vue'
 
 export default defineComponent({
@@ -24,50 +30,54 @@ export default defineComponent({
     givenSelectedTags: {
       type: Array,
       default: () => {
-        return [] as Array<TagFromApi>
+        return [] as Array<TagToApi>
       },
     },
     givenNotSelectedTags: {
       type: Array,
       default: () => {
-        return [] as Array<TagFromApi>
+        return [] as Array<TagToApi>
       },
     },
   },
   data() {
     return {
-      selectedTags: [] as Array<TagFromApi>,
-      notSelectedTags: [] as Array<TagFromApi>,
+      selectedTags: [] as Array<TagToApi>,
+      notSelectedTags: [] as Array<TagToApi>,
     }
   },
-  mounted() {
-    this.selectedTags = this.givenSelectedTags
-    this.notSelectedTags = this.givenSelectedTags
+  watch: {
+    givenSelectedTags(val: Array<TagToApi>) {
+      this.selectedTags = val
+    },
+    givenNotSelectedTags(val: Array<TagToApi>) {
+      this.notSelectedTags = val
+    },
   },
+  mounted() {
+    this.selectedTags = this.givenSelectedTags as Array<TagToApi>
+    this.notSelectedTags = this.givenNotSelectedTags as Array<TagToApi>
+  },
+
   methods: {
     /**
      * 未選択タグを、選択タグに移動する
      */
     addTag(tag: TagToApi) {
-      const tagFromApi = tagToApi2FromApi(tag)
-      this.selectedTags.push(tagFromApi)
-      this.notSelectedTags = this.tagList = this.tagList.filter(
-        (item) => item !== tagFromApi
+      this.selectedTags.push(tag)
+      this.notSelectedTags = this.notSelectedTags.filter(
+        (item) => item.id !== tag.id
       )
     },
     /**
      * 選択多済みタグを、未選択タグに移動する
      */
     deleteTag(tag: TagToApi) {
-      const tagFromApi = tagToApi2FromApi(tag)
-      this.notSelectedTags.push(tagFromApi)
-      this.selectedTags = this.tagList = this.tagList.filter(
-        (item) => item !== tagFromApi
-      )
-    },
-    // todo: changeSelectedTagsが動いてない
-    changeSelectedTags(selectedTags: Array<TagFromApi>): void {
-      this.selectedTags = selectedTags
+      this.notSelectedTags.push(tag)
+      this.selectedTags = this.selectedTags.filter((item) => item.id !== tag.id)
+      console.log('in  delete tag')
+      console.log(tag)
+      console.log(this.selectedTags)
     },
     /**
      * tagをNikkiに設定する

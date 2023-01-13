@@ -100,7 +100,7 @@ import { defineComponent } from 'vue'
 import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
 import NikkiDialog from '../components/NikkiDialog.vue'
 import { initId } from '../store'
-import { TagFromApi } from '../script/tag'
+import { TagFromApi, tagfromApi2ToApi, TagToApi } from '../script/tag'
 export default defineComponent({
   components: { NikkiDialog },
   data() {
@@ -111,7 +111,7 @@ export default defineComponent({
       deleteDialog: false, // 削除ダイアログを表示するフラグ
       date: new Date(),
       nikkiList: [] as Array<NikkiFromApi>,
-      tags: [] as Array<TagFromApi>,
+      tags: [] as Array<TagToApi>,
       id: 0,
       createdBy: initId,
       deleteId: -100,
@@ -207,7 +207,12 @@ export default defineComponent({
       this.createdAt = new Date(nikki.created_at * 1000)
       this.summary = nikki.summary
       this.goodness = nikki.goodness
-      this.tags = nikki.tags
+      const tagToApis = [] as Array<TagToApi>
+      for (let index = 0; index < nikki.tags.length; index++) {
+        const tagToApi = tagfromApi2ToApi(nikki.tags[index])
+        tagToApis.push(tagToApi)
+      }
+      this.tags = tagToApis
       this.dialog = true
     },
     /**

@@ -1,7 +1,7 @@
 <template>
   <v-card class="mx-auto" max-width="344">
     <v-card-text>
-      <tag-list :tags="choicedTag" />
+      <tag-list :tags="selectedTag" />
     </v-card-text>
     <v-card-actions>
       <v-btn text color="deep-purple accent-4" @click="tagChoice = true">
@@ -22,7 +22,7 @@
 // todo: tag-choice-dialogにgivenSelectedTags,givenNotSelectedTagsをあげる
 // givenSelectedTags はもらったものをそのまま。
 // givenNotSelectedTagsはmoubnted でallTagsを取得し、編集して渡す。(async await で未選択タグ部分でawaitする)
-//
+// TagToApiに変換してから渡す。
 
 import { defineComponent } from 'vue'
 
@@ -38,7 +38,7 @@ export default defineComponent({
     givenTag: {
       type: Array,
       default: () => {
-        return [] as Array<TagFromApi>
+        return [] as Array<TagToApi>
       },
     },
   },
@@ -46,27 +46,30 @@ export default defineComponent({
   data() {
     return {
       tagChoice: false,
-      selectedTag: [] as Array<TagFromApi>,
-      notSelectedTag: [] as Array<TagFromApi>,
+      selectedTag: [] as Array<TagToApi>,
+      notSelectedTag: [] as Array<TagToApi>,
       noLoginError: Error('ログインしていません。'),
       createdBy: initId,
     }
   },
   async mounted() {
-    this.selectedTag = this.givenTag as Array<TagFromApi>
+    this.selectedTag = this.givenTag as Array<TagToApi>
     this.notSelectedTag = await this.getNotSelectedTag()
   },
   methods: {
-    async getNotSelectedTag(): Promise<Array<TagFromApi>> {
+    async getNotSelectedTag(): Promise<Array<TagToApi>> {
       try {
         this.createdBy = this.getUserId() as string
       } catch {}
-      const allTags = (await getAllTags(this.createdBy)) as Array<TagFromApi>
+      const allTagsFromApi = (await getAllTags(
+        this.createdBy
+      )) as Array<TagFromApi>
+      const allTags = allTagsFromApi as Array<TagToApi>
       const notSelectedTag = this.getArrayDiff(this.selectedTag, allTags)
       return notSelectedTag
     },
 
-    tagAdded(tags: Array<TagFromApi>) {
+    tagAdded(tags: Array<TagToApi>) {
       this.selectedTag = tags
       this.$emit('tagAdded', this.selectedTag)
     },
