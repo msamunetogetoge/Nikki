@@ -56,9 +56,11 @@ export default defineComponent({
      * 削除したら、削除したタグの情報を
      */
     popTag(tag: TagToApi) {
+      console.log('popTag')
       if (this.isEditable) {
         try {
           this.tagList = this.tagList.filter((item) => item.id !== tag.id)
+          console.log('TagList will emit pop tag id' + tag.id)
           this.$emit('pop', tag)
         } catch (error) {
           console.error(error)
