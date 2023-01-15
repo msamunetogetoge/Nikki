@@ -28,7 +28,12 @@ import { initId } from '../../store'
 
 import TagChoiceDialog from './TagChoiceDialog.vue'
 import TagList from './TagList.vue'
-
+/**
+ * タグ付けされたタグを表示する。
+ * タグ選択ダイアログを表示する。
+ * event:
+ * tagAdded... tag-choice-dialogで保存ボタンが押されたときに呼ばれる。親に選択されたタグの情報を伝える。
+ */
 export default defineComponent({
   components: { TagChoiceDialog, TagList },
   props: {
@@ -42,20 +47,26 @@ export default defineComponent({
 
   data() {
     return {
-      tagChoice: false,
-      selectedTag: [] as Array<TagToApi>,
-      notSelectedTag: [] as Array<TagToApi>,
+      tagChoice: false, // TagChoiceDialog出現のフラグ
+      selectedTag: [] as Array<TagToApi>, // タグ付け済みのタグ
+      notSelectedTag: [] as Array<TagToApi>, // タグ付けされていないタグ
       noLoginError: Error('ログインしていません。'),
-      createdBy: initId,
-      allTag: [] as Array<TagFromApi>,
+      createdBy: initId, // tag.created_by で使用する変数
+      allTag: [] as Array<TagFromApi>, // ダイアログが作られたときに、一度だけ作成する。 todo: もしかしたらnikkiList を作成した時にasyncで作成し、dialogを呼ぶときにawaitした方が良いかもしれない。
     }
   },
   watch: {
+    /**
+     * タグ付けされたタグのリストが更新されたら表示を変更する
+     */
     givenTag(val: Array<TagToApi>) {
       this.selectedTag = val
       this.notSelectedTag = this.getNotSelectedTag()
     },
   },
+  /**
+   * タグの表示を整える為に変数を更新する
+   */
   async mounted() {
     try {
       this.createdBy = this.getUserId() as string
@@ -65,12 +76,18 @@ export default defineComponent({
     this.notSelectedTag = this.getNotSelectedTag()
   },
   methods: {
+    /**
+     * タグ付けされていないタグの取得
+     */
     getNotSelectedTag(): Array<TagToApi> {
       const allTags = this.allTag as Array<TagToApi>
       const notSelectedTag = this.getArrayDiff(this.selectedTag, allTags)
       return notSelectedTag
     },
-
+    /**
+     * 保存ボタンが押されたときに呼ばれる関数
+     * emit 'tagAdded'
+     */
     tagAdded(tags: Array<TagToApi>) {
       this.selectedTag = tags
       this.$emit('tagAdded', this.selectedTag)

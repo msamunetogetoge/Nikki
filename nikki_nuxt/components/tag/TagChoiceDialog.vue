@@ -23,7 +23,15 @@
 import { defineComponent } from 'vue'
 import { TagToApi } from '../../script/tag'
 import TagList from './TagList.vue'
-
+/**
+ * タグを選択するダイアログ。
+ * 選択済みのタグリストと、未選択タグのリストを表示する。
+ * 選択済みタグをクリックすると、選択済みタグリストから削除して、未選択タグリストに追加する。その逆も行う。
+ * 保存ボタンを押すと、親に選択済みタグリストをArray<TagToApi>に詰めて渡す。
+ * evrnt:
+ * saveTags... 保存ボタンを押すと呼ばれる。親に選択済みタグリストをArray<TagToApi>に詰めて渡す。
+ * close... 閉じるボタンを押すと呼ばれる。親にダイアログを非表示にしてくれと信号を送る。
+ */
 export default defineComponent({
   components: { TagList },
   props: {

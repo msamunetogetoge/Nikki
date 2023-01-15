@@ -18,7 +18,12 @@
 import { defineComponent } from 'vue'
 import { TagToApi } from '../../script/tag'
 import TagComponent from '../tag/TagComponent.vue'
-
+/**
+ * タグのリストを表示する。
+ * タグをクリックしたら、そのタグをリストから削除して、削除した情報を親に伝える。
+ * event:
+ * pop... タグをクリックしたら呼ばれる。親に、クリックされたタグをTagToApiに詰めて渡す。
+ */
 export default defineComponent({
   components: {
     TagComponent,
@@ -53,14 +58,14 @@ export default defineComponent({
   methods: {
     /**
      * tagListからデータを削除する
-     * 削除したら、削除したタグの情報を
+     * 削除したら、削除したタグの情報を親に伝える
+     * emit pop
      */
     popTag(tag: TagToApi) {
       console.log('popTag')
       if (this.isEditable) {
         try {
           this.tagList = this.tagList.filter((item) => item.id !== tag.id)
-          console.log('TagList will emit pop tag id' + tag.id)
           this.$emit('pop', tag)
         } catch (error) {
           console.error(error)

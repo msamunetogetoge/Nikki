@@ -1,12 +1,16 @@
 <template>
-  <v-chip class="ma-2" close outlined @click="giveTagInfo">
+  <v-chip class="ma-1" outlined @click="giveTagInfo">
     {{ name }}
   </v-chip>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { TagToApi } from '../../script/tag'
-
+/**
+ * タグを表示する。
+ * event:
+ * 'clickTag'... v-chip がクリックされたときに呼ばれる。親に、クリックされたタグの情報をTagToApiに詰めて渡す。
+ */
 export default defineComponent({
   props: {
     nameGiven: {
