@@ -72,6 +72,7 @@ class Tags():
     tags: list[Tag]
 
 
+@dataclass
 class User(Base):
     """DBにユーザー情報を格納する為のモデル
 
@@ -96,6 +97,7 @@ class Nikkis():
     nikkis: list[Nikki]
 
 
+@dataclass
 class PublicNikki(Base):
     __tablename__ = 'public_nikki'
     user_id = Column(Integer, primary_key=True)

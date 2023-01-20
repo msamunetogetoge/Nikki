@@ -132,6 +132,7 @@ def to_crypted_nikki(nikki: Nikki) -> _NikkiOut:
         _NikkiOut:nuxtに渡すnikkiオブジェクト
     """
     created_at = nikki.created_at.timestamp()
+    crypted_tags = [to_crypted_tag(tag) for tag in nikki.tags]
     _nikki = _NikkiOut(id=nikki.id,
                        created_by=CIPHER.encrypt(str(nikki.created_by)),
                        created_at=created_at,
@@ -139,7 +140,7 @@ def to_crypted_nikki(nikki: Nikki) -> _NikkiOut:
                        goodness=nikki.goodness,
                        content=nikki.content,
                        summary=nikki.summary,
-                       tags=nikki.tags)
+                       tags=crypted_tags)
     return _nikki
 
 

@@ -93,7 +93,7 @@ import { defineComponent } from 'vue'
 import { NikkiFromApi, deleteNikki } from '../../script/nikki'
 import NikkiDialog from '../../components/NikkiDialog.vue'
 import { initId } from '../../store'
-import { TagFromApi } from '../../script/tag'
+import { TagToApi, tagfromApi2ToApi } from '../../script/tag'
 export default defineComponent({
   components: { NikkiDialog },
   props: {
@@ -118,7 +118,7 @@ export default defineComponent({
       summary: '',
       goodness: 10,
       noLoginError: Error('ログインしていません。'),
-      tags: [] as Array<TagFromApi>,
+      tags: [] as Array<TagToApi>,
 
       // NikkiDialog で使うデータ終わり
     }
@@ -165,7 +165,12 @@ export default defineComponent({
       this.createdAt = new Date(nikki.created_at * 1000)
       this.summary = nikki.summary
       this.goodness = nikki.goodness
-      this.tags = nikki.tags
+      const tagToApis = [] as Array<TagToApi>
+      for (let index = 0; index < nikki.tags.length; index++) {
+        const tagToApi = tagfromApi2ToApi(nikki.tags[index])
+        tagToApis.push(tagToApi)
+      }
+      this.tags = tagToApis
       this.dialog = true
     },
     /**
