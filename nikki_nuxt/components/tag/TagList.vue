@@ -49,11 +49,12 @@ export default defineComponent({
   },
   watch: {
     givenTagList(val: Array<TagToApi>) {
-      this.tagList = val
+      this.tagList = [...val]
     },
   },
+
   mounted() {
-    this.tagList = this.givenTagList as Array<TagToApi>
+    this.tagList = [...(this.givenTagList as Array<TagToApi>)]
   },
   methods: {
     /**
@@ -62,10 +63,11 @@ export default defineComponent({
      * emit pop
      */
     popTag(tag: TagToApi) {
-      console.log('popTag')
       if (this.isEditable) {
         try {
-          this.tagList = this.tagList.filter((item) => item.id !== tag.id)
+          this.tagList = (this.tagList as Array<TagToApi>).filter(
+            (item) => item.id !== tag.id
+          )
           this.$emit('pop', tag)
         } catch (error) {
           console.error(error)

@@ -1,5 +1,6 @@
 <template>
   <v-card>
+    <tag-create-form :given-tags="allTags" @newTag="addNewTag" />
     <v-card-title>選択済</v-card-title>
     <tag-list
       :given-tag-list="selectedTags"
@@ -22,7 +23,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { TagToApi } from '../../script/tag'
+import { initId } from '../../store'
 import TagList from './TagList.vue'
+import TagCreateForm from './TagCreateForm.vue'
+
 /**
  * タグを選択するダイアログ。
  * 選択済みのタグリストと、未選択タグのリストを表示する。
@@ -33,7 +37,7 @@ import TagList from './TagList.vue'
  * close... 閉じるボタンを押すと呼ばれる。親にダイアログを非表示にしてくれと信号を送る。
  */
 export default defineComponent({
-  components: { TagList },
+  components: { TagList, TagCreateForm },
   props: {
     givenSelectedTags: {
       type: Array,
@@ -50,24 +54,44 @@ export default defineComponent({
   },
   data() {
     return {
+      noLoginError: Error('ログインしていません。'),
       selectedTags: [] as Array<TagToApi>,
       notSelectedTags: [] as Array<TagToApi>,
+      allTags: [] as Array<TagToApi>,
+      createdBy: initId,
     }
   },
   watch: {
     givenSelectedTags(val: Array<TagToApi>) {
-      this.selectedTags = val
+      this.selectedTags = [...val]
     },
     givenNotSelectedTags(val: Array<TagToApi>) {
-      this.notSelectedTags = val
+      this.notSelectedTags = [...val]
     },
   },
   mounted() {
-    this.selectedTags = this.givenSelectedTags as Array<TagToApi>
-    this.notSelectedTags = this.givenNotSelectedTags as Array<TagToApi>
+    this.selectedTags = [...(this.givenSelectedTags as Array<TagToApi>)]
+    this.notSelectedTags = [...(this.givenNotSelectedTags as Array<TagToApi>)]
+    this.allTags = Array.from(
+      new Set([...this.selectedTags, ...this.notSelectedTags])
+    )
   },
 
   methods: {
+    /**
+     * tag-create-form で作成したタグを追加する。
+     */
+    addNewTag(tagName: string) {
+      try {
+        this.createdBy = this.getUserId() as string
+      } catch {}
+      const newTag: TagToApi = {
+        id: null,
+        name: tagName,
+        created_by: this.createdBy,
+      }
+      this.addTag(newTag)
+    },
     /**
      * 未選択タグを、選択タグに移動する
      */
@@ -79,13 +103,13 @@ export default defineComponent({
     },
     /**
      * 選択多済みタグを、未選択タグに移動する
+     * todo: tagのidがnull の時は、selectedTag から削除するだけにする
      */
     deleteTag(tag: TagToApi) {
-      this.notSelectedTags.push(tag)
       this.selectedTags = this.selectedTags.filter((item) => item.id !== tag.id)
-      console.log('in  delete tag')
-      console.log(tag)
-      console.log(this.selectedTags)
+      if (tag.id !== null) {
+        this.notSelectedTags.push(tag)
+      }
     },
     /**
      * tagをNikkiに設定する
@@ -99,6 +123,19 @@ export default defineComponent({
      */
     closeDialog(): void {
       this.$emit('close')
+    },
+    /**
+     * ユーザーidを取得する。ログインしていなかったらエラーを返す
+     */
+    getUserId(): string | Error {
+      if (
+        this.$accessor.logedIn === true ||
+        this.$accessor.logedInTrial === true
+      ) {
+        return this.$accessor.id
+      } else {
+        throw this.noLoginError
+      }
     },
   },
 })

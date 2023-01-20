@@ -66,3 +66,14 @@ export async function getAllTags(userId: string): Promise<Array<TagFromApi> | Er
     return tags
 
 }
+
+/**
+ * 与えられたtagNameのタグが存在するか調べる。存在すればtrueを返す。
+ * @param tags :調べたいタグの配列
+ * @param tagName : TagToApi.name
+ * @returns 存在すればtrue
+ */
+export function isExistTag(tags: Array<TagToApi>, tagName: string): Boolean {
+    const tagNames = tags.map(item => item.name)
+    return tagNames.includes(tagName)
+}

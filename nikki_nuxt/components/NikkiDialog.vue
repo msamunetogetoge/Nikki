@@ -73,7 +73,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import GuruGuru from '../components/GuruGuru.vue'
-import TagList from '../components/tag/TagList.vue'
+import TagDialog from '../components/tag/TagDialog.vue'
 import {
   NikkiToApi,
   postNikki,
@@ -109,7 +109,7 @@ import { initId } from '../store'
 export default defineComponent({
   components: {
     GuruGuru,
-    TagList,
+    TagDialog,
   },
   props: {
     tagsProvided: {
@@ -236,7 +236,6 @@ export default defineComponent({
     this.createdAtDisplay = (this.createdAt as Date).toLocaleDateString('ja-jp')
     this.createdAtISO = (this.createdAt as Date).toISOString().substr(0, 10)
     this.tags = this.tagsProvided as Array<TagFromApi>
-    console.log(this.tags)
   },
 
   // todo: 2022/11/1, 2022/11/8 に作ったnikki を見ると、作成日が2022/10/31 になったりするので原因を調べる
