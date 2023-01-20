@@ -271,8 +271,13 @@ async def delete_user_and_nikkis(user_id: str):
         return HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "ユーザー情報削除失敗")
 
 
-@app.get("/random")
+@app.get("/random", response_model=None)
 async def publish_random_user() -> UserStore | HTTPException:
+    """ランダムに作成した文字列のID,passwordを持ったユーザーを払いだす
+
+    Returns:
+        UserStore | HTTPException: 成功したらユーザー情報、失敗したらexception
+    """
     try:
         user = create_random_user()
         id_of_user = add_user(user_info=user)
