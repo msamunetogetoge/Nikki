@@ -234,7 +234,7 @@ def get_random_str(min_length=5, max_length=32) -> str:
 
 @dataclass_json
 @dataclass
-class UserStore():
+class UserStore(BaseModel):
     """nuxt側でユーザー情報を格納する為に使う
     """
     id: bytes
