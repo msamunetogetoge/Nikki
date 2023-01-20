@@ -1,5 +1,6 @@
 """
 nikki 編集、登録、公開範囲の設定などを処理するapi
+HttpStatusを返したくなったらhttps://fastapi.tiangolo.com/ja/advanced/additional-status-codes/ を参照する。
 """
 
 
