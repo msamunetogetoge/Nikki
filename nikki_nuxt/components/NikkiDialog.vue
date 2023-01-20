@@ -44,7 +44,7 @@
             </v-btn>
           </v-date-picker>
         </v-menu>
-        <tag-list :tags="tagsProvided" />
+        <tag-dialog :given-tag="tagsProvided" @tagAdded="saveTags" />
         <v-text-field v-model="summary" label="要約"></v-text-field>
         <v-textarea v-model="content" label="本文" rows="5"></v-textarea>
         <v-slider
@@ -73,7 +73,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import GuruGuru from '../components/GuruGuru.vue'
-import TagList from '../components/tag/TagList.vue'
+import TagDialog from '../components/tag/TagDialog.vue'
 import {
   NikkiToApi,
   postNikki,
@@ -83,16 +83,39 @@ import {
 import { TagToApi, TagFromApi } from '../script/tag'
 import { initId } from '../store'
 
+/**
+ *  chatGPTに生成してもらったものを少し補足
+ * NikkiDialog component
+ *
+ * This component is used to create or edit a nikki (journal entry or diary). It
+ * displays a form with fields for the title, creation date, tags, summary, content,
+ * and goodness of the nikki. When the form is submitted, the component will
+ * either create a new nikki or update an existing one, depending on the value of
+ * the `isNewNikkiProvided` prop.
+ *
+ * Props:
+ *   - tagsProvided: An array of tags to be displayed in the tag input field.
+ *   - isNewNikkiProvided: A boolean indicating whether the component is being used to create
+ *       a new nikki (true) or edit an existing one (false).
+ *   - idProvided: The ID of the nikki being edited, if applicable.
+ *   - titleProvided: The title of the nikki being edited, if applicable.
+ *   - createdAtProvided: The creation date of the nikki being edited, if applicable.
+ *
+ * Events:
+ *   - close-dialog: Emitted when the close button is clicked. Close this dialog by calling methods.closeDialog, finally, emit 'close'.
+ *   - save-nikki: Emitted when the save button is clicked. Save Nikki by calling methods.SaveNikki, finally, emit 'close'
+ */
+
 export default defineComponent({
   components: {
     GuruGuru,
-    TagList,
+    TagDialog,
   },
   props: {
     tagsProvided: {
       type: Array,
       default: () => {
-        return [] as Array<TagFromApi>
+        return [] as Array<TagToApi>
       },
     },
     isNewNikkiProvided: {
@@ -158,7 +181,7 @@ export default defineComponent({
       menu: false,
       goodness: 10,
       nowLoading: false,
-      tags: [] as Array<TagFromApi>,
+      tags: [] as Array<TagToApi>,
     }
   },
   /**
@@ -166,7 +189,6 @@ export default defineComponent({
    */
   watch: {
     tagsProvided(val) {
-      console.log(val)
       this.tags = val
     },
     idProvided(val) {
@@ -213,11 +235,15 @@ export default defineComponent({
     this.createdAt = this.createdAtProvided
     this.createdAtDisplay = (this.createdAt as Date).toLocaleDateString('ja-jp')
     this.createdAtISO = (this.createdAt as Date).toISOString().substr(0, 10)
+    this.tags = this.tagsProvided as Array<TagFromApi>
   },
 
   // todo: 2022/11/1, 2022/11/8 に作ったnikki を見ると、作成日が2022/10/31 になったりするので原因を調べる
   // 同じnikkiを2回開くと直る
   methods: {
+    saveTags(tags: Array<TagToApi>) {
+      this.tags = tags
+    },
     /**
      * このコンポーネントを閉じる
      */
@@ -243,6 +269,7 @@ export default defineComponent({
         nikki,
         tags,
       }
+      console.log(nikkiWithTag)
 
       // グルグル表示
       this.nowLoading = true
@@ -254,7 +281,7 @@ export default defineComponent({
           alert('登録に失敗しました。ログインしなおしてみてください。')
         } finally {
           this.nowLoading = false
-          this.$emit('close')
+          this.closeDialog()
         }
       } else {
         // データ更新
@@ -264,7 +291,7 @@ export default defineComponent({
           alert('登録に失敗しました。ログインしなおしてみてください。')
         } finally {
           this.nowLoading = false
-          this.$emit('close')
+          this.closeDialog()
         }
       }
     },

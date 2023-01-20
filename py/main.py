@@ -106,6 +106,7 @@ async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn) -> HTTPResponse:
     """
     try:
         nikki = to_decrypted_nikki(_nikki)
+
         edit_nikki(nikki=nikki, nikki_id=nikki_id)
         return HTTPStatus.ACCEPTED
     except NoResultFound:
