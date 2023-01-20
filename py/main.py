@@ -216,7 +216,7 @@ async def register_user(user: _User):
 
 
 @app.post("/login", response_model=UserStore)
-async def login(user_info: Login) -> UserStore | HTTPException:
+async def login(user_info: Login) -> UserStore:
     """
     ユーザーを検索する。一件だけデータが取得出来たら成功を返す。
 
