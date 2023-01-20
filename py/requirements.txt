@@ -1,7 +1,7 @@
 alembic
 fastapi
 uvicorn[standard]
-pydantic
+pydantic==1.10
 dataclasses-json
 sqlalchemy==1.4
 psycopg2-binary
