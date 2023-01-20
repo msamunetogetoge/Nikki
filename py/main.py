@@ -215,7 +215,7 @@ async def register_user(user: _User):
                             detail="api側でエラーが発生") from exc
 
 
-@app.post("/login")
+@app.post("/login", response_model=UserStore)
 async def login(user_info: Login) -> UserStore | HTTPException:
     """
     ユーザーを検索する。一件だけデータが取得出来たら成功を返す。
@@ -264,7 +264,6 @@ async def delete_user_and_nikkis(user_id: str):
     """
     try:
         remove_user_and_nikki(user_id=user_id)
-
         return HTTPStatus.ACCEPTED
     except Exception as e:
         print(f"in delete_user_and_nikkis, error = {e}")
