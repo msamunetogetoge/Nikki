@@ -5,7 +5,6 @@ nikki 編集、登録、公開範囲の設定などを処理するapi
 
 from secure.crypto import CIPHER, decrypt_from_url_row_to_int
 from http import HTTPStatus
-from http.client import HTTPResponse
 import logging
 from fastapi import FastAPI, HTTPException
 
@@ -79,7 +78,7 @@ def search_nikki_detail(search_params_encrypted: NikkiSearchParamsEncrypted) -> 
 
 
 @app.post("/nikki")
-async def register_nikki(nikki: NikkiWithTagIn) -> HTTPStatus:
+async def register_nikki(nikki: NikkiWithTagIn) -> HTTPStatus | HTTPException:
     """
     nikki を登録する
     Returns:
@@ -95,7 +94,7 @@ async def register_nikki(nikki: NikkiWithTagIn) -> HTTPStatus:
 
 
 @app.put("/nikki/{nikki_id}")
-async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn) -> HTTPResponse:
+async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn) -> HTTPStatus | HTTPException:
     """nikkiを編集する
 
     Args:
@@ -114,7 +113,7 @@ async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn) -> HTTPResponse:
 
 
 @app.delete("/nikki/{nikki_id}")
-async def delete_nikki(nikki_id: int) -> HTTPResponse:
+async def delete_nikki(nikki_id: int) -> HTTPStatus | HTTPException:
     """nikkiを削除する
 
     Args:
@@ -125,7 +124,7 @@ async def delete_nikki(nikki_id: int) -> HTTPResponse:
     """
     try:
         remove_nikki(nikki_id=nikki_id)
-        return HTTPStatus.OK
+        return HTTPStatus.ACCEPTED
     except Exception as error_of_delete_nikki:
         print(error_of_delete_nikki)
         raise HTTPException(HTTPStatus.BAD_REQUEST,
@@ -173,7 +172,7 @@ def get_tag(created_by: str) -> list[_TagOut]:
 
 
 @app.post("/tag/delete")
-def delete_tags(tag_ids: list[int]) -> None | HTTPException:
+def delete_tags(tag_ids: list[int]) -> HTTPStatus | HTTPException:
     """タグのid(Tag.id)のリストからタグを削除する。
     delete でなくてpostなのに注意。
 
@@ -188,7 +187,7 @@ def delete_tags(tag_ids: list[int]) -> None | HTTPException:
     """
     try:
         delete_tag(tag_ids)
-        return
+        return HTTPStatus.ACCEPTED
     except Exception as delete_failed:
         print(delete_failed)
         raise HTTPException(HTTPStatus.BAD_REQUEST,
@@ -196,7 +195,7 @@ def delete_tags(tag_ids: list[int]) -> None | HTTPException:
 
 
 @app.post("/user")
-async def register_user(user: _User) -> HTTPStatus:
+async def register_user(user: _User) -> HTTPStatus | HTTPException:
     """
     ユーザー登録する
 
@@ -216,7 +215,7 @@ async def register_user(user: _User) -> HTTPStatus:
 
 
 @app.post("/login")
-async def login(user_info: Login) -> UserStore or HTTPException:
+async def login(user_info: Login) -> UserStore | HTTPException:
     """
     ユーザーを検索する。一件だけデータが取得出来たら成功を返す。
 
@@ -236,7 +235,7 @@ async def login(user_info: Login) -> UserStore or HTTPException:
 
 
 @app.get("/user/{user_id}")
-async def is_exist_user_id(user_id: str) -> HTTPStatus or HTTPException:
+async def is_exist_user_id(user_id: str) -> bool:
     """ 既に存在するユーザーIDか調べる
 
     Args:
@@ -253,7 +252,7 @@ async def is_exist_user_id(user_id: str) -> HTTPStatus or HTTPException:
 
 
 @app.delete("/user/{user_id}")
-async def delete_user_and_nikkis(user_id: str) -> HTTPStatus or HTTPException:
+async def delete_user_and_nikkis(user_id: str) -> HTTPStatus | HTTPException:
     """ ユーザーと、そのユーザーが作成したNikkiを削除する
 
     Args:
@@ -272,7 +271,7 @@ async def delete_user_and_nikkis(user_id: str) -> HTTPStatus or HTTPException:
 
 
 @app.get("/random")
-async def publish_random_user() -> UserStore or HTTPException:
+async def publish_random_user() -> UserStore | HTTPException:
     try:
         user = create_random_user()
         id_of_user = add_user(user_info=user)
