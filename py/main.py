@@ -78,7 +78,7 @@ def search_nikki_detail(search_params_encrypted: NikkiSearchParamsEncrypted) -> 
 
 
 @app.post("/nikki")
-async def register_nikki(nikki: NikkiWithTagIn) -> HTTPStatus | HTTPException:
+async def register_nikki(nikki: NikkiWithTagIn):
     """
     nikki を登録する
     Returns:
@@ -94,7 +94,7 @@ async def register_nikki(nikki: NikkiWithTagIn) -> HTTPStatus | HTTPException:
 
 
 @app.put("/nikki/{nikki_id}")
-async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn) -> HTTPStatus | HTTPException:
+async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn):
     """nikkiを編集する
 
     Args:
@@ -113,7 +113,7 @@ async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn) -> HTTPStatus | HT
 
 
 @app.delete("/nikki/{nikki_id}")
-async def delete_nikki(nikki_id: int) -> HTTPStatus | HTTPException:
+async def delete_nikki(nikki_id: int):
     """nikkiを削除する
 
     Args:
@@ -172,7 +172,7 @@ def get_tag(created_by: str) -> list[_TagOut]:
 
 
 @app.post("/tag/delete")
-def delete_tags(tag_ids: list[int]) -> HTTPStatus | HTTPException:
+def delete_tags(tag_ids: list[int]):
     """タグのid(Tag.id)のリストからタグを削除する。
     delete でなくてpostなのに注意。
 
@@ -195,7 +195,7 @@ def delete_tags(tag_ids: list[int]) -> HTTPStatus | HTTPException:
 
 
 @app.post("/user")
-async def register_user(user: _User) -> HTTPStatus | HTTPException:
+async def register_user(user: _User):
     """
     ユーザー登録する
 
@@ -252,7 +252,7 @@ async def is_exist_user_id(user_id: str) -> bool:
 
 
 @app.delete("/user/{user_id}")
-async def delete_user_and_nikkis(user_id: str) -> HTTPStatus | HTTPException:
+async def delete_user_and_nikkis(user_id: str):
     """ ユーザーと、そのユーザーが作成したNikkiを削除する
 
     Args:
