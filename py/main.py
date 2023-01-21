@@ -20,7 +20,7 @@ app = FastAPI()
 
 
 @app.get("/")
-async def root() -> dict:
+async def root():
     """テスト用
 
     Returns:
@@ -216,7 +216,7 @@ async def register_user(user: _User):
 
 
 @app.post("/login", response_model=UserStore)
-async def login(user_info: Login) -> UserStore:
+async def login(user_info: Login):
     """
     ユーザーを検索する。一件だけデータが取得出来たら成功を返す。
 
@@ -236,7 +236,7 @@ async def login(user_info: Login) -> UserStore:
 
 
 @app.get("/user/{user_id}")
-async def is_exist_user_id(user_id: str) -> bool:
+async def is_exist_user_id(user_id: str):
     """ 既に存在するユーザーIDか調べる
 
     Args:
@@ -271,7 +271,7 @@ async def delete_user_and_nikkis(user_id: str):
 
 
 @app.get("/random", response_model=UserStore)
-async def publish_random_user() -> UserStore:
+async def publish_random_user():
     """ランダムに作成した文字列のID,passwordを持ったユーザーを払いだす
 
     Returns:
