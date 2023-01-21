@@ -14,7 +14,7 @@
       :is-editable="true"
       @pop="addTag"
     />
-    <v-card-actions>
+    <v-card-actions class="justify-end">
       <v-btn text color="deep-purple accent-4" @click="tagNikki"> 保存 </v-btn>
       <v-btn text @click="closeDialog">閉じる</v-btn>
     </v-card-actions>

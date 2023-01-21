@@ -10,7 +10,7 @@
         タグ追加
       </v-btn>
     </v-card-actions>
-    <v-dialog v-model="tagChoice">
+    <v-dialog v-model="tagChoice" max-width="600">
       <tag-choice-dialog
         :given-selected-tags="selectedTag"
         :given-not-selected-tags="notSelectedTag"
