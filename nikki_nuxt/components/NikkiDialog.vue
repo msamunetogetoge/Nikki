@@ -238,8 +238,6 @@ export default defineComponent({
     this.tags = this.tagsProvided as Array<TagFromApi>
   },
 
-  // todo: 2022/11/1, 2022/11/8 に作ったnikki を見ると、作成日が2022/10/31 になったりするので原因を調べる
-  // 同じnikkiを2回開くと直る
   methods: {
     saveTags(tags: Array<TagToApi>) {
       this.tags = tags
@@ -269,7 +267,6 @@ export default defineComponent({
         nikki,
         tags,
       }
-      console.log(nikkiWithTag)
 
       // グルグル表示
       this.nowLoading = true

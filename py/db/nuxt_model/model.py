@@ -202,6 +202,16 @@ class _User(BaseModel):
         orm_mode = True
 
 
+class _TrialUser(BaseModel):
+    """お試しユーザーを登録する時に使うモデル。
+    """
+    id: int or None = None
+    crypted_id: str
+    user_id: str
+    user_name: str
+    password: str
+
+
 def create_random_user() -> _User:
     """ ユーザー登録せずにNikkiを利用したい時、適当なユーザー情報を作る為に使用する。
     ランダムな文字列([a-zA-Z])を使用してユーザー情報を作成する。user_nameは固定。

@@ -7,15 +7,13 @@ from pydantic import BaseModel, Field
 
 
 from sqlalchemy import create_engine, or_
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from db.model import Nikki, User, Tag, nikkitag_table
-from db.nuxt_model.model import _User, UserStore, utc_str_to_datetime
-# from db.nuxt_model.user import _User, UserStore
-# from db.nuxt_model.nikki import utc_str_to_datetime
+from db.model import Nikki, User, Tag
+from db.nuxt_model.model import _User, UserStore, _TrialUser, utc_str_to_datetime
 from db.dbconfig import DATABASE_URI
+
 from secure.crypto import CIPHER, decrypt_from_url_row_to_int
 
 engine = create_engine(DATABASE_URI)
@@ -411,6 +409,30 @@ def add_user(user_info: _User) -> int or Exception:
         raise e
     finally:
         session.close()
+
+
+def add_trial_user(user_info: _TrialUser) -> int or Exception:
+    """お試しユーザーを登録する。User.user_id, user_name, passwordを更新する。
+
+    Args:
+        user_info (_TrialUser): _description_
+
+    Returns:
+        int or Exception: _description_
+    """
+    session = Session()
+
+    try:
+        user_id = int(CIPHER.decrypt(user_info.crypted_id))
+        user = session.query(User).filter(
+            User.id == user_id).one()
+        user.user_id = user_info.user_id
+        user.user_name = user_info.user_name
+        user.password = user_info.password
+        session.commit()
+        return user.id
+    except Exception as e:
+        raise e
 
 
 def remove_user_and_nikki(user_id: str) -> None or Exception:
