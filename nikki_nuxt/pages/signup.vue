@@ -41,6 +41,9 @@
           <v-btn color="primary" :disabled="!valid" @click="addUser">
             登録
           </v-btn>
+          <v-btn v-if="isTrial" color="secondly" @click="backNikki">
+            登録せずに続ける
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-col>
@@ -49,7 +52,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { registerUser } from '../script/user'
+import { registerTrialUser, registerUser } from '../script/user'
 
 export default defineComponent({
   name: 'SignUpPage',
@@ -71,7 +74,19 @@ export default defineComponent({
       },
     }
   },
+  computed: {
+    // 登録せずに続けるボタンの表示非表示
+    isTrial() {
+      return this.$accessor.logedInTrial as boolean
+    },
+  },
   methods: {
+    /**
+     * nikkiページに戻す
+     */
+    backNikki() {
+      this.$router.push('/home')
+    },
     /**
      * バリデーション
      */
@@ -86,13 +101,24 @@ export default defineComponent({
      */
     async addUser() {
       try {
-        await registerUser(
-          undefined,
-          this.userId,
-          this.userName,
-          this.password1
-        )
+        if (this.isTrial) {
+          await registerTrialUser(
+            undefined,
+            this.$accessor.id,
+            this.userId,
+            this.userName,
+            this.password1
+          )
+        } else {
+          await registerUser(
+            undefined,
+            this.userId,
+            this.userName,
+            this.password1
+          )
+        }
         alert('登録しました。登録内容でログインしてください。')
+
         this.$router.push('/')
       } catch (error) {
         console.error(error)

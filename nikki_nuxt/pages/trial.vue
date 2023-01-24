@@ -16,9 +16,8 @@ import NikkiList from '../components/NikkiList.vue'
 
 export default defineComponent({
   name: 'HomeComponent',
-
   components: { NikkiList },
-  middleware: 'is-trial-user',
+  layout: 'trial',
 
   data() {
     return {}

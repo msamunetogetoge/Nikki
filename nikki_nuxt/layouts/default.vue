@@ -73,14 +73,12 @@
 import { defineComponent } from 'vue'
 import { deleteTrialLoginUser } from '../script/login'
 import NikkiDialog from '../components/NikkiDialog.vue'
-import NikkiButton from '../components/NikkiBottun.vue'
 import { initId } from '../store'
 
 export default defineComponent({
   name: 'DefaultLayout',
   components: {
     NikkiDialog,
-    NikkiButton,
   },
   data() {
     return {

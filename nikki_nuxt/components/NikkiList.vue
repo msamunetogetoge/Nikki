@@ -100,7 +100,7 @@ import { defineComponent } from 'vue'
 import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
 import NikkiDialog from '../components/NikkiDialog.vue'
 import { initId } from '../store'
-import { TagFromApi, tagfromApi2ToApi, TagToApi } from '../script/tag'
+import { tagfromApi2ToApi, TagToApi } from '../script/tag'
 export default defineComponent({
   components: { NikkiDialog },
   data() {
