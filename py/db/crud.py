@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
 from db.model import Nikki, User, Tag
-from db.nuxt_model.model import _User, UserStore, _TrialUser, utc_str_to_datetime
+from db.nuxt_model.model import _User, UserStore, _UserInfo, utc_str_to_datetime
 from db.dbconfig import DATABASE_URI
 
 from secure.crypto import CIPHER, decrypt_from_url_row_to_int
@@ -209,16 +209,6 @@ def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:
         session.close()
 
 
-def subtract_list_try_remove(lst1, lst2):
-    lst = lst1.copy()
-    for e2 in lst2:
-        try:
-            lst.remove(e2)
-        except ValueError:
-            continue
-    return lst
-
-
 def add_nikki(nikki: Nikki) -> None or Exception:
     """dbにnikkiを登録する
 
@@ -411,11 +401,11 @@ def add_user(user_info: _User) -> int or Exception:
         session.close()
 
 
-def add_trial_user(user_info: _TrialUser) -> int or Exception:
-    """お試しユーザーを登録する。User.user_id, user_name, passwordを更新する。
+def update_user(user_info: _UserInfo) -> int or Exception:
+    """ユーザー情報を更新する。User.user_id, user_name, passwordを更新する。
 
     Args:
-        user_info (_TrialUser): _description_
+        user_info (_UserInfor): ユーザー情報
 
     Returns:
         int or Exception: _description_

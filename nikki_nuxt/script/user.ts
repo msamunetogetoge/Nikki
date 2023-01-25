@@ -13,9 +13,9 @@ interface User {
     password: string
 }
 /**
- * お試しユーザーを登録する時に使うインターフェイス。
+ * ユーザー情報をアップデートする時に使うインターフェイス。
  */
-interface TrialUser {
+interface UserInfo {
     id: number | undefined
     crypted_id: string
     user_id: string
@@ -57,23 +57,23 @@ export async function registerUser(id: number | undefined, userId: string, userN
 }
 
 /**
- *  お試しユーザーを登録する関数。失敗したらthrowする
+ *  ユーザー情報を更新する関数。失敗したらthrowする
  * @param id number or undefined, 自動で割り振られる
+ * @param cryptedId: string, 暗号化されたid
  * @param userId  ユーザーID, 重複不可
  * @param userName  ユーザー名
  * @param password  パスワード
  */
-export async function registerTrialUser(id: number | undefined, cryptedId: string, userId: string, userName: string, password: string) {
-    const user: TrialUser = {
+export async function updateUserInfo(id: number | undefined, cryptedId: string, userId: string, userName: string, password: string) {
+    const user: UserInfo = {
         id,
         crypted_id: cryptedId,
         user_id: userId,
         user_name: userName,
         password,
     }
-    const trialUserUrl = "trial_user"
-    const urlBuilder = new UrlBuilder(trialUserUrl)
-    await axios.post(urlBuilder.buildUrl(), user).then().catch(function (error) {
+    const urlBuilder = new UrlBuilder(url)
+    await axios.put(urlBuilder.buildUrl(), user).then().catch(function (error) {
         throw error
     })
 }

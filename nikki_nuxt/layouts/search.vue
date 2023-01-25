@@ -42,11 +42,6 @@
     <v-app-bar :clipped-left="clipped" fixed app>
       <v-app-bar-nav-icon v-if="!permanent" @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
-      <v-spacer> </v-spacer>
-      <v-btn @click="tryLogout">
-        <v-icon> mdi-logout</v-icon>
-        ログアウト
-      </v-btn>
     </v-app-bar>
 
     <v-main>

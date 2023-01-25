@@ -13,8 +13,8 @@ from fastapi import FastAPI, HTTPException
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
 from db.model import Nikki, Tag
-from db.nuxt_model.model import _NikkiOut, to_decrypted_nikki, to_crypted_nikki, NikkiWithTagIn, utc_str_to_datetime, _User, _TrialUser, UserStore, Login, create_random_user, _TagOut, to_crypted_tag
-from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, add_trial_user, NikkiSearchParamsEncrypted, get_tags, delete_tag
+from db.nuxt_model.model import _NikkiOut, to_decrypted_nikki, to_crypted_nikki, NikkiWithTagIn, utc_str_to_datetime, _User, _UserInfo, UserStore, Login, create_random_user, _TagOut, to_crypted_tag
+from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, update_user, NikkiSearchParamsEncrypted, get_tags, delete_tag
 
 app = FastAPI()
 
@@ -215,8 +215,8 @@ async def register_user(user: _User):
                             detail="api側でエラーが発生") from exc
 
 
-@app.post("/trial_user")
-def register_trial_user(user: _TrialUser):
+@app.put("/user")
+def register_trial_user(user: _UserInfo):
     """お試しユーザーを登録する。
 
     Args:
@@ -226,7 +226,7 @@ def register_trial_user(user: _TrialUser):
         HTTPException: _description_
     """
     try:
-        add_trial_user(user)
+        update_user(user)
         return
     except Exception as e:
         print(e)

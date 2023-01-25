@@ -2,7 +2,7 @@
   <v-row justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
       <v-card>
-        <v-card-title class="headline">Nikkiに登録しましょう </v-card-title>
+        <v-card-title class="headline">ユーザー情報変更 </v-card-title>
         <v-card-text>
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-text-field
@@ -38,11 +38,8 @@
           </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" :disabled="!valid" @click="addUser">
+          <v-btn color="primary" :disabled="!valid" @click="updateUser">
             登録
-          </v-btn>
-          <v-btn v-if="isTrial" color="secondly" @click="backNikki">
-            登録せずに続ける
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -52,10 +49,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { updateUserInfo, registerUser } from '../script/user'
+import { updateUserInfo } from '../script/user'
 
 export default defineComponent({
-  name: 'SignUpPage',
+  name: 'UserPage',
   layout: 'simple',
   data() {
     return {
@@ -74,19 +71,12 @@ export default defineComponent({
       },
     }
   },
-  computed: {
-    // 登録せずに続けるボタンの表示非表示
-    isTrial() {
-      return this.$accessor.logedInTrial as boolean
-    },
+  mounted() {
+    this.userId = this.$accessor.userId
+    this.userName = this.$accessor.userName
   },
+
   methods: {
-    /**
-     * nikkiページに戻す
-     */
-    backNikki() {
-      this.$router.push('/home')
-    },
     /**
      * バリデーション
      */
@@ -98,26 +88,16 @@ export default defineComponent({
      * ユーザー登録する。
      * alertで成功、失敗を教える。
      */
-    async addUser() {
+    async updateUser() {
       try {
-        if (this.isTrial) {
-          await updateUserInfo(
-            undefined,
-            this.$accessor.id,
-            this.userId,
-            this.userName,
-            this.password1
-          )
-        } else {
-          await registerUser(
-            undefined,
-            this.userId,
-            this.userName,
-            this.password1
-          )
-        }
+        await updateUserInfo(
+          undefined,
+          this.$accessor.id,
+          this.userId,
+          this.userName,
+          this.password1
+        )
         alert('登録しました。登録内容でログインしてください。')
-
         this.$router.push('/')
       } catch (error) {
         console.error(error)
