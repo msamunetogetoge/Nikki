@@ -11,3 +11,11 @@ declare module '@nuxt/types' {
         $accessor: typeof accessorType
     }
 }
+
+export interface MenuIcon {
+    icon: string
+    title: string,
+    to: string | undefined,
+    action: (() => void) | undefined
+}
+
