@@ -18,6 +18,7 @@ export default defineComponent({
   name: 'HomeComponent',
   components: { NikkiList },
   layout: 'trial',
+  middleware: 'is-not-trial-user',
 
   data() {
     return {}
