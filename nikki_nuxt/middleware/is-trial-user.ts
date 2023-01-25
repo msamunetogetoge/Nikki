@@ -5,8 +5,6 @@ import { Middleware, Context } from '@nuxt/types'
  * @param param0 
  */
 const checkTrial: Middleware = ({ redirect, app: { $accessor } }: Context) => {
-    console.log("middleware is-tial-user calling userName= ")
-    console.log($accessor.userName)
     if ($accessor.logedInTrial as boolean) {
         // お試しユーザー
         redirect("/trial")
