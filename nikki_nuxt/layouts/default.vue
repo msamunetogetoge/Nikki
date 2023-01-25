@@ -43,6 +43,10 @@
       <v-app-bar-nav-icon v-if="!permanent" @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
       <v-spacer> </v-spacer>
+      <v-btn @click="userInfoPage">
+        <v-icon> mdi-user-circle</v-icon>
+        登録情報変更
+      </v-btn>
       <v-btn @click="tryLogout">
         <v-icon> mdi-logout</v-icon>
         ログアウト
@@ -146,6 +150,19 @@ export default defineComponent({
     },
     calculateWindowWidth() {
       this.permanent = window.innerWidth > 768
+    },
+    /**
+     * ユーザー情報変更ページに行く
+     */
+    userInfoPage() {
+      console.log(this.$accessor.userId)
+      this.$router.push({
+        path: '/user',
+        params: {
+          userID: this.$accessor.userId,
+          userNAME: this.$accessor.userName,
+        },
+      })
     },
   },
 })

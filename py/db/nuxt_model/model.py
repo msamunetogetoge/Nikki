@@ -202,8 +202,8 @@ class _User(BaseModel):
         orm_mode = True
 
 
-class _TrialUser(BaseModel):
-    """お試しユーザーを登録する時に使うモデル。
+class _UserInfo(BaseModel):
+    """ユーザー情報を更新する時に使うモデル。
     """
     id: int or None = None
     crypted_id: str
