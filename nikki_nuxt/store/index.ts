@@ -104,12 +104,11 @@ export const actions = actionTree({ state, getters, mutations }, {
     },
     /**
      * localstorage からデータを削除して、logoutする
-     * todo: vuex からも削除する
      */
     logout({ commit }) {
-        localStorage.clear()
         commit("setId", initId)
         commit('setLogedIn', false)
+        localStorage.clear()
 
     },
     loginTrial({ commit }) {
@@ -117,12 +116,11 @@ export const actions = actionTree({ state, getters, mutations }, {
     },
     /**
      * localstorage からデータを削除して、logoutする
-     * todo: vuex からも削除する
      */
     logoutTrial({ commit }) {
-        localStorage.clear()
         commit("setId", initId)
         commit('setLogedInTrial', false)
+        localStorage.clear()
 
 
     }

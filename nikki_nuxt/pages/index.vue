@@ -96,7 +96,6 @@ export default defineComponent({
     /**
      * お試しユーザーの情報をstoreにセットする
      * 注意:storeの方でlocalStorageも使っている
-     * todo: 新規登録なしで利用していたら、登録する時にdbでupdateを発行するようにする
      */
     setTrialUserInfo() {
       // 変なことが起きないように、普通のユーザーはログアウトする。
