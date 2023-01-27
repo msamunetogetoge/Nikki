@@ -5,16 +5,13 @@ import { Middleware, Context } from '@nuxt/types'
  * 既に登録済みで、ログイン済みなら/homeに飛ばす
  * @param param0 
  */
-const checkTrial: Middleware = ({ redirect, app: { $accessor } }: Context) => {
+const checkLoginTrial: Middleware = ({ redirect, app: { $accessor } }: Context) => {
+    console.log("is-not-trial-user middleware dayo--n")
     if ($accessor.logedInTrial as boolean) {
         // お試しユーザー
-
-    } else if ($accessor.logedIn as boolean) {
-        // 既に登録済みで、ログイン済みのユーザー
-        redirect("/home")
     } else {
-        // ログインしてないユーザー
+        // それ以外のユーザー
         redirect("/")
     }
 }
-export default checkTrial
+export default checkLoginTrial

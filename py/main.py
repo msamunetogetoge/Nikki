@@ -205,8 +205,8 @@ async def register_user(user: _User):
         HTTPStatus: 成功なら200, 失敗なら500
     """
     try:
-        add_user(user_info=user)
-        return HTTPStatus.OK
+        crepted_id = add_user(user_info=user)
+        return crepted_id
     except IntegrityError as user_id_already_exist:
         raise HTTPException(HTTPStatus.BAD_REQUEST,
                             detail="既に存在するユーザーID") from user_id_already_exist
@@ -227,7 +227,7 @@ def register_trial_user(user: _UserInfo):
     """
     try:
         update_user(user)
-        return
+        return user.crypted_id
     except Exception as e:
         print(e)
         raise HTTPException(
@@ -299,7 +299,6 @@ async def publish_random_user():
     try:
         user = create_random_user()
         id_of_user = add_user(user_info=user)
-        id_of_user = CIPHER.encrypt(str(id_of_user))
         user_store = UserStore(
             id=id_of_user, user_id=user.user_id, user_name=user.user_name)
         return user_store
