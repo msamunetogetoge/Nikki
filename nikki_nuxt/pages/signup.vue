@@ -57,8 +57,10 @@ import { updateUserInfo, registerUser } from '../script/user'
 export default defineComponent({
   name: 'SignUpPage',
   layout: 'simple',
+  middleware: 'auth-trial-or-login',
   data() {
     return {
+      id: '',
       valid: true,
       showPassword1: false,
       showPassword2: false,
@@ -116,8 +118,7 @@ export default defineComponent({
             this.password1
           )
         }
-        alert('登録しました。登録内容でログインしてください。')
-
+        alert('登録しました。登録した情報でログインしてください。')
         this.$router.push('/')
       } catch (error) {
         console.error(error)

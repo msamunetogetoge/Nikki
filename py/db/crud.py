@@ -376,14 +376,17 @@ def try_login(user_id: str, password: str) -> UserStore or Exception:
         session.close()
 
 
-def add_user(user_info: _User) -> int or Exception:
-    """ ユーザーを登録する。
+def add_user(user_info: _User) -> bytes or Exception:
+    """ユーザーを新規登録する
 
     Args:
-        user_info (_User):  ユーザー情報
+        user_info (_User): ユーザー情報
 
     Raises:
-        e: 登録エラー
+        e: 登録失敗エラー
+
+    Returns:
+        bytes or Exception: 成功したら, User.id を暗号化したもの
     """
     session = Session()
     user = User(id=None, user_id=user_info.user_id,
@@ -393,7 +396,8 @@ def add_user(user_info: _User) -> int or Exception:
         session.commit()
         created_user = session.query(User).filter(
             User.user_id == user.user_id).one()
-        return created_user.id
+        user_id = CIPHER.encrypt(str(created_user.id))
+        return user_id
     except Exception as e:
         session.rollback()
         raise e
@@ -401,7 +405,7 @@ def add_user(user_info: _User) -> int or Exception:
         session.close()
 
 
-def update_user(user_info: _UserInfo) -> int or Exception:
+def update_user(user_info: _UserInfo) -> str or Exception:
     """ユーザー情報を更新する。User.user_id, user_name, passwordを更新する。
 
     Args:
@@ -420,7 +424,7 @@ def update_user(user_info: _UserInfo) -> int or Exception:
         user.user_name = user_info.user_name
         user.password = user_info.password
         session.commit()
-        return user.id
+        return user_info.crypted_id
     except Exception as e:
         raise e
 

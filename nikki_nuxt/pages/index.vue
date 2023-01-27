@@ -33,6 +33,7 @@ import { initId } from '../store'
 export default defineComponent({
   name: 'IndexPage',
   layout: 'simple',
+  middleware: 'logout',
   data() {
     return {
       showPassword: false,
@@ -43,6 +44,7 @@ export default defineComponent({
       password: '',
     }
   },
+  created() {},
   mounted() {},
   methods: {
     /**
@@ -73,7 +75,7 @@ export default defineComponent({
         this.id = userInfo.id
         this.userName = userInfo.user_name
         this.setTrialUserInfo()
-        this.$router.push('/home')
+        this.$router.push('/trial')
       } catch (error) {
         console.error(error)
         alert('login失敗')

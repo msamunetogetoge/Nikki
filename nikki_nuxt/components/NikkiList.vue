@@ -99,7 +99,6 @@
 import { defineComponent } from 'vue'
 import { NikkiFromApi, getNikki, deleteNikki } from '../script/nikki'
 import NikkiDialog from '../components/NikkiDialog.vue'
-import { initId } from '../store'
 import { tagfromApi2ToApi, TagToApi } from '../script/tag'
 export default defineComponent({
   components: { NikkiDialog },
@@ -112,8 +111,7 @@ export default defineComponent({
       date: new Date(),
       nikkiList: [] as Array<NikkiFromApi>,
       tags: [] as Array<TagToApi>,
-      id: 0,
-      createdBy: initId,
+      id: '',
       deleteId: -100,
       title: '',
       content: '',
@@ -123,15 +121,19 @@ export default defineComponent({
       noLoginError: Error('ログインしていません。'),
     }
   },
+
+  computed: {
+    createdBy() {
+      return this.$accessor.id
+    },
+  },
   /**
    * ログインした人が書いたNikkiを取得する
    */
   async mounted() {
     const date = new Date()
     try {
-      const createdBy = this.getUserId() as string
-      this.createdBy = createdBy
-      const nikki = await getNikki(date, createdBy)
+      const nikki = await getNikki(date, this.createdBy)
       this.nikkiList = nikki
     } catch (error) {
       alert('ログインしてください。')
@@ -173,20 +175,6 @@ export default defineComponent({
         console.error(error)
       } finally {
         this.isLoading = false
-      }
-    },
-    /**
-     * userIdを取得する。
-     * そもそもログインしていなかったらエラーを返す
-     */
-    getUserId(): string | Error {
-      if (
-        this.$accessor.logedIn === true ||
-        this.$accessor.logedInTrial === true
-      ) {
-        return this.$accessor.id
-      } else {
-        throw this.noLoginError
       }
     },
     /**

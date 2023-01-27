@@ -1,5 +1,5 @@
 <template>
-  <v-card class="overflow-hidden">
+  <v-card key="input-email" class="overflow-hidden">
     <v-row justify="center" align="center">
       <v-col cols="12" sm="12">
         <nikki-list />
@@ -18,8 +18,7 @@ export default defineComponent({
   name: 'HomeComponent',
 
   components: { NikkiList },
-  middleware: 'is-trial-user',
-
+  middleware: 'auth',
   data() {
     return {}
   },

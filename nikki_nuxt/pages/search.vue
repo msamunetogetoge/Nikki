@@ -39,7 +39,7 @@ export default defineComponent({
   name: 'SearchComponent',
   components: { SearchedNikkiList, TextSearch, DetailSearch },
   layout: 'search',
-  middleware: 'is-trial-user',
+  middleware: 'auth',
 
   data() {
     return {

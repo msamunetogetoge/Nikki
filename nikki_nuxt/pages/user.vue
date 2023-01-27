@@ -54,6 +54,7 @@ import { updateUserInfo } from '../script/user'
 export default defineComponent({
   name: 'UserPage',
   layout: 'simple',
+  middleware: 'auth-trial-or-login',
   data() {
     return {
       valid: true,
@@ -97,7 +98,7 @@ export default defineComponent({
           this.userName,
           this.password1
         )
-        alert('登録しました。登録内容でログインしてください。')
+        alert('登録しました。登録した情報でログインしてください。')
         this.$router.push('/')
       } catch (error) {
         console.error(error)
