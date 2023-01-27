@@ -57,7 +57,6 @@ import { updateUserInfo, registerUser } from '../script/user'
 export default defineComponent({
   name: 'SignUpPage',
   layout: 'simple',
-  middleware: 'auth-trial-or-login',
   data() {
     return {
       id: '',
