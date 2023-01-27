@@ -41,9 +41,6 @@
           <v-btn color="primary" :disabled="!valid" @click="addUser">
             登録
           </v-btn>
-          <v-btn v-if="isTrial" color="secondly" @click="backNikki">
-            登録せずに続ける
-          </v-btn>
         </v-card-actions>
       </v-card>
     </v-col>
@@ -82,12 +79,6 @@ export default defineComponent({
     },
   },
   methods: {
-    /**
-     * nikkiページに戻す
-     */
-    backNikki() {
-      this.$router.push('/home')
-    },
     /**
      * バリデーション
      */

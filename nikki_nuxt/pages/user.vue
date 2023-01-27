@@ -41,6 +41,10 @@
           <v-btn color="primary" :disabled="!valid" @click="updateUser">
             登録
           </v-btn>
+          <v-btn v-if="isTrial" color="secondly" @click="backTrial">
+            登録せずに続ける
+          </v-btn>
+          <v-btn v-else color="secondly" @click="backNikki"> キャンセル </v-btn>
         </v-card-actions>
       </v-card>
     </v-col>
@@ -60,6 +64,7 @@ export default defineComponent({
       valid: true,
       showPassword1: false,
       showPassword2: false,
+      isTrial: false,
       userId: '',
       userName: '',
       password1: '',
@@ -75,9 +80,22 @@ export default defineComponent({
   mounted() {
     this.userId = this.$accessor.userId
     this.userName = this.$accessor.userName
+    this.isTrial = this.$accessor.logedInTrial
   },
 
   methods: {
+    /**
+     * nikkiページに戻す
+     */
+    backNikki() {
+      this.$router.push('/home')
+    },
+    /**
+     * お試しページに戻す
+     */
+    backTrial() {
+      this.$router.push('/trial')
+    },
     /**
      * バリデーション
      */

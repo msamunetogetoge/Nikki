@@ -6,7 +6,6 @@ import { Middleware, Context } from '@nuxt/types'
  * @param param0 
  */
 const checkSomeLogin: Middleware = ({ redirect, app: { $accessor } }: Context) => {
-    console.log("is-not-trial-user middleware dayo--n")
     if ($accessor.logedInTrial as boolean) {
         // お試しユーザー
     } else if ($accessor.logedIn as boolean) {

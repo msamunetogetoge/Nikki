@@ -140,7 +140,7 @@ export default defineComponent({
      * トライアルユーザーを登録ページに送る。
      */
     trialSignUp() {
-      this.$router.push('/signup')
+      this.$router.push('/user')
     },
     // ログアウト処理をする
     async tryLogout() {
