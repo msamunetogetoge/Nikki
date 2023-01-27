@@ -111,7 +111,7 @@ export default defineComponent({
       date: new Date(),
       nikkiList: [] as Array<NikkiFromApi>,
       tags: [] as Array<TagToApi>,
-      id: '',
+      id: 0, // nikkiのid
       deleteId: -100,
       title: '',
       content: '',
