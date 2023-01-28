@@ -186,7 +186,7 @@ def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:
 
         for tag in chenged_tags:
             # tagにidが無ければ新規のtagなので、append
-            # appendすると、tag tableにinsertされる
+            # (sqlalcgemyでfilterしてきたtag以外を)appendすると、tag tableにinsertされる
             if tag.id is None:
                 nikki_edit.tags.append(tag)
                 continue
@@ -219,6 +219,19 @@ def add_nikki(nikki: Nikki) -> None or Exception:
         None or Exception: insert時にエラーが起きたらexception
     """
     session = Session()
+    tags: list[Tag] = []
+    for tag in nikki.tags:
+        # tagにidが無ければ新規のtagなので、append
+        # appendすると、tag tableにinsertされる
+        if tag.id is None:
+            tags.append(tag)
+            continue
+        # tagにidがあれば既存のtag
+        else:
+            _tag = session.query(Tag).filter(Tag.id == tag.id).one()
+            # query で取ってきたオブジェクトを足すなら、tag tableにinsertは走らない。
+            tags.append(_tag)
+    nikki.tags = tags
     session.add(nikki)
     try:
         session.commit()
