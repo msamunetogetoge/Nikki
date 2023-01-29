@@ -79,6 +79,7 @@ import {
   postNikki,
   editNikki,
   NikkiWithTagToApi,
+  NikkiFromApi,
 } from '../script/nikki'
 import { TagToApi, TagFromApi } from '../script/tag'
 import { initId } from '../store'
@@ -250,6 +251,10 @@ export default defineComponent({
     },
     /**
      * Nikkiを保存する
+     * 保存に成功したら
+     * 新規登録時はnikkiAdded,
+     * 更新時はnikkiEdited
+     * をemitする
      */
     async saveNikki() {
       const dateUtc = this.createdAt.toUTCString()
@@ -272,24 +277,43 @@ export default defineComponent({
       this.nowLoading = true
       if (this.isNewNikki) {
         // 新規登録
-        try {
-          await postNikki(nikkiWithTag)
-        } catch {
-          alert('登録に失敗しました。ログインしなおしてみてください。')
-        } finally {
-          this.nowLoading = false
-          this.closeDialog()
-        }
+        await this.postNikki(nikkiWithTag)
       } else {
         // データ更新
-        try {
-          await editNikki(nikkiWithTag)
-        } catch {
-          alert('登録に失敗しました。ログインしなおしてみてください。')
-        } finally {
-          this.nowLoading = false
-          this.closeDialog()
-        }
+        await this.putNikki(nikkiWithTag)
+      }
+    },
+    /**
+     * nikkiを新規登録する。
+     * 保存に成功したらnewNikkiPostと登録したnikkiをemitする
+     */
+    async postNikki(nikkiWithTag: NikkiWithTagToApi) {
+      try {
+        const nikkiFromApi = (await postNikki(nikkiWithTag)) as NikkiFromApi
+        console.log('emit nikkiAdded')
+        console.log(nikkiFromApi)
+        this.$emit('new-nikki-post', nikkiFromApi)
+        console.log('emited nikkiAdded')
+      } catch {
+        alert('登録に失敗しました。ログインしなおしてみてください。')
+      } finally {
+        this.nowLoading = false
+        this.closeDialog()
+      }
+    },
+    /**
+     * nikkiを更新する。
+     * 更新に成功したらnikkiEditedをemitする
+     */
+    async putNikki(nikkiWithTag: NikkiWithTagToApi) {
+      try {
+        const nikkiFromApi = (await editNikki(nikkiWithTag)) as NikkiFromApi
+        this.$emit('nikkiEdited', nikkiFromApi)
+      } catch {
+        alert('登録に失敗しました。ログインしなおしてみてください。')
+      } finally {
+        this.nowLoading = false
+        this.closeDialog()
       }
     },
   },

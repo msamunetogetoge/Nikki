@@ -59,7 +59,10 @@
           :created-at-provided="createdAt"
           :goodness-provided="goodness"
           :tags-provided="tags"
-          @close="dialog = false"
+          @close="closeNikkiDialog"
+          @new-nikki-post="addNewNikkiToNikkiList"
+          @hige="testDao"
+          @nikkiEdited="editNikki"
         />
       </v-dialog>
       <!-- 削除確認ダイアログ -->
@@ -112,6 +115,7 @@ export default defineComponent({
       nikkiList: [] as Array<NikkiFromApi>,
       tags: [] as Array<TagToApi>,
       id: 0, // nikkiのid
+      editingNikkiIndex: -1, // nikkiDialog で編集しているnikki のindex
       deleteId: -100,
       title: '',
       content: '',
@@ -141,6 +145,28 @@ export default defineComponent({
     }
   },
   methods: {
+    testDao() {
+      console.log('calling testDao')
+    },
+    closeNikkiDialog() {
+      this.dialog = false
+    },
+    /**
+     * nikkiを新規作成した時、nikkiListの先頭にデータを追加する
+     */
+    addNewNikkiToNikkiList(nikki: NikkiFromApi) {
+      console.log('addNikki calling')
+      this.nikkiList.push(nikki)
+      console.log(this.nikkiList)
+    },
+    /**
+     * nikkiを編集した時、nikkiListのデータを更新する
+     * 更新時は、spliceでないと検出してくれない
+     */
+    editNikki(nikki: NikkiFromApi) {
+      this.nikkiList.splice(this.editingNikkiIndex, 1, nikki)
+      this.editingNikkiIndex = -1
+    },
     /**
      * 最下部まで到達した時に、さらにNikkiデータを読み込む関数。
      * データはNikkiFromApi.created_at - 1日を頼りに読み込む。
@@ -195,6 +221,7 @@ export default defineComponent({
       this.createdAt = new Date(nikki.created_at * 1000)
       this.summary = nikki.summary
       this.goodness = nikki.goodness
+      this.editingNikkiIndex = this.nikkiList.indexOf(nikki)
       const tagToApis = [] as Array<TagToApi>
       for (let index = 0; index < nikki.tags.length; index++) {
         const tagToApi = tagfromApi2ToApi(nikki.tags[index])

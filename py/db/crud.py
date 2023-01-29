@@ -149,8 +149,6 @@ def get_nikki(nikki_id: int) -> Nikki or NoResultFound:
     except NoResultFound as no_result:
         logging.error(no_result)
         raise no_result
-    finally:
-        session.close()
 
 
 def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:
@@ -209,7 +207,7 @@ def edit_nikki(nikki: Nikki, nikki_id: int) -> None or Exception:
         session.close()
 
 
-def add_nikki(nikki: Nikki) -> None or Exception:
+def add_nikki(nikki: Nikki) -> int or Exception:
     """dbにnikkiを登録する
 
     Args:
@@ -235,6 +233,7 @@ def add_nikki(nikki: Nikki) -> None or Exception:
     session.add(nikki)
     try:
         session.commit()
+        return nikki.id
     except Exception as e:
         session.rollback()
         raise e
