@@ -6,7 +6,6 @@ import { Middleware, Context } from '@nuxt/types'
  * @param param0 
  */
 const checkSomeLogin: Middleware = ({ app: { $accessor } }: Context) => {
-    console.log("logout.ts")
     if (($accessor.logedInTrial as boolean) || ($accessor.logedIn as boolean)) {
         $accessor.logout()
         $accessor.logoutTrial()
