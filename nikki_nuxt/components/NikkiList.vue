@@ -59,7 +59,8 @@
           :created-at-provided="createdAt"
           :goodness-provided="goodness"
           :tags-provided="tags"
-          @close="dialog = false"
+          @close="closeNikkiDialog"
+          @nikkiListChanged="updateNikkiList"
         />
       </v-dialog>
       <!-- 削除確認ダイアログ -->
@@ -112,6 +113,7 @@ export default defineComponent({
       nikkiList: [] as Array<NikkiFromApi>,
       tags: [] as Array<TagToApi>,
       id: 0, // nikkiのid
+      editingNikkiIndex: -1, // nikkiDialog で編集しているnikki のindex
       deleteId: -100,
       title: '',
       content: '',
@@ -130,17 +132,30 @@ export default defineComponent({
   /**
    * ログインした人が書いたNikkiを取得する
    */
-  async mounted() {
-    const date = new Date()
-    try {
-      const nikki = await getNikki(date, this.createdBy)
-      this.nikkiList = nikki
-    } catch (error) {
-      alert('ログインしてください。')
-      this.$router.push('/')
-    }
+  mounted() {
+    this.nikkiList = this.$accessor.nikkiList
   },
   methods: {
+    /**
+     * nikkiDialogを閉じる
+     */
+    closeNikkiDialog() {
+      this.dialog = false
+    },
+    /**
+     * nikkiを新規作成、更新したら表示データも更新する
+     */
+    updateNikkiList() {
+      this.nikkiList = this.$accessor.nikkiList
+    },
+    /**
+     * nikkiを編集した時、nikkiListのデータを更新する
+     * 更新時は、spliceでないと検出してくれない
+     */
+    editNikki(nikki: NikkiFromApi) {
+      this.nikkiList.splice(this.editingNikkiIndex, 1, nikki)
+      this.editingNikkiIndex = -1
+    },
     /**
      * 最下部まで到達した時に、さらにNikkiデータを読み込む関数。
      * データはNikkiFromApi.created_at - 1日を頼りに読み込む。
@@ -195,6 +210,7 @@ export default defineComponent({
       this.createdAt = new Date(nikki.created_at * 1000)
       this.summary = nikki.summary
       this.goodness = nikki.goodness
+      this.editingNikkiIndex = this.nikkiList.indexOf(nikki)
       const tagToApis = [] as Array<TagToApi>
       for (let index = 0; index < nikki.tags.length; index++) {
         const tagToApi = tagfromApi2ToApi(nikki.tags[index])
@@ -218,8 +234,10 @@ export default defineComponent({
     async deleteNikkiFromVue() {
       try {
         await deleteNikki(this.deleteId)
+        this.$accessor.deleteFromNikkiList(this.deleteId)
         alert('削除しました')
-      } catch {
+      } catch (error) {
+        console.error(error)
         await alert('削除に失敗しました。')
       } finally {
         this.deleteDialog = false

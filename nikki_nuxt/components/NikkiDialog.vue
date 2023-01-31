@@ -79,6 +79,7 @@ import {
   postNikki,
   editNikki,
   NikkiWithTagToApi,
+  NikkiFromApi,
 } from '../script/nikki'
 import { TagToApi, TagFromApi } from '../script/tag'
 import { initId } from '../store'
@@ -249,7 +250,8 @@ export default defineComponent({
       this.$emit('close')
     },
     /**
-     * Nikkiを保存する
+     * Nikkiを保存する。
+     * 保存に成功したら、vuexのnikkiListを更新する
      */
     async saveNikki() {
       const dateUtc = this.createdAt.toUTCString()
@@ -272,24 +274,41 @@ export default defineComponent({
       this.nowLoading = true
       if (this.isNewNikki) {
         // 新規登録
-        try {
-          await postNikki(nikkiWithTag)
-        } catch {
-          alert('登録に失敗しました。ログインしなおしてみてください。')
-        } finally {
-          this.nowLoading = false
-          this.closeDialog()
-        }
+        await this.postNikki(nikkiWithTag)
       } else {
         // データ更新
-        try {
-          await editNikki(nikkiWithTag)
-        } catch {
-          alert('登録に失敗しました。ログインしなおしてみてください。')
-        } finally {
-          this.nowLoading = false
-          this.closeDialog()
-        }
+        await this.putNikki(nikkiWithTag)
+      }
+      this.$emit('nikkiListChanged')
+    },
+    /**
+     * nikkiを新規登録する。
+     * 保存に成功したらnewNikkiPostと登録したnikkiをemitする
+     */
+    async postNikki(nikkiWithTag: NikkiWithTagToApi) {
+      try {
+        const nikkiFromApi = (await postNikki(nikkiWithTag)) as NikkiFromApi
+        this.$accessor.addNikkiList(nikkiFromApi)
+      } catch {
+        alert('登録に失敗しました。ログインしなおしてみてください。')
+      } finally {
+        this.nowLoading = false
+        this.closeDialog()
+      }
+    },
+    /**
+     * nikkiを更新する。
+     * 更新に成功したらnikkiEditedをemitする
+     */
+    async putNikki(nikkiWithTag: NikkiWithTagToApi) {
+      try {
+        const nikkiFromApi = (await editNikki(nikkiWithTag)) as NikkiFromApi
+        this.$accessor.updateNikkiList(nikkiFromApi)
+      } catch {
+        alert('登録に失敗しました。ログインしなおしてみてください。')
+      } finally {
+        this.nowLoading = false
+        this.closeDialog()
       }
     },
   },

@@ -61,30 +61,34 @@ export async function getNikki(fromDate: Date, createdBy: string): Promise<Array
 
 
 
-export async function postNikki(nikkiWithTag: NikkiWithTagToApi) {
+export async function postNikki(nikkiWithTag: NikkiWithTagToApi): Promise<NikkiFromApi | Error> {
     const url = 'nikki';
     const urlBuilder = new UrlBuilder(url)
 
-    await axios.post(urlBuilder.buildUrl(), nikkiWithTag).then(function () {
+    const nikki = await axios.post(urlBuilder.buildUrl(), nikkiWithTag).then(function (data) {
+        return data.data
     }).catch(function (error) {
         console.error(error)
         throw new Error('post is failed');
     })
+    return nikki
 }
 
 /**
  * Nikkiをもらったパラメータでupdateする。
  * @param nikki Nikkiのデータ。
  */
-export async function editNikki(nikkiWithTag: NikkiWithTagToApi) {
+export async function editNikki(nikkiWithTag: NikkiWithTagToApi): Promise<NikkiFromApi | Error> {
     const url = 'nikki';
     const urlBuilder = new UrlBuilder(url, undefined, nikkiWithTag.nikki.id?.toString())
-    console.log(nikkiWithTag)
-    await axios.put(urlBuilder.buildByPathParameter(), nikkiWithTag).then(function () {
+
+    const nikki = await axios.put(urlBuilder.buildByPathParameter(), nikkiWithTag).then(function (data) {
+        return data.data
     }).catch(function (error) {
         console.error(error)
         throw new Error('edit is failed');
     })
+    return nikki
 }
 
 export async function deleteNikki(nikkiId: number) {

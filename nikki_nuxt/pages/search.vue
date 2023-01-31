@@ -20,7 +20,7 @@
     <!-- 検索が完了したらv-ifにtrueを渡す。 -->
     <searched-nikki-list
       v-if="searchComplete"
-      :seached-nikki-list="nikkiList"
+      :seached-nikki-list="$accessor.nikkiList"
     />
   </v-card>
 </template>
@@ -47,19 +47,11 @@ export default defineComponent({
       searchComplete: false,
       detail: false,
       searchParams: new SearchParams(),
-      noLoginError: Error('ログインしていません。'),
     }
   },
   // ログインしていたら、searchParams にidをセットする
   mounted() {
-    if (
-      this.$accessor.logedIn === true ||
-      this.$accessor.logedInTrial === true
-    ) {
-      this.searchParams.created_by = this.$accessor.id
-    } else {
-      throw this.noLoginError
-    }
+    this.searchParams.created_by = this.$accessor.id
   },
   methods: {
     // <text-search />のテキストフィールドの値の更新を検知して、searchParamsにセットする
@@ -98,7 +90,7 @@ export default defineComponent({
     // 検索を実行してthis.nikkiListに与える。
     async excecuteSearch(searchParamsFromChild: SearchParams | undefined) {
       const nikkiList = await this.search(searchParamsFromChild)
-      this.nikkiList = nikkiList
+      this.$accessor.setNikkiList(nikkiList)
       this.searchComplete = true
     },
   },

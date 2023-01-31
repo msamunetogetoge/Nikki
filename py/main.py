@@ -14,7 +14,7 @@ from sqlalchemy.exc import NoResultFound, MultipleResultsFound, IntegrityError
 
 from db.model import Nikki, Tag
 from db.nuxt_model.model import _NikkiOut, to_decrypted_nikki, to_crypted_nikki, NikkiWithTagIn, utc_str_to_datetime, _User, _UserInfo, UserStore, Login, create_random_user, _TagOut, to_crypted_tag
-from db.crud import get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, update_user, NikkiSearchParamsEncrypted, get_tags, delete_tag
+from db.crud import get_nikki, get_nikkis, add_nikki, remove_nikki, try_get_one_user, add_user, try_login, edit_nikki, remove_user_and_nikki, search_nikkis, update_user, NikkiSearchParamsEncrypted, get_tags, delete_tag
 
 app = FastAPI()
 
@@ -30,7 +30,7 @@ async def root():
 
 
 @app.get("/nikki", response_model=list[_NikkiOut])
-def get_nikki(created_by: str, from_date: str, number_of_nikki: int = 10) -> list[_NikkiOut]:
+def nikki_get(created_by: str, from_date: str, number_of_nikki: int = 10) -> list[_NikkiOut]:
     """nikkiを取得する。
     Args:
         from_date (str): '%a, %d %b %Y %H:%M:%S %Z' フォーマットのdatetimeに変換されるstr
@@ -78,7 +78,7 @@ def search_nikki_detail(search_params_encrypted: NikkiSearchParamsEncrypted) -> 
         return HTTPException(HTTPStatus.BAD_REQUEST, detail="検索に失敗した")
 
 
-@app.post("/nikki")
+@app.post("/nikki", response_model=_NikkiOut)
 async def register_nikki(nikki: NikkiWithTagIn):
     """
     nikki を登録する
@@ -87,14 +87,16 @@ async def register_nikki(nikki: NikkiWithTagIn):
     """
     nikki: Nikki = to_decrypted_nikki(nikki)
     try:
-        add_nikki(nikki=nikki)
-        return HTTPStatus.OK
+        nikki_id = add_nikki(nikki=nikki)
+        nikki = get_nikki(nikki_id)
+        nikki = to_crypted_nikki(nikki)
+        return nikki
     except Exception as e:
         logging.error(e)
         raise HTTPException(HTTPStatus.BAD_REQUEST, detail="登録に失敗した")
 
 
-@app.put("/nikki/{nikki_id}")
+@app.put("/nikki/{nikki_id}", response_model=_NikkiOut)
 async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn):
     """nikkiを編集する
 
@@ -108,7 +110,9 @@ async def update_nikki(nikki_id: int, _nikki: NikkiWithTagIn):
         nikki = to_decrypted_nikki(_nikki)
 
         edit_nikki(nikki=nikki, nikki_id=nikki_id)
-        return HTTPStatus.ACCEPTED
+        nikki = get_nikki(nikki_id)
+        nikki = to_crypted_nikki(nikki)
+        return nikki
     except NoResultFound:
         raise HTTPException(HTTPStatus.BAD_REQUEST, "更新失敗")
 
