@@ -60,7 +60,6 @@
           :goodness-provided="goodness"
           :tags-provided="tags"
           @close="closeNikkiDialog"
-          @nikkiListChanged="updateNikkiList"
         />
       </v-dialog>
       <!-- 削除確認ダイアログ -->

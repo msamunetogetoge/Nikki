@@ -279,7 +279,6 @@ export default defineComponent({
         // データ更新
         await this.putNikki(nikkiWithTag)
       }
-      this.$emit('nikkiListChanged')
     },
     /**
      * nikkiを新規登録する。
