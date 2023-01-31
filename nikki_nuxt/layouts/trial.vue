@@ -45,6 +45,23 @@
         <nikki-bottun v-if="!permanent" @click="dialog = true" />
       </v-container>
     </v-main>
+    <v-dialog
+      v-model="logOutDialog"
+      transition="dialog-bottom-transition"
+      max-width="600"
+      ><v-card>
+        <v-toolbar color="red" dark></v-toolbar>
+        <v-card-text class="text-lg-h5 text-sm-h5">
+          ログアウトすると、作成したNikkiが削除されます。
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn color="red lighten-1 " dark @click="tryLogout"
+            >ログアウト</v-btn
+          >
+          <v-btn text @click="logOutDialog = false">キャンセル</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-footer :absolute="!fixed" app>
       <span>&copy; {{ new Date().getFullYear() }}</span>
@@ -75,6 +92,7 @@ export default defineComponent({
       createdBy: initId,
       // nikki作成の為の変数終わり
       dialog: false, // nikki作成ダイアログの出現フラグ
+      logOutDialog: false, // logoutdialog出現フラグ
       clipped: false, // 左側にメニューアイコンを出すかのフラグ
       drawer: false, // メニュー表示のフラグ
       permanent: window.innerWidth > 768, // スマートフォンかどうかの判別
@@ -119,7 +137,7 @@ export default defineComponent({
           icon: 'mdi-logout',
           title: 'ログアウト',
           to: undefined,
-          action: this.tryLogout,
+          action: this.showLogOutDialog,
         },
       ],
     ]
@@ -131,6 +149,10 @@ export default defineComponent({
     this.title = 'Nikki@' + this.$accessor.userName
   },
   methods: {
+    // logoutdialogを表示する
+    showLogOutDialog() {
+      this.logOutDialog = true
+    },
     // NikkiDialogを選ぶ
     showNikkiDialog() {
       this.dialog = true
@@ -146,10 +168,11 @@ export default defineComponent({
     async tryLogout() {
       try {
         const userId: string = this.$accessor.userId
+
         this.$accessor.logout()
         this.$accessor.logoutTrial()
         await deleteTrialLoginUser(userId)
-        this.$router.go(0) // middleware が監視していて、login画面に戻る。再読み込みする事でlocalStorageの値も教える事が出来て一石二鳥。
+        this.$router.push('/')
       } catch (error) {
         console.error(error)
         alert('ログアウト失敗')

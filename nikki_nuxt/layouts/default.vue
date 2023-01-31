@@ -136,7 +136,7 @@ export default defineComponent({
     tryLogout() {
       this.$accessor.logout()
       this.$accessor.logoutTrial()
-      this.$router.go(0) // layoutを配置するページを middleware が監視していて、login画面に戻る。再読み込みする事でlocalStorageの値も教える事が出来て一石二鳥。
+      this.$router.push('/')
     },
     calculateWindowWidth() {
       this.permanent = window.innerWidth > 768
