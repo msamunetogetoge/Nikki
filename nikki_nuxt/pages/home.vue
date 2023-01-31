@@ -18,7 +18,7 @@ export default defineComponent({
   name: 'HomeComponent',
 
   components: { NikkiList },
-  middleware: 'auth',
+  middleware: ['auth', 'get-nikki-list'],
   data() {
     return {}
   },

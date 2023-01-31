@@ -1,4 +1,5 @@
 import { getAccessorType, getterTree, mutationTree, actionTree } from 'typed-vuex'
+import { NikkiFromApi } from '~/script/nikki'
 
 /**
  * storeが初期化されているかどうか、確かめる為の初期値
@@ -21,6 +22,7 @@ function stringToBoolean(bool: string): boolean {
 
 export const state = () => {
     return {
+        nikkiList: [] as Array<NikkiFromApi>,
         id: initId as string,
         userId: "" as string,
         userName: "" as string,
@@ -32,6 +34,9 @@ export const state = () => {
 export type RootState = ReturnType<typeof state>
 
 export const getters = getterTree(state, {
+    nikkiList: state => {
+        return state.nikkiList
+    },
     id: state => {
         const Id = localStorage.getItem(ID)
         if (Id != null) {
@@ -75,6 +80,20 @@ export const getters = getterTree(state, {
 })
 
 export const mutations = mutationTree(state, {
+    deleteFromNikkiList(state, id: number) {
+        const index = state.nikkiList.findIndex(item => item.id === id)
+        state.nikkiList.splice(index, 1)
+    },
+    updateNikkiList(state, nikki: NikkiFromApi) {
+        const index = state.nikkiList.findIndex(item => item.id === nikki.id)
+        state.nikkiList.splice(index, 1, nikki)
+    },
+    addNikkiList(state, nikki: NikkiFromApi) {
+        state.nikkiList.unshift(nikki)
+    },
+    setNikkiList(state, nikkiList: Array<NikkiFromApi>) {
+        state.nikkiList = nikkiList
+    },
     setId(state, id: string): void {
         state.id = id
         localStorage.setItem(ID, id)

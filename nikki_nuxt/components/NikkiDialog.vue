@@ -250,11 +250,8 @@ export default defineComponent({
       this.$emit('close')
     },
     /**
-     * Nikkiを保存する
-     * 保存に成功したら
-     * 新規登録時はnikkiAdded,
-     * 更新時はnikkiEdited
-     * をemitする
+     * Nikkiを保存する。
+     * 保存に成功したら、vuexのnikkiListを更新する
      */
     async saveNikki() {
       const dateUtc = this.createdAt.toUTCString()
@@ -282,6 +279,7 @@ export default defineComponent({
         // データ更新
         await this.putNikki(nikkiWithTag)
       }
+      this.$emit('nikkiListChanged')
     },
     /**
      * nikkiを新規登録する。
@@ -290,10 +288,7 @@ export default defineComponent({
     async postNikki(nikkiWithTag: NikkiWithTagToApi) {
       try {
         const nikkiFromApi = (await postNikki(nikkiWithTag)) as NikkiFromApi
-        console.log('emit nikkiAdded')
-        console.log(nikkiFromApi)
-        this.$emit('new-nikki-post', nikkiFromApi)
-        console.log('emited nikkiAdded')
+        this.$accessor.addNikkiList(nikkiFromApi)
       } catch {
         alert('登録に失敗しました。ログインしなおしてみてください。')
       } finally {
@@ -308,7 +303,7 @@ export default defineComponent({
     async putNikki(nikkiWithTag: NikkiWithTagToApi) {
       try {
         const nikkiFromApi = (await editNikki(nikkiWithTag)) as NikkiFromApi
-        this.$emit('nikkiEdited', nikkiFromApi)
+        this.$accessor.updateNikkiList(nikkiFromApi)
       } catch {
         alert('登録に失敗しました。ログインしなおしてみてください。')
       } finally {

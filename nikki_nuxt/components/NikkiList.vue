@@ -60,9 +60,7 @@
           :goodness-provided="goodness"
           :tags-provided="tags"
           @close="closeNikkiDialog"
-          @new-nikki-post="addNewNikkiToNikkiList"
-          @hige="testDao"
-          @nikkiEdited="editNikki"
+          @nikkiListChanged="updateNikkiList"
         />
       </v-dialog>
       <!-- 削除確認ダイアログ -->
@@ -134,30 +132,21 @@ export default defineComponent({
   /**
    * ログインした人が書いたNikkiを取得する
    */
-  async mounted() {
-    const date = new Date()
-    try {
-      const nikki = await getNikki(date, this.createdBy)
-      this.nikkiList = nikki
-    } catch (error) {
-      alert('ログインしてください。')
-      this.$router.push('/')
-    }
+  mounted() {
+    this.nikkiList = this.$accessor.nikkiList
   },
   methods: {
-    testDao() {
-      console.log('calling testDao')
-    },
+    /**
+     * nikkiDialogを閉じる
+     */
     closeNikkiDialog() {
       this.dialog = false
     },
     /**
-     * nikkiを新規作成した時、nikkiListの先頭にデータを追加する
+     * nikkiを新規作成、更新したら表示データも更新する
      */
-    addNewNikkiToNikkiList(nikki: NikkiFromApi) {
-      console.log('addNikki calling')
-      this.nikkiList.push(nikki)
-      console.log(this.nikkiList)
+    updateNikkiList() {
+      this.nikkiList = this.$accessor.nikkiList
     },
     /**
      * nikkiを編集した時、nikkiListのデータを更新する
@@ -245,8 +234,10 @@ export default defineComponent({
     async deleteNikkiFromVue() {
       try {
         await deleteNikki(this.deleteId)
+        this.$accessor.deleteFromNikkiList(this.deleteId)
         alert('削除しました')
-      } catch {
+      } catch (error) {
+        console.error(error)
         await alert('削除に失敗しました。')
       } finally {
         this.deleteDialog = false
