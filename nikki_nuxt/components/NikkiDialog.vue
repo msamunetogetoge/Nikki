@@ -214,6 +214,7 @@ export default defineComponent({
       this.createdAt = val
       this.createdAtDisplay = val.toLocaleDateString('ja-jp')
       // createAtISOもwatchしているので、ISOStringにした時に時刻がずれないように補正する
+      // 日本から使うと思ってる
       val.setHours(val.getHours() + 9)
       this.createdAtISO = val.toISOString().substr(0, 10)
     },
