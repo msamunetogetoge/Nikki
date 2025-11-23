@@ -39,7 +39,7 @@ async function prepareDb(
   const tempDir = await Deno.makeTempDir();
   const dbPath = join(tempDir, "test.db");
   const db = createSQLiteClient(dbPath);
-  const schema = await Deno.readTextFile("packages/db/schema.sql");
+  const schema = await Deno.readTextFile("../../packages/db/schema.sql");
 
   for (const statement of schema.split(";")) {
     const trimmed = statement.trim();
@@ -48,7 +48,7 @@ async function prepareDb(
   }
 
   for (const user of users) {
-    db.execute(
+    db.query(
       "INSERT INTO users (user_id, user_name, password) VALUES (?, ?, ?)",
       [user.user_id, user.user_name ?? user.user_id, user.password],
     );
