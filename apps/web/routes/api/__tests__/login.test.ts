@@ -3,8 +3,8 @@ import {
   assertObjectMatch,
 } from "https://deno.land/std@0.224.0/testing/asserts.ts";
 import { join } from "https://deno.land/std@0.224.0/path/mod.ts";
-import type { HandlerContext } from "$fresh/server.ts";
 import { handler } from "../login.ts";
+import type { HandlerContext } from "$fresh/server.ts";
 import { createSQLiteClient } from "../../../../../packages/infrastructure/db/sqlite.ts";
 
 type LoginBody = {
@@ -30,10 +30,9 @@ function createHandlerContext(): HandlerContext {
 
 async function prepareDb(
   users: Array<
-    {
-      user_id: string;
-      user_name?: string;
+    Omit<LoginBody, "password"> & {
       password: string;
+      user_name?: string;
     }
   >,
 ) {
@@ -49,7 +48,7 @@ async function prepareDb(
   }
 
   for (const user of users) {
-    db.query(
+    db.execute(
       "INSERT INTO users (user_id, user_name, password) VALUES (?, ?, ?)",
       [user.user_id, user.user_name ?? user.user_id, user.password],
     );
