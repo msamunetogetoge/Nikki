@@ -36,11 +36,18 @@
 
 ## 開発サイクル
 
-1. **Issue**: 機能追加・バグ修正ごとに Issue を作成する。
-2. **Coding**: `deno` ブランチから作業用ブランチを作成し (例:
-   `feat/login`)、実装を行う。
-3. **Review**: Pull Request を作成し、レビューを依頼する。
-4. **Merge**: 承認後、`deno` ブランチにマージする。
+1. **仕様調査 (Specification Research)**
+   - 実現したい機能について調査し、要件を明確にする。
+2. **設計書作成 (Design Document Creation)**
+   - `docs/dev/<feature>/` 以下に設計書を作成する。
+   - **BE設計**: `be_design.md` (Swagger定義必須)
+   - **FE設計**: `fe_design.md`
+   - **実装計画**: `implementation_plan.md`
+3. **実装 (Implementation)**
+   - 設計書に基づきコーディングを行う。
+   - `deno` ブランチから作業用ブランチを作成 (例: `feat/login`)。
+4. **Review & Merge**
+   - Pull Request を作成し、レビューを経て `deno` ブランチへマージ。
 
 ### ワークツリー運用
 - 作成: `git worktree add worktrees/<name> -b <branch> origin/deno`

@@ -52,6 +52,15 @@
 - **Path**: `/api/v1/...`
 - **Description**: Brief description of what this API does.
 
+## Swagger Definition (Required)
+
+Define the API specification using OpenAPI 3.0 (YAML).
+Save the definition in `docs/swagger/<feature>.yaml` and reference it here.
+
+```yaml
+# Paste the content of docs/swagger/<feature>.yaml here or link to it
+```
+
 ## Request
 
 ### Headers
