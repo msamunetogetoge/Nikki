@@ -1,14 +1,6 @@
 import { JSX } from "preact";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
-import { saveSession } from "../utils/session.ts";
-
-interface LoginResponse {
-  id: number;
-  user_id: string;
-  user_name: string;
-  token?: string;
-}
 
 export default function LoginForm() {
   const userId = useSignal("");
@@ -16,7 +8,6 @@ export default function LoginForm() {
   const showPassword = useSignal(false);
   const loading = useSignal(false);
   const error = useSignal<string | null>(null);
-  const message = useSignal<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -27,7 +18,6 @@ export default function LoginForm() {
   const handleSubmit = async (event: Event) => {
     event.preventDefault();
     error.value = null;
-    message.value = null;
 
     if (!userId.value.trim() || !password.value.trim()) {
       error.value = "ユーザーIDとパスワードを入力してください。";
@@ -45,31 +35,17 @@ export default function LoginForm() {
         }),
       });
 
-      const data = (await response.json().catch(() => ({}))) as
-        & Partial<
-          LoginResponse
-        >
-        & { error?: string };
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
 
       if (!response.ok) {
         throw new Error(data.error || "ログインに失敗しました。");
       }
 
-      const user: LoginResponse = {
-        id: data.id ?? 0,
-        user_id: data.user_id ?? userId.value.trim(),
-        user_name: data.user_name ?? data.user_id ?? userId.value.trim(),
-        token: data.token,
-      };
-
-      saveSession(user);
-      message.value = `ようこそ、${user.user_name} さん`;
-
-      setTimeout(() => {
-        if (typeof globalThis !== "undefined" && globalThis.location) {
-          globalThis.location.href = "/home";
-        }
-      }, 450);
+      if (typeof globalThis !== "undefined" && globalThis.location) {
+        globalThis.location.href = "/home";
+      }
     } catch (err) {
       const fallback = err instanceof Error
         ? err.message
@@ -195,21 +171,6 @@ export default function LoginForm() {
           }}
         >
           {error.value}
-        </div>
-      )}
-
-      {message.value && (
-        <div
-          style={{
-            background: "#0f2f27",
-            border: "1px solid #0f766e",
-            color: "#c7ffef",
-            borderRadius: "12px",
-            padding: "12px 14px",
-            fontSize: "14px",
-          }}
-        >
-          {message.value}
         </div>
       )}
 
