@@ -33,6 +33,14 @@ Returns the `UserStore` object (User ID, Name, and internal ID).
 
 ## Implementation Details (Clean Architecture)
 
+### Domain Entity (`packages/domain/entities/User.ts`)
+*   **Interface**: `User`
+*   **Properties**:
+    *   `id`: `number` (Internal ID)
+    *   `user_id`: `string` (Login ID)
+    *   `user_name`: `string` (Display Name)
+    *   `password`: `string` (Hashed Password)
+
 ### Controller (`apps/web/routes/api/login.ts`)
 *   **Handler Function**: `handler` (POST)
 *   **Responsibility**:
@@ -55,7 +63,21 @@ Returns the `UserStore` object (User ID, Name, and internal ID).
 
 ### Infrastructure (`packages/infrastructure/repositories/UserRepositoryImpl.ts`)
 *   **Implementation**: `UserRepositoryImpl`
+*   **Tables Used**:
+    *   `users` (Select)
 *   **SQL**:
     ```sql
+    -- Find user by ID and Password
     SELECT id, user_id, user_name, password FROM users WHERE user_id = ? AND password = ?
     ```
+
+## Testing Strategy
+
+### Unit Tests (`packages/usecase/tests/LoginUseCase.test.ts`)
+*   **Test Case 1**: Should return User entity when valid `user_id` and `password` are provided.
+*   **Test Case 2**: Should throw "User not found" error when `user_id` does not exist.
+*   **Test Case 3**: Should throw "User not found" error when `password` is incorrect.
+
+### Integration Tests (`packages/infrastructure/tests/UserRepository.test.ts`)
+*   **Test Case 1**: Should return `User` object when querying with existing `user_id` and `password`.
+*   **Test Case 2**: Should return `null` when querying with non-existent `user_id`.

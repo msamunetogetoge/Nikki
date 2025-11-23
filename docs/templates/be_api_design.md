@@ -117,9 +117,21 @@
 - **Method**: `methodName(args): Promise<ReturnType>`
 
 ### Infrastructure (`packages/infrastructure/repositories/...`)
+*   **Implementation**: `[Entity]RepositoryImpl`
+*   **Tables Used**:
+    *   `table_name` (Select/Insert/Update/Delete)
+*   **SQL**:
+    ```sql
+    -- Description of query
+    SELECT ... FROM table_name WHERE ...
+    ```
 
-- **Implementation**: `[Entity]RepositoryImpl`
-- **SQL**:
-  ```sql
-  SELECT ...
-  ```
+## Testing Strategy
+
+### Unit Tests (`packages/usecase/tests/...`)
+*   **Test Case 1**: [Description, e.g., "Should return user when credentials are valid"]
+*   **Test Case 2**: [Description, e.g., "Should throw error when user not found"]
+
+### Integration Tests (`packages/infrastructure/tests/...`)
+*   **Test Case 1**: [Description, e.g., "Should insert user into SQLite DB"]
+
