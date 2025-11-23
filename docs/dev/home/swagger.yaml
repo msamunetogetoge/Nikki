@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: Nikki Home API
+  version: 1.0.0
+  description: API for the Home screen of the Nikki application.
+paths:
+  /api/nikki:
+    get:
+      summary: Get list of Nikkis
+      description: Retrieves a paginated list of Nikkis for the authenticated user.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number (1-based)
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Number of items per page
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        summary:
+                          type: string
+                        content:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                  total:
+                    type: integer
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: invalid_page
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: internal_error

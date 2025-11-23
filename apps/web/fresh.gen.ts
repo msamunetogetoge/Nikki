@@ -2,12 +2,16 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
+import * as $api_login from "./routes/api/login.ts";
+import * as $api_nikki from "./routes/api/nikki.ts";
 import * as $index from "./routes/index.tsx";
 
 import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
+    "./routes/api/login.ts": $api_login,
+    "./routes/api/nikki.ts": $api_nikki,
     "./routes/index.tsx": $index,
   },
   islands: {},
