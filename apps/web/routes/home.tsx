@@ -1,27 +1,33 @@
 import { Handlers } from "$fresh/server.ts";
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
 
+/**
+ * Home page handler with SSR auth check.
+ * Redirects to /login if no auth cookie is present.
+ * TODO: Cookie name and validation will be finalized in Issue #105.
+ */
 export const handler: Handlers = {
   GET(req, ctx) {
     const cookies = req.headers.get("cookie");
-    // TODO: Verify the correct cookie name with the backend team.
-    // Assuming 'auth_token' or similar for now.
-    // If no cookie is present at all, definitely redirect.
-    if (!cookies) {
+
+    // Check for auth_token cookie (name may change based on Issue #105)
+    const hasAuthToken = cookies?.split(";")
+      .some((c) => c.trim().startsWith("auth_token="));
+
+    if (!hasAuthToken) {
       return new Response("", {
         status: 307,
         headers: { Location: "/login" },
       });
     }
 
-    // TODO: Validate token validity if possible or rely on API calls to fail.
+    // TODO: Validate token validity with backend (Issue #105)
 
     return ctx.render();
   },
 };
 
 export default function Home() {
-  // @ts-ignore: MUI types with Preact/Fresh
   return (
     <Container maxWidth="md">
       <Box sx={{ my: 4 }}>
@@ -31,7 +37,7 @@ export default function Home() {
           alignItems="center"
           mb={4}
         >
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography variant="h4" gutterBottom>
             Nikki Home
           </Typography>
           <Button variant="contained" color="primary" href="/new">
@@ -41,7 +47,7 @@ export default function Home() {
         <Typography variant="body1">
           Welcome to your diary dashboard.
         </Typography>
-        {/* NikkiList will go here */}
+        {/* NikkiList will go here (Issue #102) */}
       </Box>
     </Container>
   );
