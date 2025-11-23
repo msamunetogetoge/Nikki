@@ -2,15 +2,23 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
+import * as $_middleware from "./routes/_middleware.ts";
+import * as $api_login from "./routes/api/login.ts";
+import * as $home from "./routes/home.tsx";
 import * as $index from "./routes/index.tsx";
-
+import * as $LoginForm from "./islands/LoginForm.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
+    "./routes/_middleware.ts": $_middleware,
+    "./routes/api/login.ts": $api_login,
+    "./routes/home.tsx": $home,
     "./routes/index.tsx": $index,
   },
-  islands: {},
+  islands: {
+    "./islands/LoginForm.tsx": $LoginForm,
+  },
   baseUrl: import.meta.url,
 } satisfies Manifest;
 
