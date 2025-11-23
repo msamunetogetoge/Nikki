@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # Nikki DB
-nikkidb
+nikki.db
