@@ -2,6 +2,13 @@ import { JSX } from "preact";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 
+type LoginResponse = {
+  id: number;
+  user_id: string;
+  user_name: string;
+  token?: string;
+};
+
 export default function LoginForm() {
   const userId = useSignal("");
   const password = useSignal("");
@@ -35,17 +42,32 @@ export default function LoginForm() {
         }),
       });
 
-      const data = (await response.json().catch(() => ({}))) as {
-        error?: string;
-      };
+      let data: Partial<LoginResponse> & { error?: string } = {};
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error("Failed to parse /api/login response:", jsonError);
+        throw new Error(
+          "サーバーからの応答が不正です。もう一度お試しください。",
+        );
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "ログインに失敗しました。");
       }
 
-      if (typeof globalThis !== "undefined" && globalThis.location) {
-        globalThis.location.href = "/home";
+      if (!data.id || !data.user_id || !data.user_name) {
+        throw new Error(
+          "サーバーからの応答が不完全です。もう一度お試しください。",
+        );
       }
+
+      // 成功メッセージを目視できるよう短い待機を挟んでから遷移
+      setTimeout(() => {
+        if (typeof globalThis !== "undefined" && globalThis.location) {
+          globalThis.location.href = "/home";
+        }
+      }, 450);
     } catch (err) {
       const fallback = err instanceof Error
         ? err.message
@@ -141,7 +163,9 @@ export default function LoginForm() {
           <button
             type="button"
             onClick={() => (showPassword.value = !showPassword.value)}
-            aria-label={showPassword.value ? "Hide password" : "Show password"}
+            aria-label={showPassword.value
+              ? "パスワードを非表示"
+              : "パスワードを表示"}
             style={{
               position: "absolute",
               top: "50%",
