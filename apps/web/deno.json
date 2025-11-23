@@ -1,7 +1,7 @@
 {
   "tasks": {
     "check": "deno fmt --check && deno lint",
-    "start": "deno run -A --watch=static/,routes/ dev.ts",
+    "start": "deno run -A --unstable-kv ../../scripts/setup_db.ts && deno run -A --watch=static/,routes/ dev.ts",
     "build": "deno run -A dev.ts build",
     "preview": "deno run -A main.ts"
   },
@@ -20,8 +20,8 @@
     "$fresh/": "https://deno.land/x/fresh@1.6.8/",
     "preact": "https://esm.sh/preact@10.19.6",
     "preact/": "https://esm.sh/preact@10.19.6/",
-    "@preact/signals": "https://esm.sh/@preact/signals@1.2.2",
-    "@preact/signals-core": "https://esm.sh/@preact/signals-core@1.5.1",
+    "@preact/signals": "https://esm.sh/@preact/signals@1.2.2?deps=preact@10.19.6",
+    "@preact/signals-core": "https://esm.sh/@preact/signals-core@1.5.1?deps=preact@10.19.6",
     "@domain/": "../../packages/domain/",
     "@usecase/": "../../packages/usecase/",
     "@infra/": "../../packages/infrastructure/",
