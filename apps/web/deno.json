@@ -30,6 +30,8 @@
     "std/testing/asserts": "https://deno.land/std@0.224.0/testing/asserts.ts",
     "std/path": "https://deno.land/std@0.224.0/path/mod.ts",
     "std/encoding/base64": "https://deno.land/std@0.224.0/encoding/base64.ts",
+    "@mui/icons-material": "https://esm.sh/@mui/icons-material@5.15.20?alias=react:preact/compat&deps=preact@10.19.6",
+    "@mui/icons-material/": "https://esm.sh/@mui/icons-material@5.15.20&alias=react:preact/compat&deps=preact@10.19.6/",
     "@mui/material": "https://esm.sh/@mui/material@5.15.20?alias=react:preact/compat&deps=preact@10.19.6",
     "@mui/material/": "https://esm.sh/@mui/material@5.15.20&alias=react:preact/compat&deps=preact@10.19.6/",
     "@mui/system": "https://esm.sh/@mui/system@5.15.20?alias=react:preact/compat&deps=preact@10.19.6",

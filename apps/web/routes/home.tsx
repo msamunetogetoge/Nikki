@@ -1,54 +1,51 @@
-import { Handlers } from "$fresh/server.ts";
-import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import { Head } from "$fresh/runtime.ts";
+import { Handlers, PageProps } from "$fresh/server.ts";
+import { Box, Container, Stack, Typography } from "@mui/material";
+import { getUserFromRequest } from "../utils/auth_cookie.ts";
+import NikkiList from "../islands/NikkiList.tsx";
+import type { PublicUser } from "@domain/entities/User.ts";
 
-/**
- * Home page handler with SSR auth check.
- * Redirects to /login if no auth cookie is present.
- * TODO: Cookie name and validation will be finalized in Issue #105.
- */
-export const handler: Handlers = {
-  GET(req, ctx) {
-    const cookies = req.headers.get("cookie");
+type HomePageData = {
+  user: PublicUser;
+};
 
-    // Check for auth_token cookie (name may change based on Issue #105)
-    const hasAuthToken = cookies?.split(";")
-      .some((c) => c.trim().startsWith("auth_token="));
+export const handler: Handlers<HomePageData> = {
+  async GET(req, ctx) {
+    const user = await getUserFromRequest(req);
 
-    if (!hasAuthToken) {
+    if (!user) {
       return new Response("", {
-        status: 307,
-        headers: { Location: "/login" },
+        status: 302,
+        headers: { Location: "/" },
       });
     }
 
-    // TODO: Validate token validity with backend (Issue #105)
-
-    return ctx.render();
+    return ctx.render({ user });
   },
 };
 
-export default function Home() {
+export default function Home({ data }: PageProps<HomePageData>) {
+  const { user } = data;
+
   return (
-    <Container maxWidth="md">
-      <Box sx={{ my: 4 }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={4}
-        >
-          <Typography variant="h4" gutterBottom>
-            Nikki Home
-          </Typography>
-          <Button variant="contained" color="primary" href="/new">
-            New Entry
-          </Button>
+    <>
+      <Head>
+        <title>Nikki | Home</title>
+      </Head>
+      <Container maxWidth="md" sx={{ py: 6 }}>
+        <Stack spacing={3}>
+          <Box>
+            <Typography variant="h4" component="h1" fontWeight={700}>
+              ホーム
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              ようこそ、{user.user_name}さん
+            </Typography>
+          </Box>
+
+          <NikkiList userId={user.user_id} />
         </Stack>
-        <Typography variant="body1">
-          Welcome to your diary dashboard.
-        </Typography>
-        {/* NikkiList will go here (Issue #102) */}
-      </Box>
-    </Container>
+      </Container>
+    </>
   );
 }

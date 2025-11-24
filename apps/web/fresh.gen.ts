@@ -7,6 +7,7 @@ import * as $api_login from "./routes/api/login.ts";
 import * as $home from "./routes/home.tsx";
 import * as $index from "./routes/index.tsx";
 import * as $LoginForm from "./islands/LoginForm.tsx";
+import * as $NikkiList from "./islands/NikkiList.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -18,6 +19,7 @@ const manifest = {
   },
   islands: {
     "./islands/LoginForm.tsx": $LoginForm,
+    "./islands/NikkiList.tsx": $NikkiList,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;
