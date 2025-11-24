@@ -1,29 +1,23 @@
 import { Handlers } from "$fresh/server.ts";
 import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import { getCookies } from "std/http/cookie";
+import {
+  SESSION_COOKIE_NAME,
+  validateSession,
+} from "../utils/session.ts";
 
-/**
- * Home page handler with SSR auth check.
- * Redirects to /login if no auth cookie is present.
- * TODO: Cookie name and validation will be finalized in Issue #105.
- */
 export const handler: Handlers = {
-  GET(req, ctx) {
-    const cookies = req.headers.get("cookie");
+  async GET(req, ctx) {
+    const cookies = getCookies(req.headers);
+    const token = cookies[SESSION_COOKIE_NAME];
+    const session = token ? validateSession(token) : null;
 
-    // Check for auth_token cookie (name may change based on Issue #105)
-    const hasAuthToken = cookies?.split(";")
-      .some((c) => c.trim().startsWith("auth_token="));
-
-    if (!hasAuthToken) {
-      return new Response("", {
-        status: 307,
-        headers: { Location: "/login" },
-      });
+    if (!session) {
+      return Response.redirect(new URL("/", req.url), 302);
     }
 
-    // TODO: Validate token validity with backend (Issue #105)
-
-    return ctx.render();
+    ctx.state.user = { user_id: session.userId };
+    return await ctx.render();
   },
 };
 

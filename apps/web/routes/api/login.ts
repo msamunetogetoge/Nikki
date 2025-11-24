@@ -5,6 +5,12 @@ import {
   createSQLiteClient,
   defaultDbPath,
 } from "../../../../packages/infrastructure/db/sqlite.ts";
+import { setCookie } from "std/http/cookie";
+import {
+  createSession,
+  SESSION_COOKIE_NAME,
+  SESSION_MAX_AGE_SECONDS,
+} from "../../utils/session.ts";
 
 interface LoginBody {
   user_id?: string;
@@ -36,7 +42,18 @@ const handler: Handlers = {
 
     try {
       const user = await loginUseCase.execute(userId, password);
-      return jsonResponse(user, 200);
+      const headers = new Headers();
+      setCookie(headers, {
+        name: SESSION_COOKIE_NAME,
+        value: createSession(user.user_id),
+        httpOnly: true,
+        sameSite: "Lax",
+        secure: shouldUseSecureCookie(request),
+        path: "/",
+        maxAge: SESSION_MAX_AGE_SECONDS,
+      });
+
+      return jsonResponse(user, 200, headers);
     } catch (error) {
       const message = error instanceof Error
         ? error.message
@@ -56,9 +73,20 @@ const handler: Handlers = {
 
 export { handler };
 
-function jsonResponse(body: unknown, status = 200) {
+function shouldUseSecureCookie(request: Request) {
+  const requestIsHttps = new URL(request.url).protocol === "https:";
+  return requestIsHttps || Deno.env.get("COOKIE_SECURE") === "true";
+}
+
+function jsonResponse(
+  body: unknown,
+  status = 200,
+  headersInit?: HeadersInit,
+) {
+  const headers = new Headers(headersInit ?? {});
+  headers.set("Content-Type", "application/json");
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers,
   });
 }
