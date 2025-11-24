@@ -1,10 +1,13 @@
-import {
-  assertEquals,
-  assertObjectMatch,
-} from "https://deno.land/std@0.224.0/testing/asserts.ts";
-import { join } from "https://deno.land/std@0.224.0/path/mod.ts";
-import { handler } from "../login.ts";
+import { assert, assertEquals, assertObjectMatch } from "std/testing/asserts";
+import { getSetCookies } from "std/http/cookie";
+import { join } from "std/path";
 import type { HandlerContext } from "$fresh/server.ts";
+import { handler } from "../login.ts";
+import {
+  deleteSession,
+  SESSION_COOKIE_NAME,
+  SESSION_MAX_AGE_SECONDS,
+} from "../../../utils/session.ts";
 import { createSQLiteClient } from "../../../../../packages/infrastructure/db/sqlite.ts";
 
 type LoginBody = {
@@ -84,6 +87,22 @@ Deno.test("POST /api/login returns 200 and user on valid credentials", async () 
       user_id: "tester",
       user_name: "Tester",
     });
+
+    const cookies = getSetCookies(response.headers);
+    const sessionCookie = cookies.find((cookie) =>
+      cookie.name === SESSION_COOKIE_NAME
+    );
+
+    assert(sessionCookie);
+    assert(sessionCookie!.value.length > 0);
+    assertEquals(sessionCookie!.httpOnly, true);
+    assertEquals(sessionCookie!.sameSite, "Lax");
+    assertEquals(sessionCookie!.path, "/");
+    assertEquals(sessionCookie!.maxAge, SESSION_MAX_AGE_SECONDS);
+
+    if (sessionCookie?.value) {
+      deleteSession(sessionCookie.value);
+    }
   } finally {
     if (originalDbPath === undefined) {
       Deno.env.delete("DB_PATH");
@@ -111,6 +130,7 @@ Deno.test("POST /api/login returns 400 for invalid credentials", async () => {
     assertObjectMatch(body as Record<string, unknown>, {
       error: "User not found",
     });
+    assertEquals(getSetCookies(response.headers).length, 0);
   } finally {
     if (originalDbPath === undefined) {
       Deno.env.delete("DB_PATH");
@@ -132,4 +152,5 @@ Deno.test("POST /api/login returns 400 when request body is missing", async () =
   assertObjectMatch(body as Record<string, unknown>, {
     error: "user_id と password は必須です。",
   });
+  assertEquals(getSetCookies(response.headers).length, 0);
 });

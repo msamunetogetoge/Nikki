@@ -1,7 +1,8 @@
 import { Head } from "$fresh/runtime.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { Box, Container, Stack, Typography } from "@mui/material";
-import { getUserFromRequest } from "../utils/auth_cookie.ts";
+import { getCookies } from "std/http/cookie";
+import { SESSION_COOKIE_NAME, validateSession } from "../utils/session.ts";
 import NikkiList from "../islands/NikkiList.tsx";
 import type { PublicUser } from "@domain/entities/User.ts";
 
@@ -10,8 +11,10 @@ type HomePageData = {
 };
 
 export const handler: Handlers<HomePageData> = {
-  async GET(req, ctx) {
-    const user = await getUserFromRequest(req);
+  GET(req, ctx) {
+    const cookies = getCookies(req.headers);
+    const token = cookies[SESSION_COOKIE_NAME];
+    const user = token ? validateSession(token) : null;
 
     if (!user) {
       return new Response("", {

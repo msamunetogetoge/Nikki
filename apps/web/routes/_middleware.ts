@@ -1,5 +1,7 @@
 import { MiddlewareHandlerContext } from "$fresh/server.ts";
-import { getUserFromRequest } from "../utils/auth_cookie.ts";
+import { getCookies } from "std/http/cookie";
+import { SESSION_COOKIE_NAME, validateSession } from "../utils/session.ts";
+import type { PublicUser } from "@domain/entities/User.ts";
 
 const PUBLIC_PATHS = ["/", "/login", "/api/login"];
 const PUBLIC_PREFIXES = ["/static", "/_frsh", "/favicon.ico", "/manifest.json"];
@@ -20,7 +22,11 @@ export async function handler(
   const url = new URL(req.url);
   const pathname = url.pathname;
 
-  const user = await getUserFromRequest(req);
+  const cookies = getCookies(req.headers);
+  const token = cookies[SESSION_COOKIE_NAME];
+  const session = token ? validateSession(token) : null;
+  const user: PublicUser | null = session ?? null;
+
   if (user) {
     ctx.state.user = user;
   }
