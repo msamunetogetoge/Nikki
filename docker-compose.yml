@@ -1,0 +1,14 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: docker/dev/Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000" # Next.js
+      - "8000:8000" # Hono API
+    tty: true
+    stdin_open: true
+    environment:
+      - DATABASE_URL=file:./packages/db/prisma/dev.db
