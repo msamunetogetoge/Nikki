@@ -5,8 +5,8 @@
     "apps/nikki_next"
   ],
   "tasks": {
-    "dev:api": "$env:DENO_DIR=\".deno_cache\"; deno task -c apps/api/deno.json dev",
-    "dev:app": "$env:DENO_DIR=\".deno_cache\"; deno task -c apps/nikki_next/deno.json dev",
-    "dev": "$env:DENO_DIR=\".deno_cache\"; deno run -A npm:concurrently \"deno task dev:app\" \"deno task dev:api\""
+    "dev:api": "deno task -c apps/api/deno.json dev",
+    "dev:app": "deno task -c apps/nikki_next/deno.json dev",
+    "dev": "deno run -A scripts/dev.ts"
   }
 }

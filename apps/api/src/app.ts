@@ -8,6 +8,8 @@ export type AppDependencies = {
 
 export function createApp(dependencies: AppDependencies) {
   const app = new Hono()
+  
+app.get("/healthcheck", (c) => c.text("I'm fine!"))  
 
   registerAuthRoutes(app, dependencies)
 

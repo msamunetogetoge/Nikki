@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "DENO_DIR=../../.deno_cache deno run --node-modules-dir=none --allow-env --allow-read --allow-write --allow-net --allow-ffi --allow-sys --watch main.ts",
-    "start": "DENO_DIR=../../.deno_cache deno run --node-modules-dir=none --allow-env --allow-read --allow-write --allow-net --allow-ffi --allow-sys main.ts",
-    "test": "DENO_DIR=../../.deno_cache deno run --node-modules-dir=none -A ./tests/run.ts"
+    "dev": "deno run  --allow-env --allow-read --allow-write --allow-net --allow-ffi --allow-sys --watch main.ts",
+    "start": "deno run  --allow-env --allow-read --allow-write --allow-net --allow-ffi --allow-sys main.ts",
+    "test": "deno run  -A ./tests/run.ts"
   }
 }
