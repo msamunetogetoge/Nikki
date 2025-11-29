@@ -28,14 +28,15 @@
 -   [Deno](https://deno.com) (v2.x)
 -   [Node.js](https://nodejs.org/) (v18以降)
 -   [npm](https://docs.npmjs.com/cli/v10/configuring-npm/install)
+-   [Deno](https://deno.com) (v2系、API開発に使用)
 
 ### 2. インストール
 
-リポジトリをクローンし、npmを使用して依存関係をインストールします。
+リポジトリをクローンし、フロントエンドの依存関係をインストールします。
 
 ```bash
 git clone <repository-url>
-cd Nikki
+cd Nikki/apps/nikki_next
 npm install
 ```
 
@@ -51,11 +52,13 @@ cp packages/db/.env.example packages/db/.env
 
 ### 4. 開発サーバーの起動
 
-Next.jsフロントエンドとHonoバックエンドの両方を同時に起動するには、プロジェクトのルートから`dev`スクリプトを実行します。
+Next.jsフロントエンドとHonoバックエンドを同時に起動するには、リポジトリのルートで次を実行します。
 
 ```bash
 deno task dev
 ```
 
--   Next.js（フロントエンド）は`http://localhost:3000`で利用可能です。
--   Hono（バックエンド）は`http://localhost:8787`で利用可能です。
+個別に起動する場合は以下です。
+
+- フロントエンド: `cd apps/nikki_next && npm run dev` (http://localhost:3000)
+- バックエンド: `cd apps/api && deno task dev` (http://localhost:8000 など設定に応じて)
