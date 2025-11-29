@@ -2,6 +2,7 @@
 /node_modules
 /.pnp
 .pnp.js
+/.deno_cache
 
 # Build outputs
 **/.next/

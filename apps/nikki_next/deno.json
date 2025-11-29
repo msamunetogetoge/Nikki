@@ -1,0 +1,9 @@
+{
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "dev": "$env:DENO_DIR=\"../../.deno_cache\"; deno run -A --node-modules-dir=auto -C . npm:next dev --hostname 0.0.0.0 --port 3000",
+    "build": "$env:DENO_DIR=\"../../.deno_cache\"; deno run -A --node-modules-dir=auto -C . npm:next build",
+    "start": "$env:DENO_DIR=\"../../.deno_cache\"; deno run -A --node-modules-dir=auto -C . npm:next start",
+    "lint": "$env:DENO_DIR=\"../../.deno_cache\"; deno run -A --node-modules-dir=auto -C . npm:next lint"
+  }
+}

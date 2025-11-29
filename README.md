@@ -25,6 +25,7 @@
 
 ### 1. 前提条件
 
+-   [Deno](https://deno.com) (v2.x)
 -   [Node.js](https://nodejs.org/) (v18以降)
 -   [npm](https://docs.npmjs.com/cli/v10/configuring-npm/install)
 
@@ -53,7 +54,7 @@ cp packages/db/.env.example packages/db/.env
 Next.jsフロントエンドとHonoバックエンドの両方を同時に起動するには、プロジェクトのルートから`dev`スクリプトを実行します。
 
 ```bash
-npm run dev
+deno task dev
 ```
 
 -   Next.js（フロントエンド）は`http://localhost:3000`で利用可能です。
