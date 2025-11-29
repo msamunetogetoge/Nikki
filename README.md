@@ -1,53 +1,60 @@
-# Nikki
+# Nikki - Next.js & Honoによるリライト
 
-ユーザー登録して日記を書いて保存。友達と共有したりするアプリになる予定。
-友達と共有する部分は後日実装予定。
-
-## デモ
-
-https://nikkinuxt-al3xm4xtvq-nn.a.run.app
-にアクセスして試せる。
+このプロジェクトは、Nikki（日記）アプリケーションを最新のTypeScript中心のスタックでリライトするものです。
 
 ## 技術スタック
 
-### フロントエンド
+-   **フロントエンド**: [Next.js](https://nextjs.org/) (App Router使用)
+-   **UI**: [React](https://react.dev/) & [Material-UI (MUI)](https://mui.com/)
+-   **バックエンドAPI**: [Hono](https://hono.dev/)
+-   **ORM**: [Prisma](https://www.prisma.io/)
+-   **データベース**: PostgreSQL
+-   **パッケージマネージャー**: [npm](https://docs.npmjs.com/cli/v10/configuring-npm/install) (ワークスペース使用)
 
-- **Framework**: Nuxt.js (Vue.js)
-- **UI Library**: Vuetify
-- **Language**: TypeScript
+## モノレポ構造
 
-### バックエンド
+このプロジェクトは、npmワークスペースを使用して、フロントエンドおよびバックエンドアプリケーションをモノレポとして管理します。
 
-- **Framework**: FastAPI
-- **Language**: Python
-- **ORM**: SQLAlchemy
-- **Migration**: Alembic
-- **Database**: PostgreSQL (Cloud SQL)
+-   `apps/web`: Next.jsフロントエンドアプリケーション。
+-   `apps/api`: HonoバックエンドAPIサーバー。
+-   `packages/db`: Prismaスキーマ、クライアント、およびデータベース関連スクリプト。
+-   `packages/core`: 型定義、ユーティリティ関数、コアビジネスロジックなどの共有コード。
+-   `docs/`: アーキテクチャや設計仕様を含むプロジェクトドキュメント。
 
-### インフラ
+## はじめに
 
-- **Platform**: Google Cloud Run
-- **Container**: Docker
+### 1. 前提条件
 
-## ディレクトリ構成
+-   [Node.js](https://nodejs.org/) (v18以降)
+-   [npm](https://docs.npmjs.com/cli/v10/configuring-npm/install)
 
-- `nikki_nuxt/`: フロントエンド (Nuxt.js) のソースコード
-- `py/`: バックエンド (FastAPI) のソースコード
+### 2. インストール
 
-## ローカル開発環境のセットアップ
-
-### フロントエンド (nikki_nuxt)
+リポジトリをクローンし、npmを使用して依存関係をインストールします。
 
 ```bash
-cd nikki_nuxt
+git clone <repository-url>
+cd Nikki
 npm install
+```
+
+### 3. 環境変数
+
+データベース接続のために`.env`ファイルを作成する必要があります。例のファイルをコピーしてください。
+
+```bash
+cp packages/db/.env.example packages/db/.env
+```
+
+その後、`packages/db/.env`をPostgreSQLの接続文字列で編集してください。
+
+### 4. 開発サーバーの起動
+
+Next.jsフロントエンドとHonoバックエンドの両方を同時に起動するには、プロジェクトのルートから`dev`スクリプトを実行します。
+
+```bash
 npm run dev
 ```
 
-### バックエンド (py)
-
-```bash
-cd py
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
+-   Next.js（フロントエンド）は`http://localhost:3000`で利用可能です。
+-   Hono（バックエンド）は`http://localhost:8787`で利用可能です。
