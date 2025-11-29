@@ -1,0 +1,69 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@hono/hono@^4.10.7": "4.10.7"
+  },
+  "jsr": {
+    "@hono/hono@4.10.7": {
+      "integrity": "b60512559d554f20a945e07a6c5f115e57cbd4c024da9217833c8e7b2c90355d"
+    }
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:ansi-regex@^5.0.1",
+        "npm:ansi-styles@^4.3.0",
+        "npm:chalk@^4.1.2",
+        "npm:cliui@^8.0.1",
+        "npm:color-convert@^2.0.1",
+        "npm:color-name@^1.1.4",
+        "npm:concurrently@^8.2.2",
+        "npm:date-fns@^2.30.0",
+        "npm:emoji-regex@8",
+        "npm:escalade@^3.2.0",
+        "npm:get-caller-file@^2.0.5",
+        "npm:has-flag@4",
+        "npm:is-fullwidth-code-point@3",
+        "npm:lodash@^4.17.21",
+        "npm:nikki_next@0.1",
+        "npm:require-directory@^2.1.1",
+        "npm:rxjs@^7.8.2",
+        "npm:shell-quote@^1.8.3",
+        "npm:spawn-command@^0.0.2",
+        "npm:string-width@^4.2.3",
+        "npm:strip-ansi@^6.0.1",
+        "npm:supports-color@^8.1.1",
+        "npm:tree-kill@^1.2.2",
+        "npm:tslib@^2.8.1",
+        "npm:wrap-ansi@7",
+        "npm:y18n@^5.0.8",
+        "npm:yargs-parser@^21.1.1",
+        "npm:yargs@^17.7.2"
+      ]
+    },
+    "members": {
+      "apps/api": {
+        "dependencies": [
+          "jsr:@hono/hono@^4.10.7"
+        ]
+      },
+      "apps/nikki_next": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@tailwindcss/postcss@4",
+            "npm:@types/node@20",
+            "npm:@types/react-dom@19",
+            "npm:@types/react@19",
+            "npm:eslint-config-next@16.0.5",
+            "npm:eslint@9",
+            "npm:next@16.0.5",
+            "npm:react-dom@19.2.0",
+            "npm:react@19.2.0",
+            "npm:tailwindcss@4",
+            "npm:typescript@5"
+          ]
+        }
+      }
+    }
+  }
+}
