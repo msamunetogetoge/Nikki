@@ -5,9 +5,12 @@ services:
       dockerfile: docker/dev/Dockerfile
     volumes:
       - .:/app
+      - /app/node_modules
+      - /app/apps/nikki_next/node_modules
+      - /app/apps/nikki_next/.next
     ports:
-      - "3000:3000" # Next.js
-      - "8000:8000" # Hono API
+      - "${NIKKI_WEB_PORT:-3939}:3000" # Next.js
+      - "${NIKKI_API_PORT:-8787}:8000" # Hono API
     tty: true
     stdin_open: true
     environment:

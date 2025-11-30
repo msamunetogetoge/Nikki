@@ -3,14 +3,14 @@ const http = require("http")
 const path = require("path")
 
 const appDir = path.join(__dirname, "..")
-const host = process.env.HOST ?? "127.0.0.1"
+const host = process.env.HOST ?? "0.0.0.0"
 const port = Number(process.env.PORT ?? "3000")
 const mode = process.env.NODE_ENV === "production" ? "start" : "dev"
 
 let fallbackStarted = false
 
-const startFallback = () => {
-  if (fallbackStarted) return
+const startFallback = (fallbackPort = port) => {
+  if (fallbackStarted && fallbackPort === port) return
   fallbackStarted = true
 
   const html = `<!doctype html>
@@ -141,16 +141,28 @@ const startFallback = () => {
   </body>
 </html>`
 
-  http
-    .createServer((req, res) => {
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" })
-      res.end(html)
-    })
-    .listen(port, host, () => {
-      console.log(
-        `Fallback frontend server listening at http://${host}:${port} (Next.js spawn blocked in sandbox)`,
+  const server = http.createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" })
+    res.end(html)
+  })
+
+  server.on("error", (err) => {
+    if (err?.code === "EADDRINUSE" && fallbackPort === port) {
+      const alt = fallbackPort + 1
+      console.warn(
+        `Port ${fallbackPort} in use; retrying fallback server on ${alt}. If something else is running on ${port}, keep it or stop it.`,
       )
-    })
+      startFallback(alt)
+      return
+    }
+    throw err
+  })
+
+  server.listen(fallbackPort, host, () => {
+    console.log(
+      `Fallback frontend server listening at http://${host}:${fallbackPort} (Next.js spawn blocked in sandbox)`,
+    )
+  })
 }
 
 try {

@@ -23,5 +23,13 @@ RUN deno --version
 # Set working directory
 WORKDIR /app
 
+# Install dependencies (used for caching; runtime will install into a volume)
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Copy helper scripts
+COPY docker/dev/entrypoint.sh docker/dev/entrypoint.sh
+RUN chmod +x docker/dev/entrypoint.sh
+
 # Default command
-CMD ["sleep", "infinity"]
+CMD ["bash", "/app/docker/dev/entrypoint.sh"]
