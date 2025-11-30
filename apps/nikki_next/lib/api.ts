@@ -2,6 +2,8 @@ import type {
   LoginRequestBody,
   LoginResponse,
 } from "../../../packages/core/src/api/login.ts"
+import type { NikkiListResponse } from "../../../packages/core/src/api/nikki.ts"
+import type { CurrentUserResponse, LogoutResponse } from "../../../packages/core/src/api/session.ts"
 
 const getBaseUrl = () => {
   // deno-lint-ignore no-explicit-any
@@ -36,4 +38,54 @@ export async function login(
   }
 
   return (await response.json()) as LoginResponse
+}
+
+export async function getCurrentUser(): Promise<CurrentUserResponse | null> {
+  const response = await fetch(`${getBaseUrl()}/me`, {
+    method: "GET",
+    credentials: "include",
+  })
+
+  if (response.status === 401) {
+    return null
+  }
+
+  if (!response.ok) {
+    throw new Error(`Session check failed with status ${response.status}`)
+  }
+
+  return (await response.json()) as CurrentUserResponse
+}
+
+type PaginationParams = { limit?: number; offset?: number }
+
+export async function fetchNikkis(params: PaginationParams = {}): Promise<NikkiListResponse> {
+  const searchParams = new URLSearchParams()
+  if (params.limit !== undefined) searchParams.set("limit", String(params.limit))
+  if (params.offset !== undefined) searchParams.set("offset", String(params.offset))
+  const query = searchParams.size > 0 ? `?${searchParams.toString()}` : ""
+
+  const response = await fetch(`${getBaseUrl()}/nikki${query}`, {
+    method: "GET",
+    credentials: "include",
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch nikki list: ${response.status}`)
+  }
+
+  return (await response.json()) as NikkiListResponse
+}
+
+export async function logout(): Promise<LogoutResponse> {
+  const response = await fetch(`${getBaseUrl()}/logout`, {
+    method: "POST",
+    credentials: "include",
+  })
+
+  if (!response.ok) {
+    throw new Error(`Logout failed with status ${response.status}`)
+  }
+
+  return (await response.json()) as LogoutResponse
 }

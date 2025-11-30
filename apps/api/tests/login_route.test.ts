@@ -8,6 +8,10 @@ type LoginUseCase = {
 }
 
 const jsonHeaders = { "content-type": "application/json" }
+const noopAuthDeps = {
+  authUseCase: { getCurrentUser: async () => null },
+  getNikkiListUseCase: { execute: async () => ({ items: [] }) },
+}
 
 export const loginRouteSuite: TestSuite = {
   name: "Login route",
@@ -18,7 +22,7 @@ export const loginRouteSuite: TestSuite = {
         const loginUseCase: LoginUseCase = {
           execute: async () => ({ id: "alice", name: "Alice" }),
         }
-        const app = createApp({ loginUseCase })
+        const app = createApp({ loginUseCase, ...noopAuthDeps })
 
         const res = await app.request("/login", {
           method: "OPTIONS",
@@ -36,7 +40,7 @@ export const loginRouteSuite: TestSuite = {
         const loginUseCase: LoginUseCase = {
           execute: async () => ({ id: "alice", name: "Alice" }),
         }
-        const app = createApp({ loginUseCase })
+        const app = createApp({ loginUseCase, ...noopAuthDeps })
 
         const res = await app.request("/login", {
           method: "POST",
@@ -58,7 +62,7 @@ export const loginRouteSuite: TestSuite = {
         const loginUseCase: LoginUseCase = {
           execute: async () => ({ id: "alice", name: "Alice" }),
         }
-        const app = createApp({ loginUseCase })
+        const app = createApp({ loginUseCase, ...noopAuthDeps })
 
         const res = await app.request("/login", {
           method: "POST",
@@ -77,7 +81,7 @@ export const loginRouteSuite: TestSuite = {
             throw new InvalidCredentialsError()
           },
         }
-        const app = createApp({ loginUseCase })
+        const app = createApp({ loginUseCase, ...noopAuthDeps })
 
         const res = await app.request("/login", {
           method: "POST",

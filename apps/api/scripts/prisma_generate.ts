@@ -31,6 +31,18 @@ try {
     Deno.exit(code ?? 1)
   }
 } catch (error) {
+  const generatedClient = join(rootPath, "node_modules", ".prisma", "client", "index.js")
+  try {
+    Deno.statSync(generatedClient)
+    console.warn(
+      "Skipping prisma generate because the CLI is unavailable, using existing generated client at",
+      generatedClient,
+    )
+    Deno.exit(0)
+  } catch {
+    // fallthrough to error handling below
+  }
+
   console.error(
     `Failed to run Prisma CLI at ${prismaBin}. If this environment blocks child processes, run "npm exec prisma generate --schema packages/db/prisma/schema.prisma" from the repo root, then retry.`,
   )
