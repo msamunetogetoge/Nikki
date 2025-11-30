@@ -2,5 +2,11 @@
   "name": "db",
   "version": "1.0.0",
   "private": true,
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.17.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  }
 }

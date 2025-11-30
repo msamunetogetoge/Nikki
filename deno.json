@@ -1,0 +1,12 @@
+{
+  "nodeModulesDir": "auto",
+  "workspace": [
+    "apps/api",
+    "apps/nikki_next"
+  ],
+  "tasks": {
+    "dev:api": "deno task -c apps/api/deno.json dev",
+    "dev:app": "deno task -c apps/nikki_next/deno.json dev",
+    "dev": "deno run -A scripts/dev.ts"
+  }
+}

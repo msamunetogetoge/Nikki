@@ -2,6 +2,7 @@
 /node_modules
 /.pnp
 .pnp.js
+/.deno_cache
 
 # Build outputs
 **/.next/
@@ -18,3 +19,9 @@ yarn-error.log*
 .env
 .env*.local
 .DS_Store
+
+
+.deno_cache
+node_modules
+.prisma/
+packages/db/prisma/*.db
