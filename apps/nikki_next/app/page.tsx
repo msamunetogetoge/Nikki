@@ -1,6 +1,6 @@
 "use client"
 
-import { ChangeEvent, useMemo, useState } from "react"
+import { ChangeEvent, useEffect, useMemo, useState } from "react"
 import {
   Alert,
   Box,
@@ -13,11 +13,15 @@ import {
   TextField,
   Typography,
 } from "@mui/material"
+import { useRouter } from "next/navigation"
 import { login } from "../lib/api"
+import { useAuth } from "./auth-context"
 
 type FormStatus = "idle" | "success" | "error"
 
 export default function Home() {
+  const router = useRouter()
+  const { user, refresh } = useAuth()
   const [userId, setUserId] = useState("")
   const [password, setPassword] = useState("")
   const [status, setStatus] = useState<FormStatus>("idle")
@@ -28,6 +32,12 @@ export default function Home() {
     [userId, password, isSubmitting],
   )
 
+  useEffect(() => {
+    if (user) {
+      router.replace("/home")
+    }
+  }, [user, router])
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setStatus("idle")
@@ -35,7 +45,9 @@ export default function Home() {
 
     try {
       await login({ user_id: userId, password })
+      await refresh()
       setStatus("success")
+      router.push("/home")
     } catch (error) {
       console.error("Login failed", error)
       setStatus("error")

@@ -1,10 +1,18 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { registerAuthRoutes } from "./routes/auth.ts"
-import type { LoginUseCasePort } from "./types.ts"
+import { registerNikkiRoutes } from "./routes/nikki.ts"
+import { registerSessionRoutes } from "./routes/session.ts"
+import type {
+  AuthUseCasePort,
+  GetNikkiListUseCasePort,
+  LoginUseCasePort,
+} from "./types.ts"
 
 export type AppDependencies = {
   loginUseCase: LoginUseCasePort
+  authUseCase: AuthUseCasePort
+  getNikkiListUseCase: GetNikkiListUseCasePort
 }
 
 export function createApp(dependencies: AppDependencies) {
@@ -14,7 +22,7 @@ export function createApp(dependencies: AppDependencies) {
     "/*",
     cors({
       origin: (origin) => origin ?? "*",
-      allowMethods: ["POST", "OPTIONS"],
+      allowMethods: ["GET", "POST", "OPTIONS"],
       allowHeaders: ["Content-Type"],
       credentials: true,
     }),
@@ -23,6 +31,8 @@ export function createApp(dependencies: AppDependencies) {
   app.get("/healthcheck", (c) => c.text("I'm fine!"))
 
   registerAuthRoutes(app, dependencies)
+  registerSessionRoutes(app, dependencies)
+  registerNikkiRoutes(app, dependencies)
 
   return app
 }
