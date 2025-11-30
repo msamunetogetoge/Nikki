@@ -139,10 +139,22 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && user) {
       loadNikkis()
     }
-  }, [authLoading])
+  }, [authLoading, user])
+
+  if (authLoading) {
+    return (
+      <Box sx={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
 
   return (
     <Box sx={{ minHeight: "100vh", background: "radial-gradient(circle at 20% 20%, #e0f2fe, transparent 25%), radial-gradient(circle at 80% 0%, #d1fae5, transparent 25%)" }}>
