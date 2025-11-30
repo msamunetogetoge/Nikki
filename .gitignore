@@ -23,3 +23,5 @@ yarn-error.log*
 
 .deno_cache
 node_modules
+.prisma/
+packages/db/prisma/*.db

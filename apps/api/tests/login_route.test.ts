@@ -13,6 +13,24 @@ export const loginRouteSuite: TestSuite = {
   name: "Login route",
   tests: [
     {
+      name: "sets CORS headers for cross-origin requests",
+      fn: async () => {
+        const loginUseCase: LoginUseCase = {
+          execute: async () => ({ id: "alice", name: "Alice" }),
+        }
+        const app = createApp({ loginUseCase })
+
+        const res = await app.request("/login", {
+          method: "OPTIONS",
+          headers: { origin: "http://localhost:3000" },
+        })
+
+        assertEquals(res.status, 204)
+        assertExists(res.headers.get("access-control-allow-origin"))
+        assertEquals(res.headers.get("access-control-allow-credentials"), "true")
+      },
+    },
+    {
       name: "returns 200 with user and cookie on success",
       fn: async () => {
         const loginUseCase: LoginUseCase = {

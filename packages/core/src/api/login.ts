@@ -8,7 +8,6 @@ export type LoginUser = {
   name: string
 }
 
-export type LoginResponse = {
-  success: boolean
-  user: LoginUser
-}
+export type LoginResponse =
+  | { success: true; user: LoginUser }
+  | { success: false; error?: string }
